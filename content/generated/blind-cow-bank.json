@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "bankVersion": 7,
+ "bankVersion": 8,
  "builtFrom": {
   "playerMasterSha": "3f7e5d090da11c99",
   "matchMasterSha": "f5e6a4009e53e424"
@@ -14,16 +14,16 @@
  },
  "counts": {
   "players": 653,
-  "withQuestion": 577,
-  "solo": 577,
-  "daily": 291,
-  "duel": 291,
-  "hardcore": 168,
-  "clues": 726,
+  "withQuestion": 594,
+  "solo": 594,
+  "daily": 300,
+  "duel": 300,
+  "hardcore": 174,
+  "clues": 742,
   "byType": {
    "achievement": 28,
-   "club": 27,
-   "season_range": 138,
+   "club": 44,
+   "season_range": 136,
    "era": 13,
    "goal": 190,
    "moment": 23,
@@ -32,7 +32,7 @@
    "origin": 2,
    "position": 21,
    "shirt_number": 45,
-   "song": 228
+   "song": 229
   },
   "eligibleMatches": 3144,
   "eligibleGoals": 3476
@@ -53,6 +53,36 @@
    "difficulty": 5,
    "exclusivity": 1
   },
+  "c_2c453ce140": {
+   "id": "c_2c453ce140",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם באנורתוסיס פמגוסטה",
+   "factKey": "club:אנורתוסיס פמגוסטה",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.994
+  },
+  "c_574334b63d": {
+   "id": "c_574334b63d",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בבוורן",
+   "factKey": "club:בוורן",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.992
+  },
   "c_0504de52c3": {
    "id": "c_0504de52c3",
    "type": "club",
@@ -66,7 +96,22 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.903
+   "exclusivity": 0.896
+  },
+  "c_bcf1af48bb": {
+   "id": "c_bcf1af48bb",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בבית\"ר תל אביב",
+   "factKey": "club:בית\"ר תל אביב",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.983
   },
   "c_f6d9bb80ce": {
    "id": "c_f6d9bb80ce",
@@ -81,7 +126,7 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.919
+   "exclusivity": 0.903
   },
   "c_5f5c31729a": {
    "id": "c_5f5c31729a",
@@ -113,6 +158,66 @@
    "difficulty": 4,
    "exclusivity": 0.96
   },
+  "c_85813a7d5f": {
+   "id": "c_85813a7d5f",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בגנק",
+   "factKey": "club:גנק",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 5,
+   "exclusivity": 0.995
+  },
+  "c_7a67d2a31c": {
+   "id": "c_7a67d2a31c",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בהכוכב האדום בלגרד",
+   "factKey": "club:הכוכב האדום בלגרד",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.994
+  },
+  "c_15a29df80f": {
+   "id": "c_15a29df80f",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בהכח עמידר רמת גן",
+   "factKey": "club:הכח עמידר רמת גן",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.979
+  },
+  "c_23ca1e358f": {
+   "id": "c_23ca1e358f",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בהפועל אום אל פאחם",
+   "factKey": "club:הפועל אום אל פאחם",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.992
+  },
   "c_ca0b3503dc": {
    "id": "c_ca0b3503dc",
    "type": "club",
@@ -126,7 +231,7 @@
    ],
    "confidence": 2,
    "difficulty": 4,
-   "exclusivity": 0.965
+   "exclusivity": 0.96
   },
   "c_87cffc8e4f": {
    "id": "c_87cffc8e4f",
@@ -141,7 +246,7 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.919
+   "exclusivity": 0.911
   },
   "c_eef23a09c3": {
    "id": "c_eef23a09c3",
@@ -156,7 +261,7 @@
    ],
    "confidence": 2,
    "difficulty": 4,
-   "exclusivity": 0.988
+   "exclusivity": 0.985
   },
   "c_3d827d633f": {
    "id": "c_3d827d633f",
@@ -171,7 +276,7 @@
    ],
    "confidence": 2,
    "difficulty": 4,
-   "exclusivity": 0.985
+   "exclusivity": 0.982
   },
   "c_15a1debf2d": {
    "id": "c_15a1debf2d",
@@ -186,7 +291,7 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.942
+   "exclusivity": 0.929
   },
   "c_2762e4de0d": {
    "id": "c_2762e4de0d",
@@ -200,8 +305,8 @@
     "player-career-clubs#clubs"
    ],
    "confidence": 2,
-   "difficulty": 4,
-   "exclusivity": 0.966
+   "difficulty": 3,
+   "exclusivity": 0.952
   },
   "c_2536fdfcd1": {
    "id": "c_2536fdfcd1",
@@ -216,7 +321,22 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.923
+   "exclusivity": 0.917
+  },
+  "c_8a3d23c139": {
+   "id": "c_8a3d23c139",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בהפועל כפר שלם",
+   "factKey": "club:הפועל כפר שלם",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.991
   },
   "c_8460f6c57c": {
    "id": "c_8460f6c57c",
@@ -232,6 +352,21 @@
    "confidence": 2,
    "difficulty": 4,
    "exclusivity": 0.986
+  },
+  "c_16d8d4a5dc": {
+   "id": "c_16d8d4a5dc",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בהפועל נצרת עילית",
+   "factKey": "club:הפועל נצרת עילית",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.994
   },
   "c_c6fe4eb99a": {
    "id": "c_c6fe4eb99a",
@@ -276,7 +411,7 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.923
+   "exclusivity": 0.908
   },
   "c_f7866916b7": {
    "id": "c_f7866916b7",
@@ -291,7 +426,7 @@
    ],
    "confidence": 2,
    "difficulty": 4,
-   "exclusivity": 0.966
+   "exclusivity": 0.962
   },
   "c_67f07cd6cf": {
    "id": "c_67f07cd6cf",
@@ -306,7 +441,22 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.94
+   "exclusivity": 0.917
+  },
+  "c_8e7acdf0e3": {
+   "id": "c_8e7acdf0e3",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בהפועל רמת השרון",
+   "factKey": "club:הפועל רמת השרון",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.991
   },
   "c_96b63fd1ff": {
    "id": "c_96b63fd1ff",
@@ -323,6 +473,21 @@
    "difficulty": 4,
    "exclusivity": 0.96
   },
+  "c_d9813667ed": {
+   "id": "c_d9813667ed",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בלבסקי סופיה",
+   "factKey": "club:לבסקי סופיה",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 5,
+   "exclusivity": 0.995
+  },
   "c_cb5d7f41df": {
    "id": "c_cb5d7f41df",
    "type": "club",
@@ -336,7 +501,37 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.943
+   "exclusivity": 0.94
+  },
+  "c_fe620d9b33": {
+   "id": "c_fe620d9b33",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם במאריבור",
+   "factKey": "club:מאריבור",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.994
+  },
+  "c_b0bc06317f": {
+   "id": "c_b0bc06317f",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם במכבי אחי נצרת",
+   "factKey": "club:מכבי אחי נצרת",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.975
   },
   "c_1c3eafac24": {
    "id": "c_1c3eafac24",
@@ -351,7 +546,7 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.957
+   "exclusivity": 0.951
   },
   "c_01cb06922d": {
    "id": "c_01cb06922d",
@@ -366,7 +561,22 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.925
+   "exclusivity": 0.919
+  },
+  "c_b358b31d5e": {
+   "id": "c_b358b31d5e",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם במכבי יבנה",
+   "factKey": "club:מכבי יבנה",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.994
   },
   "c_87b72380ec": {
    "id": "c_87b72380ec",
@@ -381,7 +591,7 @@
    ],
    "confidence": 2,
    "difficulty": 4,
-   "exclusivity": 0.986
+   "exclusivity": 0.979
   },
   "c_5c9ad6dd84": {
    "id": "c_5c9ad6dd84",
@@ -396,7 +606,7 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.916
+   "exclusivity": 0.906
   },
   "c_178451972c": {
    "id": "c_178451972c",
@@ -411,7 +621,7 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.943
+   "exclusivity": 0.936
   },
   "c_49f6363445": {
    "id": "c_49f6363445",
@@ -426,7 +636,7 @@
    ],
    "confidence": 2,
    "difficulty": 4,
-   "exclusivity": 0.991
+   "exclusivity": 0.989
   },
   "c_5a662cc649": {
    "id": "c_5a662cc649",
@@ -441,7 +651,52 @@
    ],
    "confidence": 2,
    "difficulty": 3,
-   "exclusivity": 0.934
+   "exclusivity": 0.917
+  },
+  "c_deab915cae": {
+   "id": "c_deab915cae",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בסטנדרד ליאז'",
+   "factKey": "club:סטנדרד ליאז'",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.994
+  },
+  "c_9e9d43e579": {
+   "id": "c_9e9d43e579",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בעירוני קריית שמונה",
+   "factKey": "club:עירוני קריית שמונה",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 3,
+   "exclusivity": 0.94
+  },
+  "c_5fa54fd67e": {
+   "id": "c_5fa54fd67e",
+   "type": "club",
+   "family": "B",
+   "labelHe": "מועדון אחר",
+   "valueHe": "שיחק גם בעירוני ראשון לציון",
+   "factKey": "club:עירוני ראשון לציון",
+   "facet": "club",
+   "sourceRefs": [
+    "player-career-clubs#clubs"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.977
   },
   "c_4ddf6873a8": {
    "id": "c_4ddf6873a8",
@@ -456,7 +711,7 @@
    ],
    "confidence": 2,
    "difficulty": 4,
-   "exclusivity": 0.989
+   "exclusivity": 0.982
   },
   "c_7966e1b550": {
    "id": "c_7966e1b550",
@@ -608,6 +863,21 @@
    "difficulty": 4,
    "exclusivity": 0.983
   },
+  "c_3d9309c464": {
+   "id": "c_3d9309c464",
+   "type": "season_range",
+   "family": "B",
+   "labelHe": "עונת בכורה",
+   "valueHe": "עונת הבכורה שלו בהפועל: 1952/53",
+   "factKey": "debut:1952/53",
+   "facet": "start",
+   "sourceRefs": [
+    "player-master#spells.seasons"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.989
+  },
   "c_7a96b00885": {
    "id": "c_7a96b00885",
    "type": "season_range",
@@ -698,21 +968,6 @@
    "difficulty": 4,
    "exclusivity": 0.985
   },
-  "c_d9edf28659": {
-   "id": "c_d9edf28659",
-   "type": "season_range",
-   "family": "B",
-   "labelHe": "עונת בכורה",
-   "valueHe": "עונת הבכורה שלו בהפועל: 1963/64",
-   "factKey": "debut:1963/64",
-   "facet": "start",
-   "sourceRefs": [
-    "player-master#spells.seasons"
-   ],
-   "confidence": 2,
-   "difficulty": 4,
-   "exclusivity": 0.986
-  },
   "c_f71f0ec4da": {
    "id": "c_f71f0ec4da",
    "type": "season_range",
@@ -757,21 +1012,6 @@
    "confidence": 2,
    "difficulty": 4,
    "exclusivity": 0.979
-  },
-  "c_bb7d0088cd": {
-   "id": "c_bb7d0088cd",
-   "type": "season_range",
-   "family": "B",
-   "labelHe": "עונת בכורה",
-   "valueHe": "עונת הבכורה שלו בהפועל: 1971/72",
-   "factKey": "debut:1971/72",
-   "facet": "start",
-   "sourceRefs": [
-    "player-master#spells.seasons"
-   ],
-   "confidence": 2,
-   "difficulty": 4,
-   "exclusivity": 0.989
   },
   "c_8b9733e241": {
    "id": "c_8b9733e241",
@@ -952,6 +1192,21 @@
    "confidence": 2,
    "difficulty": 4,
    "exclusivity": 0.985
+  },
+  "c_50c7c67089": {
+   "id": "c_50c7c67089",
+   "type": "season_range",
+   "family": "B",
+   "labelHe": "עונת בכורה",
+   "valueHe": "עונת הבכורה שלו בהפועל: 1988/89",
+   "factKey": "debut:1988/89",
+   "facet": "start",
+   "sourceRefs": [
+    "player-master#spells.seasons"
+   ],
+   "confidence": 2,
+   "difficulty": 4,
+   "exclusivity": 0.988
   },
   "c_f48f1e8423": {
    "id": "c_f48f1e8423",
@@ -2041,21 +2296,6 @@
    "difficulty": 5,
    "exclusivity": 1
   },
-  "c_f176ed02a3": {
-   "id": "c_f176ed02a3",
-   "type": "goal",
-   "family": "E",
-   "labelHe": "שער",
-   "valueHe": "כבש מול הפועל פ\"ת בליגת העל 2006/07, במשחק שהסתיים 2:0 להפועל",
-   "factKey": "goal-match:m_042f04ae58e8",
-   "facet": "goal",
-   "sourceRefs": [
-    "match-master:m_042f04ae58e8#scorers"
-   ],
-   "confidence": 2,
-   "difficulty": 5,
-   "exclusivity": 0.998
-  },
   "c_69d85ec71d": {
    "id": "c_69d85ec71d",
    "type": "goal",
@@ -2236,21 +2476,6 @@
    "difficulty": 5,
    "exclusivity": 0.998
   },
-  "c_274236842a": {
-   "id": "c_274236842a",
-   "type": "goal",
-   "family": "E",
-   "labelHe": "שער",
-   "valueHe": "כבש מול מכבי תל אביב בליגה לאומית 1956/57, במשחק שהסתיים 4:2 להפועל",
-   "factKey": "goal-match:m_0f2c1c7399cd",
-   "facet": "goal",
-   "sourceRefs": [
-    "match-master:m_0f2c1c7399cd#scorers"
-   ],
-   "confidence": 2,
-   "difficulty": 5,
-   "exclusivity": 0.997
-  },
   "c_b070c1279b": {
    "id": "c_b070c1279b",
    "type": "goal",
@@ -2356,6 +2581,21 @@
    "difficulty": 5,
    "exclusivity": 0.997
   },
+  "c_15533e724e": {
+   "id": "c_15533e724e",
+   "type": "goal",
+   "family": "E",
+   "labelHe": "שער",
+   "valueHe": "כבש מול בית\"ר ת\"א בליגה לאומית 1956/57, במשחק שהסתיים 3:0 להפועל",
+   "factKey": "goal-match:m_15341d21d9ef",
+   "facet": "goal",
+   "sourceRefs": [
+    "match-master:m_15341d21d9ef#scorers"
+   ],
+   "confidence": 2,
+   "difficulty": 5,
+   "exclusivity": 0.997
+  },
   "c_66198b6581": {
    "id": "c_66198b6581",
    "type": "goal",
@@ -2416,21 +2656,6 @@
    "difficulty": 5,
    "exclusivity": 0.997
   },
-  "c_aa26a67512": {
-   "id": "c_aa26a67512",
-   "type": "goal",
-   "family": "E",
-   "labelHe": "שער",
-   "valueHe": "כבש מול בית\"ר ת\"א בגביע המדינה 1987/88, במשחק שהסתיים 3:2 להפועל",
-   "factKey": "goal-match:m_18ca7c2916cf",
-   "facet": "goal",
-   "sourceRefs": [
-    "match-master:m_18ca7c2916cf#scorers"
-   ],
-   "confidence": 2,
-   "difficulty": 5,
-   "exclusivity": 0.997
-  },
   "c_a78eeff51b": {
    "id": "c_a78eeff51b",
    "type": "goal",
@@ -2486,6 +2711,21 @@
    "facet": "goal",
    "sourceRefs": [
     "match-master:m_1eab072bd901#scorers"
+   ],
+   "confidence": 2,
+   "difficulty": 5,
+   "exclusivity": 1
+  },
+  "c_a7010ca578": {
+   "id": "c_a7010ca578",
+   "type": "goal",
+   "family": "E",
+   "labelHe": "שער",
+   "valueHe": "כבש מול סקציה נס ציונה בליגת העל 2019/20, במשחק שהסתיים 1:1 להפועל",
+   "factKey": "goal-match:m_1ee4b57fab14",
+   "facet": "goal",
+   "sourceRefs": [
+    "match-master:m_1ee4b57fab14#scorers"
    ],
    "confidence": 2,
    "difficulty": 5,
@@ -2670,21 +2910,6 @@
    "confidence": 2,
    "difficulty": 5,
    "exclusivity": 0.998
-  },
-  "c_3d7e277ee6": {
-   "id": "c_3d7e277ee6",
-   "type": "goal",
-   "family": "E",
-   "labelHe": "שער",
-   "valueHe": "כבש מול מכבי תל אביב בליגה לאומית 1985/86, במשחק שהסתיים 1:1 להפועל",
-   "factKey": "goal-match:m_2999186b7fc1",
-   "facet": "goal",
-   "sourceRefs": [
-    "match-master:m_2999186b7fc1#scorers"
-   ],
-   "confidence": 2,
-   "difficulty": 5,
-   "exclusivity": 1
   },
   "c_b3686b519c": {
    "id": "c_b3686b519c",
@@ -3511,6 +3736,21 @@
    "difficulty": 4,
    "exclusivity": 0.994
   },
+  "c_443f440c2c": {
+   "id": "c_443f440c2c",
+   "type": "goal",
+   "family": "E",
+   "labelHe": "שער",
+   "valueHe": "כבש מול הפועל ר\"ג בליגת העל 2026/27, במשחק שהסתיים 4:0 להפועל",
+   "factKey": "goal-match:m_892de954c111",
+   "facet": "goal",
+   "sourceRefs": [
+    "match-master:m_892de954c111#scorers"
+   ],
+   "confidence": 2,
+   "difficulty": 5,
+   "exclusivity": 0.997
+  },
   "c_b9af2122ca": {
    "id": "c_b9af2122ca",
    "type": "goal",
@@ -3766,6 +4006,21 @@
    "difficulty": 5,
    "exclusivity": 1
   },
+  "c_338eb2ed63": {
+   "id": "c_338eb2ed63",
+   "type": "goal",
+   "family": "E",
+   "labelHe": "שער",
+   "valueHe": "כבש מול בית\"ר י-ם בליגת העל 2026/27, במשחק שהסתיים 3:0 להפועל",
+   "factKey": "goal-match:m_a9769bc76420",
+   "facet": "goal",
+   "sourceRefs": [
+    "match-master:m_a9769bc76420#scorers"
+   ],
+   "confidence": 2,
+   "difficulty": 5,
+   "exclusivity": 0.997
+  },
   "c_39ee76d5cf": {
    "id": "c_39ee76d5cf",
    "type": "goal",
@@ -3841,6 +4096,21 @@
    "difficulty": 5,
    "exclusivity": 0.995
   },
+  "c_67db5890b8": {
+   "id": "c_67db5890b8",
+   "type": "goal",
+   "family": "E",
+   "labelHe": "שער",
+   "valueHe": "כבש מול מכבי אחי נצרת בליגת העל 2003/04, במשחק שהסתיים 1:0 להפועל",
+   "factKey": "goal-match:m_b449a83baf25",
+   "facet": "goal",
+   "sourceRefs": [
+    "match-master:m_b449a83baf25#scorers"
+   ],
+   "confidence": 2,
+   "difficulty": 5,
+   "exclusivity": 1
+  },
   "c_b42ed536d9": {
    "id": "c_b42ed536d9",
    "type": "goal",
@@ -3885,21 +4155,6 @@
    "confidence": 2,
    "difficulty": 5,
    "exclusivity": 1
-  },
-  "c_c60b47575f": {
-   "id": "c_c60b47575f",
-   "type": "goal",
-   "family": "E",
-   "labelHe": "שער",
-   "valueHe": "כבש מול מ.ס. אשדוד בליגת העל 2016/17, במשחק שהסתיים 2:0 להפועל",
-   "factKey": "goal-match:m_bd9c86f24a14",
-   "facet": "goal",
-   "sourceRefs": [
-    "match-master:m_bd9c86f24a14#scorers"
-   ],
-   "confidence": 2,
-   "difficulty": 5,
-   "exclusivity": 0.998
   },
   "c_75bd2294c3": {
    "id": "c_75bd2294c3",
@@ -5256,6 +5511,21 @@
    "difficulty": 3,
    "exclusivity": 0.957
   },
+  "c_5ff0c8764d": {
+   "id": "c_5ff0c8764d",
+   "type": "season_range",
+   "family": "B",
+   "labelHe": "עונה אחרונה",
+   "valueHe": "העונה האחרונה שלו בהפועל: 1964/65",
+   "factKey": "last:1964/65",
+   "facet": "end",
+   "sourceRefs": [
+    "player-master#spells.seasons"
+   ],
+   "confidence": 2,
+   "difficulty": 3,
+   "exclusivity": 0.959
+  },
   "c_2ebcdd89ba": {
    "id": "c_2ebcdd89ba",
    "type": "season_range",
@@ -5465,36 +5735,6 @@
    "confidence": 2,
    "difficulty": 3,
    "exclusivity": 0.956
-  },
-  "c_de1d033a4f": {
-   "id": "c_de1d033a4f",
-   "type": "season_range",
-   "family": "B",
-   "labelHe": "עונה אחרונה",
-   "valueHe": "העונה האחרונה שלו בהפועל: 1990/91",
-   "factKey": "last:1990/91",
-   "facet": "end",
-   "sourceRefs": [
-    "player-master#spells.seasons"
-   ],
-   "confidence": 2,
-   "difficulty": 3,
-   "exclusivity": 0.949
-  },
-  "c_15ee3e026c": {
-   "id": "c_15ee3e026c",
-   "type": "season_range",
-   "family": "B",
-   "labelHe": "עונה אחרונה",
-   "valueHe": "העונה האחרונה שלו בהפועל: 1991/92",
-   "factKey": "last:1991/92",
-   "facet": "end",
-   "sourceRefs": [
-    "player-master#spells.seasons"
-   ],
-   "confidence": 2,
-   "difficulty": 3,
-   "exclusivity": 0.946
   },
   "c_6c0725f936": {
    "id": "c_6c0725f936",
@@ -6566,21 +6806,6 @@
    "difficulty": 3,
    "exclusivity": 0.925
   },
-  "c_6df90c22f2": {
-   "id": "c_6df90c22f2",
-   "type": "season_range",
-   "family": "B",
-   "labelHe": "ותק",
-   "valueHe": "9 עונות בסגל הפועל",
-   "factKey": "seasons:9",
-   "facet": "length",
-   "sourceRefs": [
-    "player-master#spells.seasons"
-   ],
-   "confidence": 2,
-   "difficulty": 3,
-   "exclusivity": 0.949
-  },
   "c_7aefcc007e": {
    "id": "c_7aefcc007e",
    "type": "shirt_number",
@@ -7548,6 +7773,21 @@
    "labelHe": "שיר היציע",
    "valueHe": "היציע שר לכבודו על המנגינה של «Golden Boy-Nadav Guedj»",
    "factKey": "song:Golden Boy-Nadav Guedj",
+   "facet": "song",
+   "sourceRefs": [
+    "player-song-tunes#tuneHe"
+   ],
+   "confidence": 2,
+   "difficulty": 5,
+   "exclusivity": 1
+  },
+  "c_202322107e": {
+   "id": "c_202322107e",
+   "type": "song",
+   "family": "G",
+   "labelHe": "שיר היציע",
+   "valueHe": "היציע שר לכבודו על המנגינה של «Heaven/Bryan Adams»",
+   "factKey": "song:Heaven/Bryan Adams",
    "facet": "song",
    "sourceRefs": [
     "player-song-tunes#tuneHe"
@@ -11367,6 +11607,49 @@
    "dataFingerprint": "e804bcb6bd0b8418"
   },
   {
+   "id": "bq_022e5676b998",
+   "version": 1,
+   "targetPlayerId": "p_a389316c8d",
+   "targetDisplayNameHe": "יואל שוהם",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_614fe506e6",
+    "c_5ff0c8764d",
+    "c_21fa6db283",
+    "c_c78370718f",
+    "c_15a1debf2d"
+   ],
+   "remaining": [
+    490,
+    121,
+    26,
+    9,
+    7,
+    2
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "known",
+    "score": 56,
+    "appearances": 36,
+    "basis": "appearances+price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     1960
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "1eb45df1c214cbf9"
+  },
+  {
    "id": "bq_023f6e31ac1a",
    "version": 3,
    "targetPlayerId": "p_745294a871",
@@ -11593,7 +11876,7 @@
   },
   {
    "id": "bq_037c04bb3620",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_2b7f0497cc",
    "targetDisplayNameHe": "אושר דוידה",
    "clueIds": [
@@ -11602,10 +11885,10 @@
     "c_1a4d2c3d6f",
     "c_6d950578ed",
     "c_5a662cc649",
+    "c_3117f48b5e",
     "c_9504e985c2",
     "c_fa97bbb36d",
     "c_b96c88438e",
-    "c_3117f48b5e",
     "c_5435d33d3d"
    ],
    "remaining": [
@@ -11613,9 +11896,9 @@
     141,
     45,
     22,
+    5,
     4,
     2,
-    1,
     1,
     1,
     1
@@ -11644,7 +11927,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "5fd02db9721a83a4"
+   "dataFingerprint": "db02ed43ee7da159"
   },
   {
    "id": "bq_038c54df1ca1",
@@ -11908,7 +12191,7 @@
   },
   {
    "id": "bq_06bcb43f5c04",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_2f36be94d9",
    "targetDisplayNameHe": "אייל אקשטיין",
    "clueIds": [
@@ -11918,8 +12201,8 @@
     "c_1a4d2c3d6f",
     "c_a733879dae",
     "c_e344aef2fb",
-    "c_703ded77df",
     "c_09fe3c215a",
+    "c_f7866916b7",
     "c_8b171b5609",
     "c_070f4621f9"
    ],
@@ -11960,7 +12243,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "a233d8da3185180f"
+   "dataFingerprint": "ad15e386a193428c"
   },
   {
    "id": "bq_06d628518c30",
@@ -12185,7 +12468,7 @@
   },
   {
    "id": "bq_085dc8183c67",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_30f1a8b59b",
    "targetDisplayNameHe": "יעקב חודורוב",
    "clueIds": [
@@ -12194,10 +12477,10 @@
     "c_c38913bf6c",
     "c_a733879dae",
     "c_e673f15fb3",
+    "c_67f07cd6cf",
     "c_6b012276d0",
     "c_d1a4d3e0c6",
     "c_38e41a8ae7",
-    "c_7ed068232e",
     "c_23545e2dde"
    ],
    "remaining": [
@@ -12207,8 +12490,8 @@
     25,
     13,
     4,
-    3,
-    2,
+    1,
+    1,
     1,
     1
    ],
@@ -12238,11 +12521,11 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "ef64148ce0504b46"
+   "dataFingerprint": "f7c04b671908b8b0"
   },
   {
    "id": "bq_0a9a3d736315",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_7a34e02f09",
    "targetDisplayNameHe": "רוני קלדרון",
    "clueIds": [
@@ -12254,8 +12537,8 @@
     "c_e673f15fb3",
     "c_85ae5eae5a",
     "c_a733879dae",
-    "c_19e6243c87",
-    "c_b6657061ec"
+    "c_67f07cd6cf",
+    "c_19e6243c87"
    ],
    "remaining": [
     490,
@@ -12266,7 +12549,7 @@
     9,
     4,
     3,
-    1,
+    2,
     1
    ],
    "families": [
@@ -12295,7 +12578,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "510a89029e70baf3"
+   "dataFingerprint": "a0870f6e262fe7e7"
   },
   {
    "id": "bq_0b37adeecf8e",
@@ -12509,7 +12792,7 @@
   },
   {
    "id": "bq_0cedac03592b",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_b9e059450d",
    "targetDisplayNameHe": "קובי זיתוני",
    "clueIds": [
@@ -12519,7 +12802,7 @@
     "c_c38913bf6c",
     "c_5540db46e6",
     "c_e344aef2fb",
-    "c_703ded77df",
+    "c_f6d9bb80ce",
     "c_9f945bc0e3",
     "c_8b171b5609",
     "c_070f4621f9"
@@ -12561,7 +12844,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "869efe0fa12ccfdb"
+   "dataFingerprint": "74b99e7aec30706c"
   },
   {
    "id": "bq_0d000be05288",
@@ -13092,7 +13375,7 @@
   },
   {
    "id": "bq_121b4a1156e8",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_a9f3874b86",
    "targetDisplayNameHe": "אברהם פרידריך",
    "clueIds": [
@@ -13105,7 +13388,7 @@
     "c_58bdb7722d",
     "c_c9a2411f60",
     "c_2ebcdd89ba",
-    "c_318b2e8b58"
+    "c_67f07cd6cf"
    ],
    "remaining": [
     490,
@@ -13137,7 +13420,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "af7eb6e11a7d6fee"
+   "dataFingerprint": "a31cda802fb21d4d"
   },
   {
    "id": "bq_12d610e7f15a",
@@ -13430,7 +13713,7 @@
   },
   {
    "id": "bq_16c157a6e5f9",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_585fbc12eb",
    "targetDisplayNameHe": "איגור שקווירין",
    "clueIds": [
@@ -13441,7 +13724,7 @@
     "c_dfa206337e",
     "c_af947a14f2",
     "c_6c0725f936",
-    "c_614fe506e6",
+    "c_f6d9bb80ce",
     "c_0b6a3430ad",
     "c_b693947f1c"
    ],
@@ -13481,7 +13764,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "53fc17c291b6cbd3"
+   "dataFingerprint": "7187f512ec72871d"
   },
   {
    "id": "bq_16c95cc16a47",
@@ -13746,7 +14029,7 @@
   },
   {
    "id": "bq_17e0b379fe04",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_9ce327b19f",
    "targetDisplayNameHe": "יעקב בוזגלו",
    "clueIds": [
@@ -13757,9 +14040,9 @@
     "c_1a4d2c3d6f",
     "c_19e6243c87",
     "c_703ded77df",
+    "c_0504de52c3",
     "c_60d9a44a5d",
-    "c_8b171b5609",
-    "c_fd6de5ef9c"
+    "c_8b171b5609"
    ],
    "remaining": [
     490,
@@ -13799,7 +14082,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "e3d4cac5f8c0514d"
+   "dataFingerprint": "e80e0075f3b1d185"
   },
   {
    "id": "bq_18448bbb7fa5",
@@ -14284,7 +14567,7 @@
   },
   {
    "id": "bq_1a7da11fd6e3",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_49de1e4f0f",
    "targetDisplayNameHe": "אזקיאל נדואסל",
    "clueIds": [
@@ -14292,14 +14575,16 @@
     "c_dfa206337e",
     "c_9504e985c2",
     "c_d1cc6b4a24",
-    "c_6fefe14927"
+    "c_6fefe14927",
+    "c_9e9d43e579"
    ],
    "remaining": [
     311,
     121,
     48,
     12,
-    3
+    3,
+    1
    ],
    "families": [
     "A",
@@ -14321,11 +14606,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "93a9a0056541ad4d"
+   "dataFingerprint": "c84316d63889d7c3"
   },
   {
    "id": "bq_1af622a93f11",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_6036557ed5",
    "targetDisplayNameHe": "ברק בדש",
    "clueIds": [
@@ -14334,7 +14619,7 @@
     "c_d1cc6b4a24",
     "c_6e7876eb8b",
     "c_691ea68ddd",
-    "c_f6d9bb80ce",
+    "c_9e9d43e579",
     "c_69a90520ab",
     "c_de492595e5"
    ],
@@ -14344,7 +14629,7 @@
     61,
     17,
     5,
-    1,
+    2,
     1,
     1
    ],
@@ -14369,7 +14654,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "d64d2a39029fcb67"
+   "dataFingerprint": "d3f3bb310995c652"
   },
   {
    "id": "bq_1b02baf3a911",
@@ -14482,7 +14767,7 @@
   },
   {
    "id": "bq_1c98bd26a2bc",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_b2eff7ad62",
    "targetDisplayNameHe": "יואב הופמייסטר",
    "clueIds": [
@@ -14492,7 +14777,7 @@
     "c_5b6f25e1eb",
     "c_c61c271147",
     "c_bb79437eb6",
-    "c_178451972c",
+    "c_8e7acdf0e3",
     "c_5e950cb72d"
    ],
    "remaining": [
@@ -14525,7 +14810,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "0b2a8b569818be8a"
+   "dataFingerprint": "446ebda96e6beb5d"
   },
   {
    "id": "bq_1efda0b8d93b",
@@ -14993,7 +15278,7 @@
   },
   {
    "id": "bq_232699b808a1",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_8155ae390e",
    "targetDisplayNameHe": "דני בונדר",
    "clueIds": [
@@ -15004,7 +15289,7 @@
     "c_6e7876eb8b",
     "c_c25fc298ba",
     "c_691ea68ddd",
-    "c_c284b3b6a6",
+    "c_9e9d43e579",
     "c_48af511a87",
     "c_bf334e7f90"
    ],
@@ -15016,7 +15301,7 @@
     9,
     6,
     3,
-    2,
+    1,
     1,
     1
    ],
@@ -15046,7 +15331,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "6037101d39c7f675"
+   "dataFingerprint": "121544c1cc3fb9f3"
   },
   {
    "id": "bq_233f5cffe00b",
@@ -15253,7 +15538,7 @@
   },
   {
    "id": "bq_24cc81f63030",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_d5b6d6ee0a",
    "targetDisplayNameHe": "משה סיני",
    "clueIds": [
@@ -15264,8 +15549,8 @@
     "c_02df5d8bf3",
     "c_a733879dae",
     "c_3117f48b5e",
-    "c_6e7484011a",
-    "c_7ed068232e",
+    "c_f6d9bb80ce",
+    "c_c25fc298ba",
     "c_fd6de5ef9c"
    ],
    "remaining": [
@@ -15306,7 +15591,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "b41547f599ba3442"
+   "dataFingerprint": "2631ec2c0b37f640"
   },
   {
    "id": "bq_24d06e126e7f",
@@ -15792,7 +16077,7 @@
   },
   {
    "id": "bq_2b9f6f607991",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_8b7e2d4cee",
    "targetDisplayNameHe": "שייע פייגנבוים",
    "clueIds": [
@@ -15804,7 +16089,7 @@
     "c_02df5d8bf3",
     "c_a733879dae",
     "c_328335b4a8",
-    "c_f71f0ec4da",
+    "c_2762e4de0d",
     "c_ba069b3ead"
    ],
    "remaining": [
@@ -15844,7 +16129,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "144adcfb8e664c20"
+   "dataFingerprint": "fcd6e6b8140fb006"
   },
   {
    "id": "bq_2c323365fdd2",
@@ -15941,7 +16226,7 @@
   },
   {
    "id": "bq_2c74fc56191d",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_72e3940ed2",
    "targetDisplayNameHe": "יעקב כהן",
    "clueIds": [
@@ -15953,6 +16238,7 @@
     "c_26b16dcdef",
     "c_614fe506e6",
     "c_c9986226f6",
+    "c_bcf1af48bb",
     "c_1cc4f90e32"
    ],
    "remaining": [
@@ -15964,6 +16250,7 @@
     3,
     1,
     1,
+    1,
     1
    ],
    "families": [
@@ -15972,7 +16259,10 @@
     "C"
    ],
    "eligibleModes": [
-    "solo"
+    "solo",
+    "daily",
+    "duel",
+    "hardcore"
    ],
    "recognition": {
     "tier": "known",
@@ -15987,7 +16277,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "5fa472e83d9876ae"
+   "dataFingerprint": "608d0f3473599569"
   },
   {
    "id": "bq_2c82fbe786de",
@@ -16113,7 +16403,7 @@
     191,
     61,
     14,
-    4,
+    5,
     2
    ],
    "families": [
@@ -16396,7 +16686,7 @@
   },
   {
    "id": "bq_2e0b2d6c78de",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_6cfdc33356",
    "targetDisplayNameHe": "עומר פדידה",
    "clueIds": [
@@ -16405,9 +16695,9 @@
     "c_9504e985c2",
     "c_691ea68ddd",
     "c_8307e6151e",
-    "c_4d29e987ef",
-    "c_3d5b96dba0",
     "c_2536fdfcd1",
+    "c_3d5b96dba0",
+    "c_4d29e987ef",
     "c_162778c97c",
     "c_767b1b93be"
    ],
@@ -16448,7 +16738,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "3e2ea6cae18cdbe6"
+   "dataFingerprint": "7e39e38a47c2e2a3"
   },
   {
    "id": "bq_2e8e5dd3c44b",
@@ -16495,6 +16785,51 @@
     "legend": false
    },
    "dataFingerprint": "f1a33226706cbb29"
+  },
+  {
+   "id": "bq_2ee7d690b352",
+   "version": 1,
+   "targetPlayerId": "p_9fe0ea8c68",
+   "targetDisplayNameHe": "יונתן רודיונוב",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_ff43a6c77c",
+    "c_20d4667a98",
+    "c_9504e985c2",
+    "c_ba069b3ead",
+    "c_494cd0e619",
+    "c_b358b31d5e"
+   ],
+   "remaining": [
+    490,
+    191,
+    72,
+    31,
+    13,
+    7,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 25,
+    "appearances": null,
+    "basis": "price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     2010
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "6925d5dc49314b29"
   },
   {
    "id": "bq_2f7c7137bb2f",
@@ -16797,7 +17132,7 @@
   },
   {
    "id": "bq_3130e11a4ffa",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_e8a5d5b837",
    "targetDisplayNameHe": "אלון אופיר",
    "clueIds": [
@@ -16808,8 +17143,8 @@
     "c_b40e543f0e",
     "c_87b561334c",
     "c_02df5d8bf3",
-    "c_af876fe76e",
     "c_0b6a3430ad",
+    "c_1c3eafac24",
     "c_7ed2ce044d"
    ],
    "remaining": [
@@ -16847,7 +17182,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "a14a074502112c41"
+   "dataFingerprint": "b2aaf49363f95aef"
   },
   {
    "id": "bq_31496bf92f18",
@@ -17018,7 +17353,7 @@
   },
   {
    "id": "bq_32691a3356bd",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_9a92af7371",
    "targetDisplayNameHe": "שלום אביטן",
    "clueIds": [
@@ -17026,20 +17361,20 @@
     "c_ff43a6c77c",
     "c_d1cc6b4a24",
     "c_98efe905df",
+    "c_0504de52c3",
+    "c_8b86339c23",
     "c_c38913bf6c",
     "c_b40e543f0e",
-    "c_a524c4ddc5",
     "c_26b16dcdef",
-    "c_7bbbf8d7dc",
-    "c_3d7e277ee6"
+    "c_7bbbf8d7dc"
    ],
    "remaining": [
     490,
     191,
     61,
     12,
-    2,
-    1,
+    4,
+    3,
     1,
     1,
     1,
@@ -17070,7 +17405,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "3468234244317752"
+   "dataFingerprint": "3fa7a61d2b2f05e4"
   },
   {
    "id": "bq_3445f41dbcf2",
@@ -17130,7 +17465,7 @@
   },
   {
    "id": "bq_349e21181af6",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_7a5c4255b1",
    "targetDisplayNameHe": "שי רביבו",
    "clueIds": [
@@ -17139,10 +17474,10 @@
     "c_9504e985c2",
     "c_4f6aeb1898",
     "c_e5591355a2",
-    "c_0163fe7348",
     "c_15a1debf2d",
-    "c_5579b22ff2",
-    "c_472a28528b"
+    "c_0163fe7348",
+    "c_472a28528b",
+    "c_5579b22ff2"
    ],
    "remaining": [
     490,
@@ -17150,7 +17485,7 @@
     70,
     23,
     7,
-    1,
+    2,
     1,
     1,
     1
@@ -17177,11 +17512,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "65b40a2cb736a2df"
+   "dataFingerprint": "0875e5f4a7c584ec"
   },
   {
    "id": "bq_34bed5972f19",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_8cca01eddc",
    "targetDisplayNameHe": "רמי ארמה",
    "clueIds": [
@@ -17191,7 +17526,10 @@
     "c_c38913bf6c",
     "c_02df5d8bf3",
     "c_144cf7f8f3",
-    "c_aa26a67512"
+    "c_2762e4de0d",
+    "c_c61c271147",
+    "c_46ec70ebd1",
+    "c_3454d6d461"
    ],
    "remaining": [
     490,
@@ -17200,7 +17538,10 @@
     37,
     13,
     5,
-    2
+    2,
+    1,
+    1,
+    1
    ],
    "families": [
     "A",
@@ -17209,7 +17550,9 @@
     "E"
    ],
    "eligibleModes": [
-    "solo"
+    "solo",
+    "daily",
+    "duel"
    ],
    "recognition": {
     "tier": "familiar",
@@ -17225,7 +17568,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "1a74505a9f88ae9e"
+   "dataFingerprint": "f55f6203bbec900e"
   },
   {
    "id": "bq_3503cc6aa16f",
@@ -17324,7 +17667,7 @@
   },
   {
    "id": "bq_35c873c8b424",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_f09e03e43d",
    "targetDisplayNameHe": "יוסי מדר",
    "clueIds": [
@@ -17333,9 +17676,9 @@
     "c_98efe905df",
     "c_a733879dae",
     "c_02df5d8bf3",
-    "c_4ddf6873a8",
-    "c_b40e543f0e",
-    "c_5bc7e17674",
+    "c_f6d9bb80ce",
+    "c_af947a14f2",
+    "c_87b561334c",
     "c_328335b4a8",
     "c_14db72ed84"
    ],
@@ -17345,8 +17688,8 @@
     53,
     16,
     9,
+    3,
     2,
-    1,
     1,
     1,
     1
@@ -17375,7 +17718,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "bdd2c8e24bba9738"
+   "dataFingerprint": "2276cce8b620f492"
   },
   {
    "id": "bq_3634cfee0922",
@@ -18077,7 +18420,7 @@
   },
   {
    "id": "bq_3c2e619fefce",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_d41b1a477b",
    "targetDisplayNameHe": "יהודה עמר",
    "clueIds": [
@@ -18089,7 +18432,7 @@
     "c_e673f15fb3",
     "c_a733879dae",
     "c_85ae5eae5a",
-    "c_af876fe76e",
+    "c_67f07cd6cf",
     "c_46ec70ebd1"
    ],
    "remaining": [
@@ -18129,7 +18472,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "0d1f790080049d0b"
+   "dataFingerprint": "4596baf4ae4b0b25"
   },
   {
    "id": "bq_3d7711dc2832",
@@ -18859,7 +19202,7 @@
   },
   {
    "id": "bq_45b52ead29e3",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_6c61f19a2c",
    "targetDisplayNameHe": "אישטוואן פישונט",
    "clueIds": [
@@ -18870,8 +19213,8 @@
     "c_c38913bf6c",
     "c_f77bb5cee6",
     "c_1a4d2c3d6f",
-    "c_60d9a44a5d",
     "c_0504de52c3",
+    "c_60d9a44a5d",
     "c_0fc02f5eb8"
    ],
    "remaining": [
@@ -18913,7 +19256,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "6dd229ca3506826b"
+   "dataFingerprint": "bdbe2c0d59e854ed"
   },
   {
    "id": "bq_45da9cd5dad1",
@@ -18997,7 +19340,7 @@
   },
   {
    "id": "bq_46978082d790",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_4b46fbda65",
    "targetDisplayNameHe": "גבי לסרי",
    "clueIds": [
@@ -19009,7 +19352,7 @@
     "c_e673f15fb3",
     "c_02df5d8bf3",
     "c_a733879dae",
-    "c_3fcffea17e",
+    "c_d918e6454b",
     "c_46ec70ebd1"
    ],
    "remaining": [
@@ -19049,7 +19392,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "c1179760bf2f3517"
+   "dataFingerprint": "8fdd86032220d8db"
   },
   {
    "id": "bq_471191a25587",
@@ -19221,7 +19564,7 @@
   },
   {
    "id": "bq_4948daa6533e",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_e13a867a8b",
    "targetDisplayNameHe": "חנן אלקיים",
    "clueIds": [
@@ -19232,8 +19575,8 @@
     "c_d1cc6b4a24",
     "c_5cb3fb6ee9",
     "c_703ded77df",
-    "c_ca0b3503dc",
     "c_a926d83968",
+    "c_15a29df80f",
     "c_aa4bfbf6b7"
    ],
    "remaining": [
@@ -19273,7 +19616,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "a4845a3308b47a5f"
+   "dataFingerprint": "242a3959d63114d3"
   },
   {
    "id": "bq_49cf7fd5050b",
@@ -19382,7 +19725,7 @@
   },
   {
    "id": "bq_4b227234bf23",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_b7afb0d472",
    "targetDisplayNameHe": "עידו שרון",
    "clueIds": [
@@ -19393,8 +19736,8 @@
     "c_5435d33d3d",
     "c_21fa6db283",
     "c_ced6169a67",
+    "c_8a3d23c139",
     "c_5ce7579051",
-    "c_26696ce189",
     "c_4c26d703b4"
    ],
    "remaining": [
@@ -19433,7 +19776,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "3b2d6df6ac2e0aee"
+   "dataFingerprint": "5f70ee7335b33f1d"
   },
   {
    "id": "bq_4b9177ef23a3",
@@ -19728,8 +20071,51 @@
    "dataFingerprint": "0ec37e2b4450a1d8"
   },
   {
+   "id": "bq_4eacb4aa1576",
+   "version": 1,
+   "targetPlayerId": "p_79868ef7ef",
+   "targetDisplayNameHe": "לירן שטראובר",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_ff43a6c77c",
+    "c_21fa6db283",
+    "c_5bc7e17674",
+    "c_f6d9bb80ce",
+    "c_0b6a3430ad"
+   ],
+   "remaining": [
+    490,
+    191,
+    32,
+    11,
+    2,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 25,
+    "appearances": 15,
+    "basis": "appearances+price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     1990
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "420e9666d6960acd"
+  },
+  {
    "id": "bq_4ebabd9c9f52",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_9499858769",
    "targetDisplayNameHe": "ישראל מאיה",
    "clueIds": [
@@ -19740,7 +20126,7 @@
     "c_02df5d8bf3",
     "c_a733879dae",
     "c_b40e543f0e",
-    "c_87b72380ec",
+    "c_bcf1af48bb",
     "c_a524c4ddc5",
     "c_831b10bc22"
    ],
@@ -19782,11 +20168,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "d9324ae62c9d1e3a"
+   "dataFingerprint": "4ca3a63254eae3b5"
   },
   {
    "id": "bq_4ee40842a9f4",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_ea9c78eb0a",
    "targetDisplayNameHe": "ברנקו איליץ'",
    "clueIds": [
@@ -19795,7 +20181,9 @@
     "c_9504e985c2",
     "c_20d4667a98",
     "c_691ea68ddd",
+    "c_8d574ea53e",
     "c_8307e6151e",
+    "c_2c453ce140",
     "c_e0f26b935b",
     "c_86bed59e54"
    ],
@@ -19805,6 +20193,8 @@
     48,
     15,
     3,
+    2,
+    1,
     1,
     1,
     1
@@ -19816,7 +20206,10 @@
     "G"
    ],
    "eligibleModes": [
-    "solo"
+    "solo",
+    "daily",
+    "duel",
+    "hardcore"
    ],
    "recognition": {
     "tier": "known",
@@ -19831,11 +20224,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "1a0852019a92c93a"
+   "dataFingerprint": "704e33205ee60c8c"
   },
   {
    "id": "bq_4f06fcb05d42",
-   "version": 4,
+   "version": 5,
    "targetPlayerId": "p_3362416fff",
    "targetDisplayNameHe": "עידן סרור",
    "clueIds": [
@@ -19844,10 +20237,10 @@
     "c_c38913bf6c",
     "c_a733879dae",
     "c_b40e543f0e",
-    "c_6e7876eb8b",
     "c_d918e6454b",
     "c_60d9a44a5d",
     "c_66978feab9",
+    "c_1c25fe2d3e",
     "c_7e4236db95"
    ],
    "remaining": [
@@ -19886,7 +20279,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "c23a9a6a62c2fb4e"
+   "dataFingerprint": "94b26083bb06e946"
   },
   {
    "id": "bq_4f081d41e646",
@@ -19933,7 +20326,7 @@
   },
   {
    "id": "bq_4f662cadae1e",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_e636f3dfe3",
    "targetDisplayNameHe": "חנן ממן",
    "clueIds": [
@@ -19943,7 +20336,7 @@
     "c_4f6aeb1898",
     "c_32bef9fc6e",
     "c_691ea68ddd",
-    "c_0504de52c3",
+    "c_574334b63d",
     "c_60d9a44a5d",
     "c_7b01e3664e",
     "c_a15ad1194c"
@@ -19985,7 +20378,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "ef1df89b30638daf"
+   "dataFingerprint": "eb6f155e327cb717"
   },
   {
    "id": "bq_4f9a23e4b221",
@@ -20035,7 +20428,7 @@
   },
   {
    "id": "bq_4fb0f27c230a",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_f74a361546",
    "targetDisplayNameHe": "אלי בכר",
    "clueIds": [
@@ -20046,7 +20439,7 @@
     "c_e673f15fb3",
     "c_c78370718f",
     "c_536d0d412d",
-    "c_af876fe76e",
+    "c_87b72380ec",
     "c_37c40dbc08",
     "c_0556e3b304"
    ],
@@ -20086,11 +20479,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "72c0061f03c10f68"
+   "dataFingerprint": "4f5243831500e357"
   },
   {
    "id": "bq_4ffb73fc164d",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_0619566adc",
    "targetDisplayNameHe": "אנאס מחאמיד",
    "clueIds": [
@@ -20101,7 +20494,7 @@
     "c_d1cc6b4a24",
     "c_db06c0d76b",
     "c_9369e09a6f",
-    "c_2762e4de0d",
+    "c_23ca1e358f",
     "c_07e6bd8456",
     "c_807c17d891"
    ],
@@ -20142,7 +20535,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "f5e0c6e7efd91f94"
+   "dataFingerprint": "bd23ede65a030dd1"
   },
   {
    "id": "bq_51555e594792",
@@ -20304,7 +20697,7 @@
   },
   {
    "id": "bq_52e0f3ded74d",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_713b3bbb03",
    "targetDisplayNameHe": "אלון חלפון",
    "clueIds": [
@@ -20315,8 +20708,8 @@
     "c_776b25cd54",
     "c_6e7876eb8b",
     "c_15a1debf2d",
-    "c_1c25fe2d3e",
-    "c_0828029d61"
+    "c_0828029d61",
+    "c_1c25fe2d3e"
    ],
    "remaining": [
     490,
@@ -20325,7 +20718,7 @@
     27,
     13,
     6,
-    1,
+    2,
     1,
     1
    ],
@@ -20350,7 +20743,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "1c8ca55538aa789b"
+   "dataFingerprint": "df04adb8d42782d3"
   },
   {
    "id": "bq_52f1f43d0bb8",
@@ -21433,7 +21826,7 @@
   },
   {
    "id": "bq_588b37e2cd59",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_58ce5ca2c6",
    "targetDisplayNameHe": "ישראל ראש",
    "clueIds": [
@@ -21443,7 +21836,7 @@
     "c_9504e985c2",
     "c_8d574ea53e",
     "c_494cd0e619",
-    "c_67f07cd6cf"
+    "c_15a29df80f"
    ],
    "remaining": [
     490,
@@ -21474,7 +21867,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "b2ca11d9ffbab1d1"
+   "dataFingerprint": "1812104d92033fc3"
   },
   {
    "id": "bq_5916e27018b5",
@@ -21739,6 +22132,49 @@
    "dataFingerprint": "02d3a01984472b01"
   },
   {
+   "id": "bq_5b31de490496",
+   "version": 1,
+   "targetPlayerId": "p_3da3ce9ba1",
+   "targetDisplayNameHe": "לבאן קוטליה",
+   "clueIds": [
+    "c_ff43a6c77c",
+    "c_dfa206337e",
+    "c_d1cc6b4a24",
+    "c_5b6f25e1eb",
+    "c_23ca1e358f",
+    "c_c4e9d0ad6c"
+   ],
+   "remaining": [
+    311,
+    121,
+    32,
+    5,
+    1,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 0,
+    "appearances": null,
+    "basis": "price"
+   },
+   "tags": {
+    "origin": "foreign",
+    "decades": [
+     2020
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "a1f5260e8853a8fe"
+  },
+  {
    "id": "bq_5cdec8870963",
    "version": 2,
    "targetPlayerId": "p_b075f2d6fa",
@@ -21853,7 +22289,7 @@
   },
   {
    "id": "bq_5ddf5a44734a",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_c324982118",
    "targetDisplayNameHe": "יעקב אקהויז",
    "clueIds": [
@@ -21866,7 +22302,7 @@
     "c_26b16dcdef",
     "c_e344aef2fb",
     "c_7ed068232e",
-    "c_8b9733e241"
+    "c_ca0b3503dc"
    ],
    "remaining": [
     490,
@@ -21906,11 +22342,11 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "8c5909de5a2824ac"
+   "dataFingerprint": "a750ba7020f7f1b0"
   },
   {
    "id": "bq_5e2054b6ad8c",
-   "version": 4,
+   "version": 5,
    "targetPlayerId": "p_d1c100a162",
    "targetDisplayNameHe": "דב רמלר",
    "clueIds": [
@@ -21921,8 +22357,8 @@
     "c_02df5d8bf3",
     "c_a524c4ddc5",
     "c_60d9a44a5d",
-    "c_87cffc8e4f",
     "c_6e7484011a",
+    "c_bcf1af48bb",
     "c_c447606d18"
    ],
    "remaining": [
@@ -21962,31 +22398,31 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "8754704ab3193ee5"
+   "dataFingerprint": "476864e4ad930d6e"
   },
   {
    "id": "bq_5e39a9879b62",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_d73bf6d73e",
    "targetDisplayNameHe": "מוטי ברשצקי",
    "clueIds": [
     "c_35437d68c2",
     "c_4f6aeb1898",
     "c_98efe905df",
-    "c_9504e985c2",
-    "c_5e7578fbf7",
-    "c_5c9ad6dd84",
+    "c_67f07cd6cf",
     "c_02df5d8bf3",
-    "c_de26a1d0a3",
+    "c_9504e985c2",
     "c_b40e543f0e",
+    "c_de26a1d0a3",
+    "c_af947a14f2",
     "c_6fefe14927"
    ],
    "remaining": [
     490,
     139,
     53,
-    7,
-    3,
+    8,
+    4,
     2,
     1,
     1,
@@ -22016,7 +22452,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "ae75268ea5a11d0a"
+   "dataFingerprint": "1a528092088d57d8"
   },
   {
    "id": "bq_5ea935c48c25",
@@ -22227,6 +22663,49 @@
     "legend": true
    },
    "dataFingerprint": "f2d3b4f41bc92d6c"
+  },
+  {
+   "id": "bq_619f83ea5ffd",
+   "version": 1,
+   "targetPlayerId": "p_790cb29ed0",
+   "targetDisplayNameHe": "עלי כנאנה",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_ff43a6c77c",
+    "c_9504e985c2",
+    "c_d1cc6b4a24",
+    "c_5435d33d3d",
+    "c_16d8d4a5dc"
+   ],
+   "remaining": [
+    490,
+    191,
+    70,
+    17,
+    6,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 0,
+    "appearances": null,
+    "basis": "price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     2010
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "fc00100113cfcbc6"
   },
   {
    "id": "bq_61c632adee78",
@@ -22472,6 +22951,51 @@
    "dataFingerprint": "24c740e43a538ee6"
   },
   {
+   "id": "bq_66d5dbad8cb4",
+   "version": 1,
+   "targetPlayerId": "p_87301b4e02",
+   "targetDisplayNameHe": "לירון ליכטרמן",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_614fe506e6",
+    "c_35654c750f",
+    "c_5bc7e17674",
+    "c_21fa6db283",
+    "c_bcf1af48bb",
+    "c_60af1a6989"
+   ],
+   "remaining": [
+    490,
+    121,
+    27,
+    13,
+    8,
+    1,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 13,
+    "appearances": 3,
+    "basis": "appearances+price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     1990
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "11b3c7bf8830980b"
+  },
+  {
    "id": "bq_672bac3c7d2b",
    "version": 3,
    "targetPlayerId": "p_8bf30b10a2",
@@ -22631,7 +23155,7 @@
   },
   {
    "id": "bq_68786443f86d",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_96d00d5348",
    "targetDisplayNameHe": "פליקס חלפון",
    "clueIds": [
@@ -22641,7 +23165,7 @@
     "c_98efe905df",
     "c_a733879dae",
     "c_b40e543f0e",
-    "c_35446094ef",
+    "c_f6d9bb80ce",
     "c_f93f3169e1"
    ],
    "remaining": [
@@ -22677,7 +23201,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "9fb3f7b27f9500ca"
+   "dataFingerprint": "9a5af2220874cc23"
   },
   {
    "id": "bq_690688932be6",
@@ -22763,7 +23287,7 @@
   },
   {
    "id": "bq_69d96bcb2d5a",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_eb6dd2ac08",
    "targetDisplayNameHe": "אריה אלטר",
    "clueIds": [
@@ -22772,11 +23296,11 @@
     "c_c38913bf6c",
     "c_a733879dae",
     "c_e673f15fb3",
-    "c_a524c4ddc5",
+    "c_67f07cd6cf",
     "c_26b16dcdef",
-    "c_6c0725f936",
     "c_21fa6db283",
-    "c_2bc3b8df60"
+    "c_2bc3b8df60",
+    "c_7bbbf8d7dc"
    ],
    "remaining": [
     490,
@@ -22785,8 +23309,8 @@
     38,
     15,
     4,
-    3,
     2,
+    1,
     1,
     1
    ],
@@ -22814,7 +23338,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "a2d0a96a4fdab4f5"
+   "dataFingerprint": "5c9f844b567de673"
   },
   {
    "id": "bq_69dd789a98c7",
@@ -23117,7 +23641,7 @@
   },
   {
    "id": "bq_6bbd5c0bb8ae",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_81dbfd0fa0",
    "targetDisplayNameHe": "גבור מרטון",
    "clueIds": [
@@ -23127,7 +23651,7 @@
     "c_0163fe7348",
     "c_5bc7e17674",
     "c_35446094ef",
-    "c_2536fdfcd1",
+    "c_5fa54fd67e",
     "c_1cd5b8b43f",
     "c_d84512d44e"
    ],
@@ -23164,7 +23688,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "2b75d97fa5e7090e"
+   "dataFingerprint": "29aaddb26ad2c282"
   },
   {
    "id": "bq_6c1785ed1087",
@@ -23211,7 +23735,7 @@
   },
   {
    "id": "bq_6cdb64c304bc",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_1108a4ea15",
    "targetDisplayNameHe": "שבתאי לוי",
    "clueIds": [
@@ -23224,7 +23748,7 @@
     "c_e344aef2fb",
     "c_60d9a44a5d",
     "c_c25fc298ba",
-    "c_73f3638fed"
+    "c_4ddf6873a8"
    ],
    "remaining": [
     490,
@@ -23263,7 +23787,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "2df124b5811e8740"
+   "dataFingerprint": "0adf31d446260f55"
   },
   {
    "id": "bq_6d937f2daec5",
@@ -23363,7 +23887,7 @@
   },
   {
    "id": "bq_6e614a8e04f7",
-   "version": 4,
+   "version": 5,
    "targetPlayerId": "p_d8b9afcb38",
    "targetDisplayNameHe": "יהודה חוטה",
    "clueIds": [
@@ -23373,8 +23897,8 @@
     "c_c38913bf6c",
     "c_8d574ea53e",
     "c_b40e543f0e",
-    "c_6e7876eb8b",
     "c_d918e6454b",
+    "c_4879aece5e",
     "c_4f1023da33",
     "c_93a4e23e22"
    ],
@@ -23416,11 +23940,11 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "98bf95199ac3f0c9"
+   "dataFingerprint": "e5ca5bcf65d02a38"
   },
   {
    "id": "bq_6e7d17751f8c",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_9a786d53af",
    "targetDisplayNameHe": "יוסי ביטון",
    "clueIds": [
@@ -23431,7 +23955,7 @@
     "c_8d574ea53e",
     "c_c284b3b6a6",
     "c_0163fe7348",
-    "c_ca0b3503dc",
+    "c_15a29df80f",
     "c_1cce5d1f95",
     "c_76a8f22df1"
    ],
@@ -23472,7 +23996,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "1e785fd80b23e340"
+   "dataFingerprint": "0d32263bdf63f4e9"
   },
   {
    "id": "bq_6e9450ab23ac",
@@ -23731,6 +24255,51 @@
    "dataFingerprint": "2e1677c5325379a9"
   },
   {
+   "id": "bq_70242b9bde51",
+   "version": 1,
+   "targetPlayerId": "p_9e410654e2",
+   "targetDisplayNameHe": "קרזימיר קואב",
+   "clueIds": [
+    "c_ff43a6c77c",
+    "c_dfa206337e",
+    "c_20d4667a98",
+    "c_5bc7e17674",
+    "c_d9813667ed",
+    "c_8d574ea53e",
+    "c_9e288e1047"
+   ],
+   "remaining": [
+    311,
+    121,
+    30,
+    2,
+    1,
+    1,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 16,
+    "appearances": 5,
+    "basis": "appearances+price"
+   },
+   "tags": {
+    "origin": "foreign",
+    "decades": [
+     1990
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "c7436b01f1a4a52d"
+  },
+  {
    "id": "bq_7251fbb17eb5",
    "version": 2,
    "targetPlayerId": "p_f05836d2d4",
@@ -23825,7 +24394,7 @@
   },
   {
    "id": "bq_7349e43999fe",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_1d311413e7",
    "targetDisplayNameHe": "שחר כהן",
    "clueIds": [
@@ -23836,9 +24405,9 @@
     "c_a733879dae",
     "c_3d5b96dba0",
     "c_5bc7e17674",
-    "c_0cfe06597a",
+    "c_1c3eafac24",
     "c_35446094ef",
-    "c_60af1a6989"
+    "c_0cfe06597a"
    ],
    "remaining": [
     490,
@@ -23877,7 +24446,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "4e68677706c9ddbb"
+   "dataFingerprint": "227eaabcbad2dc7f"
   },
   {
    "id": "bq_738a165f216e",
@@ -23931,7 +24500,7 @@
   },
   {
    "id": "bq_738a70673954",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_0c5a194e79",
    "targetDisplayNameHe": "שביט מזל",
    "clueIds": [
@@ -23943,7 +24512,7 @@
     "c_0437aeb656",
     "c_5435d33d3d",
     "c_d1cc6b4a24",
-    "c_cb5d7f41df",
+    "c_8a3d23c139",
     "c_8e323811b1"
    ],
    "remaining": [
@@ -23979,7 +24548,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "6752b694d1e75563"
+   "dataFingerprint": "6ce1249960ba00e6"
   },
   {
    "id": "bq_73dc96f44001",
@@ -24096,7 +24665,7 @@
   },
   {
    "id": "bq_7526b5f95368",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_1494e9d514",
    "targetDisplayNameHe": "חסן אבו זייד",
    "clueIds": [
@@ -24105,7 +24674,7 @@
     "c_9504e985c2",
     "c_4f6aeb1898",
     "c_6fefe14927",
-    "c_f6d9bb80ce"
+    "c_5a662cc649"
    ],
    "remaining": [
     490,
@@ -24113,7 +24682,7 @@
     70,
     23,
     8,
-    1
+    2
    ],
    "families": [
     "A",
@@ -24135,7 +24704,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "e47db305ae216aa3"
+   "dataFingerprint": "9c3dbbbcbcc1a4a6"
   },
   {
    "id": "bq_755bc98a506d",
@@ -24699,24 +25268,30 @@
   },
   {
    "id": "bq_7a131b851fee",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_0088d3232b",
    "targetDisplayNameHe": "בן ציון צין (צינוביץ')",
    "clueIds": [
     "c_35437d68c2",
     "c_c38913bf6c",
     "c_d1cc6b4a24",
+    "c_1b881bbca9",
     "c_9014ac0a0b",
+    "c_614fe506e6",
     "c_94cf1c1a96",
+    "c_15a1debf2d",
     "c_7a96b00885"
    ],
    "remaining": [
     490,
     131,
     35,
+    9,
     8,
     3,
-    2
+    2,
+    1,
+    1
    ],
    "families": [
     "A",
@@ -24739,7 +25314,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "c2d190459cc80f15"
+   "dataFingerprint": "13546cc400b8d99f"
   },
   {
    "id": "bq_7a344a0d42ec",
@@ -24940,7 +25515,7 @@
   },
   {
    "id": "bq_7e4dcccbd3f3",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_82ea128fd2",
    "targetDisplayNameHe": "אנדריאן קרייב",
    "clueIds": [
@@ -24949,9 +25524,9 @@
     "c_8844713e6c",
     "c_85ae5eae5a",
     "c_5b6f25e1eb",
-    "c_614fe506e6",
     "c_7966e1b550",
     "c_d8553e9c8f",
+    "c_d9813667ed",
     "c_5361054028",
     "c_9e407f5ff1"
    ],
@@ -24992,7 +25567,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "997dae4aeee4a448"
+   "dataFingerprint": "89f4b28c800adb6b"
   },
   {
    "id": "bq_7e7c1a569aea",
@@ -25046,7 +25621,7 @@
   },
   {
    "id": "bq_7ead90985651",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_48448da21d",
    "targetDisplayNameHe": "אלי שכטר",
    "clueIds": [
@@ -25055,8 +25630,9 @@
     "c_4f6aeb1898",
     "c_a524c4ddc5",
     "c_c38913bf6c",
-    "c_7bbbf8d7dc",
-    "c_26b16dcdef"
+    "c_2762e4de0d",
+    "c_26b16dcdef",
+    "c_7bbbf8d7dc"
    ],
    "remaining": [
     490,
@@ -25064,6 +25640,7 @@
     56,
     9,
     2,
+    1,
     1,
     1
    ],
@@ -25088,7 +25665,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "7d3e5584d93846f1"
+   "dataFingerprint": "f0bfbdd9ffe1dc20"
   },
   {
    "id": "bq_7f6b0849f252",
@@ -25410,7 +25987,7 @@
   },
   {
    "id": "bq_81d6ac28ff27",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_9fada5719b",
    "targetDisplayNameHe": "ניקולה פטקוביץ'",
    "clueIds": [
@@ -25419,7 +25996,8 @@
     "c_9504e985c2",
     "c_20d4667a98",
     "c_32bef9fc6e",
-    "c_ba069b3ead"
+    "c_ba069b3ead",
+    "c_7a67d2a31c"
    ],
    "remaining": [
     311,
@@ -25427,6 +26005,7 @@
     48,
     15,
     4,
+    1,
     1
    ],
    "families": [
@@ -25449,7 +26028,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "d3a4d5ceb6d66aa8"
+   "dataFingerprint": "a130da180ebdf5b8"
   },
   {
    "id": "bq_82844e5b52e4",
@@ -25658,7 +26237,7 @@
   },
   {
    "id": "bq_8408b422f6b5",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_375eedf27f",
    "targetDisplayNameHe": "ישראל כהן",
    "clueIds": [
@@ -25668,8 +26247,8 @@
     "c_8d574ea53e",
     "c_c38913bf6c",
     "c_5bc7e17674",
+    "c_15a1debf2d",
     "c_144cf7f8f3",
-    "c_0504de52c3",
     "c_6e1fe6ffed",
     "c_753e846220"
    ],
@@ -25710,7 +26289,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "39271021eaaf93bc"
+   "dataFingerprint": "c5c1115c20ebf14e"
   },
   {
    "id": "bq_84d060cd7d51",
@@ -25819,24 +26398,30 @@
   },
   {
    "id": "bq_852254a14d37",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_6eab4f587e",
    "targetDisplayNameHe": "אליהו נשלסקי",
    "clueIds": [
     "c_35437d68c2",
     "c_c38913bf6c",
     "c_d1cc6b4a24",
+    "c_1b881bbca9",
     "c_9014ac0a0b",
+    "c_614fe506e6",
     "c_94cf1c1a96",
+    "c_2762e4de0d",
     "c_7a96b00885"
    ],
    "remaining": [
     490,
     131,
     35,
+    9,
     8,
     3,
-    2
+    2,
+    1,
+    1
    ],
    "families": [
     "A",
@@ -25859,7 +26444,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "c2d190459cc80f15"
+   "dataFingerprint": "5f22988ebe7b6cbe"
   },
   {
    "id": "bq_8533aec8edf2",
@@ -26151,7 +26736,7 @@
   },
   {
    "id": "bq_8684f900c6b1",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_98a480c32b",
    "targetDisplayNameHe": "וואליד באדיר",
    "clueIds": [
@@ -26164,7 +26749,7 @@
     "c_8a43147fc2",
     "c_1cce5d1f95",
     "c_4c3733fcf7",
-    "c_f176ed02a3"
+    "c_d918e6454b"
    ],
    "remaining": [
     490,
@@ -26204,7 +26789,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "33f83e1acd4ab1e1"
+   "dataFingerprint": "f65842a943a5dca7"
   },
   {
    "id": "bq_86897f2ddfc5",
@@ -26251,7 +26836,7 @@
   },
   {
    "id": "bq_870a84461da2",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_47c1ab38e1",
    "targetDisplayNameHe": "ארתור אטצזיאנוב",
    "clueIds": [
@@ -26260,8 +26845,7 @@
     "c_1a4d2c3d6f",
     "c_c38913bf6c",
     "c_02df5d8bf3",
-    "c_6e7876eb8b",
-    "c_5579b22ff2",
+    "c_67f07cd6cf",
     "c_7a6293290e"
    ],
    "remaining": [
@@ -26271,7 +26855,6 @@
     37,
     13,
     4,
-    3,
     2
    ],
    "families": [
@@ -26297,7 +26880,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "fbbc6ad63f011fb9"
+   "dataFingerprint": "4048e994efa7b18d"
   },
   {
    "id": "bq_870ac90a59be",
@@ -26394,7 +26977,7 @@
   },
   {
    "id": "bq_8822d09aeb96",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_0e92b2ee28",
    "targetDisplayNameHe": "דוד ונטורה",
    "clueIds": [
@@ -26404,7 +26987,7 @@
     "c_66da8a10ca",
     "c_d43f8205f8",
     "c_5bc7e17674",
-    "c_49f6363445",
+    "c_b358b31d5e",
     "c_14db72ed84"
    ],
    "remaining": [
@@ -26437,7 +27020,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "7b4d06e797726afe"
+   "dataFingerprint": "b8abc2ba00a23c77"
   },
   {
    "id": "bq_8831c444e098",
@@ -26999,16 +27582,16 @@
   },
   {
    "id": "bq_8d89dd2c7d0d",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_c57645355d",
    "targetDisplayNameHe": "משה מרקוביץ'",
    "clueIds": [
     "c_35437d68c2",
     "c_1a4d2c3d6f",
     "c_c38913bf6c",
-    "c_21fa6db283",
+    "c_67f07cd6cf",
     "c_e673f15fb3",
-    "c_c9986226f6",
+    "c_21fa6db283",
     "c_e344aef2fb",
     "c_26b16dcdef",
     "c_3fcffea17e",
@@ -27018,9 +27601,9 @@
     490,
     139,
     89,
-    12,
-    7,
-    1,
+    14,
+    5,
+    2,
     1,
     1,
     1,
@@ -27050,7 +27633,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "77348148bd3163a3"
+   "dataFingerprint": "98619a59a059a8dd"
   },
   {
    "id": "bq_8e454d3830f5",
@@ -27104,7 +27687,7 @@
   },
   {
    "id": "bq_8ee2a32c13b3",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_d33d2b7eec",
    "targetDisplayNameHe": "רפי שמואל",
    "clueIds": [
@@ -27117,7 +27700,7 @@
     "c_02df5d8bf3",
     "c_a733879dae",
     "c_3d5b96dba0",
-    "c_3454d6d461"
+    "c_f6d9bb80ce"
    ],
    "remaining": [
     490,
@@ -27156,11 +27739,11 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "dad376ba4523582f"
+   "dataFingerprint": "7c4d66df87d5d196"
   },
   {
    "id": "bq_90223d341970",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_1b2ef8745b",
    "targetDisplayNameHe": "בן רייכרט",
    "clueIds": [
@@ -27169,9 +27752,8 @@
     "c_9504e985c2",
     "c_e1bef93462",
     "c_ff9331a695",
-    "c_691ea68ddd",
     "c_5a662cc649",
-    "c_02df5d8bf3"
+    "c_691ea68ddd"
    ],
    "remaining": [
     490,
@@ -27179,8 +27761,7 @@
     38,
     11,
     8,
-    1,
-    1,
+    2,
     1
    ],
    "families": [
@@ -27204,11 +27785,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "f68c1162dcd5122a"
+   "dataFingerprint": "f9a01237f231646a"
   },
   {
    "id": "bq_9065ab7bebca",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_0567517457",
    "targetDisplayNameHe": "אמידו בלדה",
    "clueIds": [
@@ -27216,14 +27797,16 @@
     "c_dfa206337e",
     "c_9504e985c2",
     "c_f428445f06",
-    "c_ff9331a695"
+    "c_ff9331a695",
+    "c_574334b63d"
    ],
    "remaining": [
     311,
     121,
     48,
     12,
-    2
+    2,
+    1
    ],
    "families": [
     "A",
@@ -27245,7 +27828,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "cad8e8eae4821027"
+   "dataFingerprint": "9c1e2ba23d2f6bd5"
   },
   {
    "id": "bq_90675e223d08",
@@ -27425,7 +28008,7 @@
     191,
     32,
     11,
-    1,
+    2,
     1
    ],
    "families": [
@@ -27827,7 +28410,7 @@
   },
   {
    "id": "bq_943ec10dcbf9",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_af212b67c4",
    "targetDisplayNameHe": "אחמד עאבד",
    "clueIds": [
@@ -27837,9 +28420,9 @@
     "c_1a4d2c3d6f",
     "c_a733879dae",
     "c_3117f48b5e",
-    "c_9504e985c2",
-    "c_85ae5eae5a",
+    "c_9e9d43e579",
     "c_9f512904a3",
+    "c_85ae5eae5a",
     "c_69bc30c1a0"
    ],
    "remaining": [
@@ -27849,7 +28432,7 @@
     21,
     9,
     6,
-    1,
+    2,
     1,
     1,
     1
@@ -27879,7 +28462,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "50465bc37562d13d"
+   "dataFingerprint": "a05f9db1cb5711ff"
   },
   {
    "id": "bq_94d8093402e7",
@@ -27926,6 +28509,50 @@
     "legend": false
    },
    "dataFingerprint": "d5e2811904646b7a"
+  },
+  {
+   "id": "bq_9513d79a308a",
+   "version": 1,
+   "targetPlayerId": "p_73bd5cc79f",
+   "targetDisplayNameHe": "הרצל פריצנר",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_f428445f06",
+    "c_1a4d2c3d6f",
+    "c_9bc13ef27f",
+    "c_6cc327bc47",
+    "c_5a662cc649"
+   ],
+   "remaining": [
+    490,
+    141,
+    45,
+    13,
+    6,
+    2
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "known",
+    "score": 37,
+    "appearances": 20,
+    "basis": "appearances+price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     1940,
+     1950
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "933d494bf31d357a"
   },
   {
    "id": "bq_9519457ec6d7",
@@ -28080,7 +28707,7 @@
   },
   {
    "id": "bq_95a6a3eecd32",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_c4fc293564",
    "targetDisplayNameHe": "אסף צור",
    "clueIds": [
@@ -28090,7 +28717,7 @@
     "c_21fa6db283",
     "c_d8553e9c8f",
     "c_7966e1b550",
-    "c_96b63fd1ff",
+    "c_2c453ce140",
     "c_56818d8755",
     "c_ddcacff42f"
    ],
@@ -28126,7 +28753,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "60708234f789ea8b"
+   "dataFingerprint": "d1a5f25c64e4dae1"
   },
   {
    "id": "bq_95f6d47d6666",
@@ -28293,7 +28920,7 @@
   },
   {
    "id": "bq_96d0e38a0695",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_c4798ab261",
    "targetDisplayNameHe": "סאבו פאביצ'ביץ'",
    "clueIds": [
@@ -28303,7 +28930,7 @@
     "c_20d4667a98",
     "c_32bef9fc6e",
     "c_8d574ea53e",
-    "c_5a662cc649",
+    "c_2c453ce140",
     "c_b03342b744"
    ],
    "remaining": [
@@ -28337,7 +28964,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "cc7a3ac416d930ca"
+   "dataFingerprint": "4c8f95da5bb73889"
   },
   {
    "id": "bq_976ff14f2832",
@@ -28708,7 +29335,7 @@
   },
   {
    "id": "bq_997850a130e5",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_3fd1797d69",
    "targetDisplayNameHe": "ישראל וייס",
    "clueIds": [
@@ -28717,10 +29344,10 @@
     "c_98efe905df",
     "c_8d574ea53e",
     "c_8b86339c23",
-    "c_9014ac0a0b",
+    "c_2536fdfcd1",
     "c_46ec70ebd1",
+    "c_9014ac0a0b",
     "c_3338e8e79c",
-    "c_38e41a8ae7",
     "c_e4896d495c"
    ],
    "remaining": [
@@ -28759,11 +29386,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "ea7ef177630eb8f4"
+   "dataFingerprint": "1fd1da2796f47b57"
   },
   {
    "id": "bq_9aa37aa6533b",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_5375c40146",
    "targetDisplayNameHe": "עומרי אלטמן",
    "clueIds": [
@@ -28772,7 +29399,7 @@
     "c_1a4d2c3d6f",
     "c_02df5d8bf3",
     "c_5a662cc649",
-    "c_985272aa0c",
+    "c_60d9a44a5d",
     "c_b96c88438e",
     "c_af947a14f2",
     "c_7966e1b550",
@@ -28783,8 +29410,8 @@
     141,
     45,
     22,
+    4,
     3,
-    2,
     1,
     1,
     1,
@@ -28815,7 +29442,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "e9c94a0cf9cf53fa"
+   "dataFingerprint": "9e38dc76c3fb678f"
   },
   {
    "id": "bq_9c4ba10cabc3",
@@ -29134,6 +29761,51 @@
    "dataFingerprint": "6ceb9fc255ffe9f3"
   },
   {
+   "id": "bq_a069b3cfc3c9",
+   "version": 1,
+   "targetPlayerId": "p_3245f05ce9",
+   "targetDisplayNameHe": "דוד שטיינוורצל",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_20d4667a98",
+    "c_614fe506e6",
+    "c_4958127c75",
+    "c_9014ac0a0b",
+    "c_67f07cd6cf",
+    "c_3d9309c464"
+   ],
+   "remaining": [
+    490,
+    187,
+    50,
+    14,
+    7,
+    1,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 25,
+    "appearances": 11,
+    "basis": "appearances+price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     1950
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "6976ea08bceff0cc"
+  },
+  {
    "id": "bq_a0791cf5f4dc",
    "version": 3,
    "targetPlayerId": "p_a816bd7492",
@@ -29247,7 +29919,7 @@
   },
   {
    "id": "bq_a0dfadca9d0c",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_938f62e392",
    "targetDisplayNameHe": "רז נחמיאס",
    "clueIds": [
@@ -29255,10 +29927,10 @@
     "c_5f8ec27ab0",
     "c_98efe905df",
     "c_a733879dae",
+    "c_67f07cd6cf",
     "c_9504e985c2",
-    "c_614fe506e6",
     "c_ba069b3ead",
-    "c_f7866916b7",
+    "c_27336b322f",
     "c_d2ec26caab",
     "c_fa3993f9a0"
    ],
@@ -29267,8 +29939,8 @@
     181,
     63,
     20,
-    3,
-    2,
+    4,
+    1,
     1,
     1,
     1,
@@ -29299,11 +29971,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "3c03f849f3ff400f"
+   "dataFingerprint": "7f452ae6689f2ca9"
   },
   {
    "id": "bq_a0efa36cc0d2",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_7ad8f1c98f",
    "targetDisplayNameHe": "ניב סרדל",
    "clueIds": [
@@ -29313,7 +29985,7 @@
     "c_5b6f25e1eb",
     "c_5540db46e6",
     "c_c4e9d0ad6c",
-    "c_c6fe4eb99a",
+    "c_23ca1e358f",
     "c_4317e92d50"
    ],
    "remaining": [
@@ -29346,7 +30018,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "1478c995daefee18"
+   "dataFingerprint": "3df3b3292b09ed0e"
   },
   {
    "id": "bq_a167dc44b995",
@@ -30113,7 +30785,7 @@
   },
   {
    "id": "bq_a78523706390",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_9be895d63b",
    "targetDisplayNameHe": "יורגן קולין",
    "clueIds": [
@@ -30123,7 +30795,7 @@
     "c_4d29e987ef",
     "c_8307e6151e",
     "c_dfa206337e",
-    "c_ca0b3503dc",
+    "c_85813a7d5f",
     "c_eda3ba13bc"
    ],
    "remaining": [
@@ -30157,7 +30829,59 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "a8bcfb02bbd48551"
+   "dataFingerprint": "7b541eccd994e10d"
+  },
+  {
+   "id": "bq_a7e08e061619",
+   "version": 1,
+   "targetPlayerId": "p_62d4cb4305",
+   "targetDisplayNameHe": "טום אחי מרדכי",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_20d4667a98",
+    "c_1a4d2c3d6f",
+    "c_8d574ea53e",
+    "c_a733879dae",
+    "c_9504e985c2",
+    "c_614fe506e6",
+    "c_5435d33d3d",
+    "c_8a3d23c139",
+    "c_aa591aabce"
+   ],
+   "remaining": [
+    490,
+    187,
+    56,
+    27,
+    12,
+    9,
+    7,
+    6,
+    1,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "known",
+    "score": 50,
+    "appearances": null,
+    "basis": "price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     2010,
+     2020
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "659b721519786bc7"
   },
   {
    "id": "bq_a865d5814096",
@@ -30352,7 +31076,7 @@
   },
   {
    "id": "bq_a9e15ad5421b",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_9ee57e128a",
    "targetDisplayNameHe": "ריפעת טורק",
    "clueIds": [
@@ -30365,7 +31089,7 @@
     "c_85ae5eae5a",
     "c_a733879dae",
     "c_46ec70ebd1",
-    "c_bb7d0088cd"
+    "c_2762e4de0d"
    ],
    "remaining": [
     490,
@@ -30404,11 +31128,11 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "8a8c8ff8bd9455bb"
+   "dataFingerprint": "668ed929f8eee6cd"
   },
   {
    "id": "bq_aa0063393aa7",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_582a5ea57b",
    "targetDisplayNameHe": "שחר הירש",
    "clueIds": [
@@ -30417,8 +31141,11 @@
     "c_98efe905df",
     "c_d1cc6b4a24",
     "c_8b86339c23",
-    "c_af876fe76e",
-    "c_c60b47575f"
+    "c_67f07cd6cf",
+    "c_6b012276d0",
+    "c_9504e985c2",
+    "c_691ea68ddd",
+    "c_6fefe14927"
    ],
    "remaining": [
     490,
@@ -30426,8 +31153,11 @@
     52,
     20,
     13,
+    4,
     3,
-    2
+    1,
+    1,
+    1
    ],
    "families": [
     "A",
@@ -30435,7 +31165,9 @@
     "E"
    ],
    "eligibleModes": [
-    "solo"
+    "solo",
+    "daily",
+    "duel"
    ],
    "recognition": {
     "tier": "known",
@@ -30451,7 +31183,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "ea02d6cbac13eacf"
+   "dataFingerprint": "837ddca201dd629f"
   },
   {
    "id": "bq_aa013d8e88e7",
@@ -30558,8 +31290,51 @@
    "dataFingerprint": "608c1289480c24b5"
   },
   {
+   "id": "bq_aa724357a1ea",
+   "version": 1,
+   "targetPlayerId": "p_a7bdc2d943",
+   "targetDisplayNameHe": "דוד פיזנטי",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_ff43a6c77c",
+    "c_20d4667a98",
+    "c_a524c4ddc5",
+    "c_5c9ad6dd84",
+    "c_ccc16fbe93"
+   ],
+   "remaining": [
+    490,
+    191,
+    72,
+    12,
+    2,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 28,
+    "appearances": 18,
+    "basis": "appearances+price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     1980
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "c19c96671dda9539"
+  },
+  {
    "id": "bq_aa76e0df577a",
-   "version": 4,
+   "version": 5,
    "targetPlayerId": "p_a6f4efca3b",
    "targetDisplayNameHe": "כפיר אודי",
    "clueIds": [
@@ -30571,7 +31346,7 @@
     "c_02df5d8bf3",
     "c_d1cc6b4a24",
     "c_5e7578fbf7",
-    "c_f6d9bb80ce",
+    "c_67f07cd6cf",
     "c_041df4f540"
    ],
    "remaining": [
@@ -30583,7 +31358,7 @@
     12,
     6,
     4,
-    1,
+    2,
     1
    ],
    "families": [
@@ -30612,11 +31387,11 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "919c83ff1afde3e3"
+   "dataFingerprint": "f8fc9a6fa686e202"
   },
   {
    "id": "bq_aac2e47403e8",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_eabb2bc45d",
    "targetDisplayNameHe": "יוסי זאנה",
    "clueIds": [
@@ -30628,7 +31403,7 @@
     "c_8d574ea53e",
     "c_85ae5eae5a",
     "c_b2b3dbf37a",
-    "c_fd6de5ef9c",
+    "c_f6d9bb80ce",
     "c_b40e543f0e"
    ],
    "remaining": [
@@ -30668,7 +31443,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "c853014c7c03c3c8"
+   "dataFingerprint": "dd94a5703bdac481"
   },
   {
    "id": "bq_aad49883e48d",
@@ -30890,7 +31665,7 @@
   },
   {
    "id": "bq_acab10d63c99",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_87a6b909aa",
    "targetDisplayNameHe": "אלין טופוזאקוב",
    "clueIds": [
@@ -30902,6 +31677,7 @@
     "c_dfa206337e",
     "c_691ea68ddd",
     "c_0bf59b332b",
+    "c_d9813667ed",
     "c_cf00bbb3c3"
    ],
    "remaining": [
@@ -30913,6 +31689,7 @@
     2,
     1,
     1,
+    1,
     1
    ],
    "families": [
@@ -30921,7 +31698,10 @@
     "E"
    ],
    "eligibleModes": [
-    "solo"
+    "solo",
+    "daily",
+    "duel",
+    "hardcore"
    ],
    "recognition": {
     "tier": "known",
@@ -30936,7 +31716,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "11e6d4f0e0a5da9d"
+   "dataFingerprint": "769557781db4986e"
   },
   {
    "id": "bq_acf3b6ce6e15",
@@ -31205,7 +31985,7 @@
   },
   {
    "id": "bq_b0d12f8b5564",
-   "version": 4,
+   "version": 5,
    "targetPlayerId": "p_d20e3a28f6",
    "targetDisplayNameHe": "בן שהר",
    "clueIds": [
@@ -31216,7 +31996,7 @@
     "c_d1cc6b4a24",
     "c_5e7578fbf7",
     "c_703ded77df",
-    "c_178451972c",
+    "c_87cffc8e4f",
     "c_8a43147fc2",
     "c_dd27858c2b"
    ],
@@ -31261,7 +32041,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "f11ce7fd384ede92"
+   "dataFingerprint": "533a3bf131d5017d"
   },
   {
    "id": "bq_b15f9925fa13",
@@ -31422,7 +32202,7 @@
   },
   {
    "id": "bq_b23f9e5c6023",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_f519e72f4b",
    "targetDisplayNameHe": "דאבור רופניק",
    "clueIds": [
@@ -31430,9 +32210,9 @@
     "c_98efe905df",
     "c_c38913bf6c",
     "c_02df5d8bf3",
-    "c_144cf7f8f3",
-    "c_8f07c39184",
     "c_f6d9bb80ce",
+    "c_8f07c39184",
+    "c_144cf7f8f3",
     "c_1cd5b8b43f",
     "c_46bce1fa95",
     "c_375dda6488"
@@ -31443,7 +32223,7 @@
     28,
     13,
     3,
-    2,
+    1,
     1,
     1,
     1,
@@ -31475,7 +32255,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "0ae1f91c600b3c7e"
+   "dataFingerprint": "a5a886ca6f94b28f"
   },
   {
    "id": "bq_b39ebfb8810e",
@@ -31778,7 +32558,7 @@
   },
   {
    "id": "bq_b62669ecc27d",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_431474822c",
    "targetDisplayNameHe": "אלכסנדר בולייביץ'",
    "clueIds": [
@@ -31787,7 +32567,8 @@
     "c_dfa206337e",
     "c_5b6f25e1eb",
     "c_b96c88438e",
-    "c_dd2031e39a"
+    "c_dd2031e39a",
+    "c_574334b63d"
    ],
    "remaining": [
     311,
@@ -31795,6 +32576,7 @@
     59,
     14,
     5,
+    1,
     1
    ],
    "families": [
@@ -31817,11 +32599,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "8c55c42f6009378a"
+   "dataFingerprint": "ddeb40491d6bc455"
   },
   {
    "id": "bq_b6efb42df631",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_ea3357e961",
    "targetDisplayNameHe": "עידן כהן",
    "clueIds": [
@@ -31832,8 +32614,8 @@
     "c_9504e985c2",
     "c_691ea68ddd",
     "c_703ded77df",
-    "c_494cd0e619",
     "c_f7866916b7",
+    "c_494cd0e619",
     "c_6b7d9a58cd"
    ],
    "remaining": [
@@ -31872,11 +32654,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "b68b88782eee0c3b"
+   "dataFingerprint": "83ae28ac727dc22d"
   },
   {
    "id": "bq_b70539d1a0ed",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_4d28a411c1",
    "targetDisplayNameHe": "שון גולדברג",
    "clueIds": [
@@ -31886,7 +32668,7 @@
     "c_9504e985c2",
     "c_66da8a10ca",
     "c_ff9331a695",
-    "c_0504de52c3"
+    "c_15a1debf2d"
    ],
    "remaining": [
     490,
@@ -31895,7 +32677,7 @@
     31,
     8,
     7,
-    1
+    2
    ],
    "families": [
     "A",
@@ -31917,11 +32699,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "98f4eb0870df1ac3"
+   "dataFingerprint": "3effd852bbe2db06"
   },
   {
    "id": "bq_b73f71f624ba",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_0d01a9c7bb",
    "targetDisplayNameHe": "עמירן שקלים",
    "clueIds": [
@@ -31931,7 +32713,7 @@
     "c_9504e985c2",
     "c_ba069b3ead",
     "c_69bc30c1a0",
-    "c_2536fdfcd1"
+    "c_5a662cc649"
    ],
    "remaining": [
     490,
@@ -31940,7 +32722,7 @@
     31,
     13,
     6,
-    1
+    2
    ],
    "families": [
     "A",
@@ -31962,11 +32744,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "24e21637a9ccb33c"
+   "dataFingerprint": "30e821c64ec77097"
   },
   {
    "id": "bq_b7759ee31fea",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_5f3ad834a6",
    "targetDisplayNameHe": "גדעון טיש",
    "clueIds": [
@@ -31979,7 +32761,7 @@
     "c_58bdb7722d",
     "c_efd8d7e052",
     "c_a097a2506d",
-    "c_7a96b00885"
+    "c_eef23a09c3"
    ],
    "remaining": [
     490,
@@ -32018,7 +32800,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "cbd6c14f807dedfc"
+   "dataFingerprint": "bdefa72acedfabd2"
   },
   {
    "id": "bq_b827891289ea",
@@ -32078,7 +32860,7 @@
   },
   {
    "id": "bq_b86c86574846",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_4d893fb570",
    "targetDisplayNameHe": "זיו מורגן",
    "clueIds": [
@@ -32087,7 +32869,7 @@
     "c_98efe905df",
     "c_8d574ea53e",
     "c_8b86339c23",
-    "c_5b6f25e1eb",
+    "c_9e9d43e579",
     "c_5e7578fbf7",
     "c_d8597537e6",
     "c_2c05d318e7",
@@ -32130,7 +32912,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "d958e8c79781ac0b"
+   "dataFingerprint": "371ea7628a3b632a"
   },
   {
    "id": "bq_b8a7baa1dd4a",
@@ -32883,7 +33665,7 @@
   },
   {
    "id": "bq_bdcfef13d743",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_f04c393b45",
    "targetDisplayNameHe": "מנחם רוזנשטרייך",
    "clueIds": [
@@ -32895,7 +33677,7 @@
     "c_e673f15fb3",
     "c_c78370718f",
     "c_6e89389495",
-    "c_d9edf28659",
+    "c_4ddf6873a8",
     "c_7e3743f7bd"
    ],
    "remaining": [
@@ -32907,7 +33689,7 @@
     6,
     4,
     3,
-    1,
+    2,
     1
    ],
    "families": [
@@ -32934,7 +33716,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "59bc38c846bb6e45"
+   "dataFingerprint": "3373c88ccb368fc3"
   },
   {
    "id": "bq_be54bed97b5c",
@@ -33005,8 +33787,8 @@
     191,
     56,
     14,
-    3,
-    1,
+    4,
+    2,
     1
    ],
    "families": [
@@ -33467,7 +34249,7 @@
   },
   {
    "id": "bq_c21a8fdf518a",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_14e7aebf67",
    "targetDisplayNameHe": "דניאל דניאלי",
    "clueIds": [
@@ -33480,7 +34262,7 @@
     "c_4f1023da33",
     "c_58bdb7722d",
     "c_c9a2411f60",
-    "c_2ebcdd89ba"
+    "c_87cffc8e4f"
    ],
    "remaining": [
     490,
@@ -33518,7 +34300,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "7916cfc8b848ab42"
+   "dataFingerprint": "270662cca3376a33"
   },
   {
    "id": "bq_c225759264b3",
@@ -34042,7 +34824,7 @@
   },
   {
    "id": "bq_c61b6bb3b0b3",
-   "version": 4,
+   "version": 5,
    "targetPlayerId": "p_2cc60c0e20",
    "targetDisplayNameHe": "סלים טועמה",
    "clueIds": [
@@ -34052,9 +34834,9 @@
     "c_c38913bf6c",
     "c_02df5d8bf3",
     "c_7ed068232e",
-    "c_178451972c",
-    "c_328335b4a8",
     "c_1cd5b8b43f",
+    "c_328335b4a8",
+    "c_deab915cae",
     "c_cddc3f79a9"
    ],
    "remaining": [
@@ -34096,7 +34878,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "c456ba92eab18ad7"
+   "dataFingerprint": "18690d9cdff4ced0"
   },
   {
    "id": "bq_c653e67e120c",
@@ -34883,6 +35665,54 @@
    "dataFingerprint": "e6cf11786d2c7a36"
   },
   {
+   "id": "bq_ceac5895ac24",
+   "version": 1,
+   "targetPlayerId": "p_9da3d676ab",
+   "targetDisplayNameHe": "אייל אברמוב",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_1a4d2c3d6f",
+    "c_f56b5c94f5",
+    "c_6c0725f936",
+    "c_a524c4ddc5",
+    "c_21fa6db283",
+    "c_50c7c67089",
+    "c_bcf1af48bb"
+   ],
+   "remaining": [
+    490,
+    139,
+    28,
+    15,
+    9,
+    8,
+    7,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "known",
+    "score": 34,
+    "appearances": 7,
+    "basis": "appearances+price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     1980,
+     1990
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "8e8f9776d8cf0191"
+  },
+  {
    "id": "bq_cf897e7a454b",
    "version": 2,
    "targetPlayerId": "p_e3b0689fca",
@@ -34980,7 +35810,7 @@
   },
   {
    "id": "bq_cffd92aa215c",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_84096bfe16",
    "targetDisplayNameHe": "מרקו שולר",
    "clueIds": [
@@ -34991,7 +35821,8 @@
     "c_0163fe7348",
     "c_8d574ea53e",
     "c_dcffd63d31",
-    "c_eb8725cdb9"
+    "c_eb8725cdb9",
+    "c_fe620d9b33"
    ],
    "remaining": [
     311,
@@ -34999,6 +35830,7 @@
     48,
     15,
     2,
+    1,
     1,
     1,
     1
@@ -35024,7 +35856,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "3ba67e66ba2e4ea7"
+   "dataFingerprint": "544f36242e188a50"
   },
   {
    "id": "bq_d0241003f336",
@@ -35084,7 +35916,7 @@
   },
   {
    "id": "bq_d02489e3781a",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_50c4f2bc0d",
    "targetDisplayNameHe": "נוסא איגייבור",
    "clueIds": [
@@ -35096,7 +35928,7 @@
     "c_02df5d8bf3",
     "c_4f6aeb1898",
     "c_60d9a44a5d",
-    "c_eb8725cdb9",
+    "c_5a662cc649",
     "c_486f71419b"
    ],
    "remaining": [
@@ -35137,7 +35969,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "354aa8db274fbdde"
+   "dataFingerprint": "d2ffd6f379d043d3"
   },
   {
    "id": "bq_d03e46031a62",
@@ -35592,7 +36424,7 @@
   },
   {
    "id": "bq_d513d68891b8",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_40a9f939f5",
    "targetDisplayNameHe": "הרברט מייטנר",
    "clueIds": [
@@ -35602,6 +36434,8 @@
     "c_6d950578ed",
     "c_0d9cf5d175",
     "c_3117f48b5e",
+    "c_f7866916b7",
+    "c_38e41a8ae7",
     "c_c8346b305d",
     "c_3363eb2d87"
    ],
@@ -35613,6 +36447,8 @@
     2,
     1,
     1,
+    1,
+    1,
     1
    ],
    "families": [
@@ -35621,7 +36457,9 @@
     "E"
    ],
    "eligibleModes": [
-    "solo"
+    "solo",
+    "daily",
+    "duel"
    ],
    "recognition": {
     "tier": "familiar",
@@ -35637,7 +36475,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "c801fbf56463d9a5"
+   "dataFingerprint": "765623c23569cca4"
   },
   {
    "id": "bq_d542fe04b308",
@@ -35948,7 +36786,7 @@
   },
   {
    "id": "bq_d61cf52e9f4f",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_9a7b6e96a1",
    "targetDisplayNameHe": "שביט אלימלך",
    "clueIds": [
@@ -35957,9 +36795,9 @@
     "c_c38913bf6c",
     "c_5bc7e17674",
     "c_35446094ef",
-    "c_38741b8b13",
-    "c_0fc02f5eb8",
     "c_21fa6db283",
+    "c_d918e6454b",
+    "c_0fc02f5eb8",
     "c_2de3b199cb",
     "c_e2ebd7ff3d"
    ],
@@ -35969,8 +36807,8 @@
     89,
     12,
     9,
-    3,
     2,
+    1,
     1,
     1,
     1
@@ -36001,7 +36839,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "ce502c87553bb50d"
+   "dataFingerprint": "02697866ea192646"
   },
   {
    "id": "bq_d6348c1b9d6d",
@@ -36050,7 +36888,7 @@
   },
   {
    "id": "bq_d70d268f4149",
-   "version": 4,
+   "version": 5,
    "targetPlayerId": "p_b150788697",
    "targetDisplayNameHe": "דדי בן דיין",
    "clueIds": [
@@ -36062,7 +36900,7 @@
     "c_60d9a44a5d",
     "c_8a43147fc2",
     "c_c9998cdbc0",
-    "c_5a662cc649",
+    "c_d918e6454b",
     "c_4713577c91"
    ],
    "remaining": [
@@ -36105,7 +36943,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "99a9c61ea5df3f13"
+   "dataFingerprint": "fdea36baecf05d76"
   },
   {
    "id": "bq_d7a328737a63",
@@ -36589,7 +37427,7 @@
   },
   {
    "id": "bq_da59f67164b8",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_a5c53f27aa",
    "targetDisplayNameHe": "אורי קרגולה",
    "clueIds": [
@@ -36600,7 +37438,9 @@
     "c_691ea68ddd",
     "c_a926d83968",
     "c_b40e543f0e",
-    "c_554157c89e"
+    "c_bcf1af48bb",
+    "c_554157c89e",
+    "c_67db5890b8"
    ],
    "remaining": [
     490,
@@ -36608,6 +37448,8 @@
     61,
     17,
     5,
+    1,
+    1,
     1,
     1,
     1
@@ -36619,7 +37461,10 @@
     "G"
    ],
    "eligibleModes": [
-    "solo"
+    "solo",
+    "daily",
+    "duel",
+    "hardcore"
    ],
    "recognition": {
     "tier": "known",
@@ -36634,7 +37479,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "3e2e0a0e74803322"
+   "dataFingerprint": "09608af7f5830615"
   },
   {
    "id": "bq_dc863fe0c85f",
@@ -36795,7 +37640,7 @@
   },
   {
    "id": "bq_dd9fcc47624c",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_a4798f768c",
    "targetDisplayNameHe": "שחר פיבן",
    "clueIds": [
@@ -36805,8 +37650,8 @@
     "c_8d574ea53e",
     "c_e6b792f46f",
     "c_02df5d8bf3",
-    "c_7966e1b550",
     "c_2762e4de0d",
+    "c_7966e1b550",
     "c_32653284a3",
     "c_212855db89"
    ],
@@ -36847,7 +37692,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "7cec989baae5fe8d"
+   "dataFingerprint": "fd43c88ac37b907a"
   },
   {
    "id": "bq_ddbd7f19b312",
@@ -37014,7 +37859,7 @@
   },
   {
    "id": "bq_ded55407baa4",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_4e99a60a9c",
    "targetDisplayNameHe": "מור נעמן (כדורגלן)",
    "clueIds": [
@@ -37024,7 +37869,7 @@
     "c_5b6f25e1eb",
     "c_8d574ea53e",
     "c_c4e9d0ad6c",
-    "c_67f07cd6cf"
+    "c_15a29df80f"
    ],
    "remaining": [
     490,
@@ -37055,11 +37900,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "fa1d64b44da43165"
+   "dataFingerprint": "90218ad8435316d4"
   },
   {
    "id": "bq_df198bd925fd",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_3acb6dedd8",
    "targetDisplayNameHe": "גל הרשליקוביץ",
    "clueIds": [
@@ -37071,7 +37916,7 @@
     "c_66da8a10ca",
     "c_a524c4ddc5",
     "c_b40e543f0e",
-    "c_d1222c9c64",
+    "c_bcf1af48bb",
     "c_b9cc4ebdbc"
    ],
    "remaining": [
@@ -37111,7 +37956,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "129136776932ba03"
+   "dataFingerprint": "6a4787a47cfb715a"
   },
   {
    "id": "bq_df1c1d62c0b0",
@@ -37162,7 +38007,7 @@
   },
   {
    "id": "bq_df5b69faacf2",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_7c9ce04140",
    "targetDisplayNameHe": "אייל בן עמי",
    "clueIds": [
@@ -37174,7 +38019,7 @@
     "c_3117f48b5e",
     "c_a733879dae",
     "c_85ae5eae5a",
-    "c_6df90c22f2",
+    "c_d918e6454b",
     "c_858e5d30dd"
    ],
    "remaining": [
@@ -37215,7 +38060,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "a515fa82d31af630"
+   "dataFingerprint": "48f1e3840ad5b3b2"
   },
   {
    "id": "bq_e06d15e3e7f4",
@@ -37559,7 +38404,7 @@
   },
   {
    "id": "bq_e29413ec1fc6",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_b6e735f352",
    "targetDisplayNameHe": "מרווין פירסמן",
    "clueIds": [
@@ -37568,10 +38413,11 @@
     "c_ba069b3ead",
     "c_703ded77df",
     "c_de26a1d0a3",
-    "c_494cd0e619",
     "c_691ea68ddd",
     "c_dfa206337e",
-    "c_b40e543f0e"
+    "c_b40e543f0e",
+    "c_574334b63d",
+    "c_a7010ca578"
    ],
    "remaining": [
     229,
@@ -37579,7 +38425,8 @@
     26,
     10,
     8,
-    6,
+    2,
+    1,
     1,
     1,
     1
@@ -37590,7 +38437,10 @@
     "E"
    ],
    "eligibleModes": [
-    "solo"
+    "solo",
+    "daily",
+    "duel",
+    "hardcore"
    ],
    "recognition": {
     "tier": "familiar",
@@ -37605,11 +38455,11 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "077c0a36ee724b11"
+   "dataFingerprint": "a2d27cb162c1a6ad"
   },
   {
    "id": "bq_e41b008e6a6b",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_75ef40e9c5",
    "targetDisplayNameHe": "מוריס ז'אנו",
    "clueIds": [
@@ -37621,7 +38471,7 @@
     "c_af947a14f2",
     "c_26b16dcdef",
     "c_b40e543f0e",
-    "c_de1d033a4f",
+    "c_ca0b3503dc",
     "c_c447606d18"
    ],
    "remaining": [
@@ -37661,7 +38511,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "dcb2203cf814ac48"
+   "dataFingerprint": "42f9cd03a5a84978"
   },
   {
    "id": "bq_e475639566f8",
@@ -37721,29 +38571,29 @@
   },
   {
    "id": "bq_e4e36802746e",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_92eaa76de2",
    "targetDisplayNameHe": "מוטי אוחיון",
    "clueIds": [
     "c_35437d68c2",
     "c_20d4667a98",
     "c_c38913bf6c",
-    "c_8d574ea53e",
     "c_02df5d8bf3",
     "c_144cf7f8f3",
-    "c_691ea68ddd",
-    "c_0504de52c3",
+    "c_2762e4de0d",
+    "c_5e7578fbf7",
     "c_1cd5b8b43f",
+    "c_691ea68ddd",
     "c_76dca03c5c"
    ],
    "remaining": [
     490,
     187,
     52,
-    26,
-    8,
+    17,
+    6,
     3,
-    1,
+    2,
     1,
     1,
     1
@@ -37774,7 +38624,7 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "dc140aad6212e787"
+   "dataFingerprint": "cdda0a4e577e97f3"
   },
   {
    "id": "bq_e4e44d48a61c",
@@ -37922,7 +38772,7 @@
   },
   {
    "id": "bq_e602b21eb4ca",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_43ad8316b1",
    "targetDisplayNameHe": "אריאל הרוש",
    "clueIds": [
@@ -37932,7 +38782,7 @@
     "c_e1bef93462",
     "c_27336b322f",
     "c_21fa6db283",
-    "c_0504de52c3",
+    "c_2c453ce140",
     "c_b804b1fcf7",
     "c_54903358bb"
    ],
@@ -37968,7 +38818,48 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "2a82b78662aa0853"
+   "dataFingerprint": "cdd6849768370773"
+  },
+  {
+   "id": "bq_e72ae6a0f6ad",
+   "version": 1,
+   "targetPlayerId": "p_6fe0288598",
+   "targetDisplayNameHe": "אדמונד שמילוביץ'",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_ff43a6c77c",
+    "c_4f6aeb1898",
+    "c_9014ac0a0b",
+    "c_67f07cd6cf"
+   ],
+   "remaining": [
+    490,
+    191,
+    56,
+    11,
+    2
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "known",
+    "score": 30,
+    "appearances": 21,
+    "basis": "appearances+price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     1950
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "b8925b84a868ddc3"
   },
   {
    "id": "bq_e7447ef66705",
@@ -38024,7 +38915,7 @@
   },
   {
    "id": "bq_e755d49a01d6",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_804008bd39",
    "targetDisplayNameHe": "פטר אורלנדיץ'",
    "clueIds": [
@@ -38034,6 +38925,7 @@
     "c_691ea68ddd",
     "c_d1cc6b4a24",
     "c_8307e6151e",
+    "c_7a67d2a31c",
     "c_8db8c65074",
     "c_2552d6a68b"
    ],
@@ -38043,6 +38935,7 @@
     48,
     13,
     3,
+    1,
     1,
     1,
     1
@@ -38069,7 +38962,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "5aa5be3346efd85b"
+   "dataFingerprint": "101a0e32bce32c28"
   },
   {
    "id": "bq_e7579062109c",
@@ -38212,7 +39105,7 @@
   },
   {
    "id": "bq_e9278ec1929f",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_fc78cb8855",
    "targetDisplayNameHe": "רועי אלקוקין",
    "clueIds": [
@@ -38222,8 +39115,8 @@
     "c_1c3eafac24",
     "c_02df5d8bf3",
     "c_af876fe76e",
-    "c_985272aa0c",
     "c_7966e1b550",
+    "c_985272aa0c",
     "c_dd2031e39a",
     "c_d8dd52d202"
    ],
@@ -38231,9 +39124,9 @@
     490,
     139,
     53,
-    5,
-    3,
-    1,
+    7,
+    4,
+    2,
     1,
     1,
     1,
@@ -38263,7 +39156,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "77998410b5282c21"
+   "dataFingerprint": "f57036738276dc8c"
   },
   {
    "id": "bq_e9e312cb5be9",
@@ -38383,7 +39276,7 @@
   },
   {
    "id": "bq_ea02a680daf8",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_164f143bb6",
    "targetDisplayNameHe": "גיורא אנטמן",
    "clueIds": [
@@ -38391,16 +39284,14 @@
     "c_ff43a6c77c",
     "c_21fa6db283",
     "c_a524c4ddc5",
-    "c_0504de52c3",
-    "c_ccc16fbe93"
+    "c_15a1debf2d"
    ],
    "remaining": [
     490,
     191,
     32,
     8,
-    1,
-    1
+    2
    ],
    "families": [
     "A",
@@ -38422,7 +39313,63 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "fe0e9fd7980f193a"
+   "dataFingerprint": "5d3a0acb0f88162a"
+  },
+  {
+   "id": "bq_ea8556575fd3",
+   "version": 1,
+   "targetPlayerId": "p_342848cf55",
+   "targetDisplayNameHe": "דגלאס אווסו",
+   "clueIds": [
+    "c_ff43a6c77c",
+    "c_6f42cdcda9",
+    "c_f428445f06",
+    "c_691ea68ddd",
+    "c_7a67d2a31c",
+    "c_7966e1b550",
+    "c_54fe01f9a9",
+    "c_338eb2ed63",
+    "c_202322107e",
+    "c_443f440c2c"
+   ],
+   "remaining": [
+    311,
+    121,
+    34,
+    9,
+    2,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "families": [
+    "A",
+    "B",
+    "E",
+    "G"
+   ],
+   "eligibleModes": [
+    "solo",
+    "daily",
+    "duel",
+    "hardcore"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 25,
+    "appearances": null,
+    "basis": "price"
+   },
+   "tags": {
+    "origin": "foreign",
+    "decades": [
+     2020
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "97746a02b792ad56"
   },
   {
    "id": "bq_eaa059f17db3",
@@ -38640,7 +39587,7 @@
   },
   {
    "id": "bq_ecc3b3d7a795",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_3f6380cdd9",
    "targetDisplayNameHe": "דיאן רצ'וניצה",
    "clueIds": [
@@ -38650,9 +39597,9 @@
     "c_691ea68ddd",
     "c_c38913bf6c",
     "c_02df5d8bf3",
-    "c_5bc7e17674",
-    "c_37592a6ac0",
+    "c_5fa54fd67e",
     "c_f77bb5cee6",
+    "c_37592a6ac0",
     "c_f05c7b2966"
    ],
    "remaining": [
@@ -38693,7 +39640,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "b4a47eca3b8ff750"
+   "dataFingerprint": "66989eee094ec955"
   },
   {
    "id": "bq_edab393c2683",
@@ -38748,7 +39695,7 @@
   },
   {
    "id": "bq_edabce755785",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_0694db8ed4",
    "targetDisplayNameHe": "משה אייזנברג",
    "clueIds": [
@@ -38756,6 +39703,7 @@
     "c_ff43a6c77c",
     "c_d1cc6b4a24",
     "c_5bc7e17674",
+    "c_5a662cc649",
     "c_b40e543f0e",
     "c_a77e105638",
     "c_12fffb7952"
@@ -38765,7 +39713,8 @@
     191,
     61,
     14,
-    3,
+    4,
+    2,
     1,
     1
    ],
@@ -38790,7 +39739,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "c614b2ce46670c01"
+   "dataFingerprint": "e7ffb1e003329d0a"
   },
   {
    "id": "bq_ede5dd4501b0",
@@ -39068,7 +40017,7 @@
   },
   {
    "id": "bq_f30e9720335f",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_4923c8325d",
    "targetDisplayNameHe": "חזי שירזי",
    "clueIds": [
@@ -39078,7 +40027,7 @@
     "c_8b86339c23",
     "c_5bc7e17674",
     "c_b40e543f0e",
-    "c_703ded77df",
+    "c_f6d9bb80ce",
     "c_6c0725f936",
     "c_a77e105638",
     "c_7d05fed5af"
@@ -39090,7 +40039,7 @@
     23,
     7,
     5,
-    1,
+    2,
     1,
     1,
     1
@@ -39119,7 +40068,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "0d0b7906e5d314ab"
+   "dataFingerprint": "8405413290635a63"
   },
   {
    "id": "bq_f382de873790",
@@ -39311,7 +40260,7 @@
   },
   {
    "id": "bq_f4e795c799ff",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_967d4b240c",
    "targetDisplayNameHe": "אחמד מוסא",
    "clueIds": [
@@ -39320,11 +40269,11 @@
     "c_1a4d2c3d6f",
     "c_c38913bf6c",
     "c_4f1023da33",
+    "c_15a1debf2d",
     "c_a524c4ddc5",
-    "c_2bd7c37982",
-    "c_2bc3b8df60",
     "c_46ec70ebd1",
-    "c_ccc16fbe93"
+    "c_2bc3b8df60",
+    "c_2bd7c37982"
    ],
    "remaining": [
     490,
@@ -39363,7 +40312,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "500b1fbfc9cd60a3"
+   "dataFingerprint": "61520099fe082181"
   },
   {
    "id": "bq_f5052c539873",
@@ -39419,6 +40368,49 @@
     "legend": false
    },
    "dataFingerprint": "d0670b7f8505d95a"
+  },
+  {
+   "id": "bq_f606c654e715",
+   "version": 1,
+   "targetPlayerId": "p_f12f909ac3",
+   "targetDisplayNameHe": "אביב דדו",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_ff43a6c77c",
+    "c_9504e985c2",
+    "c_d1cc6b4a24",
+    "c_ff9331a695",
+    "c_b0bc06317f"
+   ],
+   "remaining": [
+    490,
+    191,
+    70,
+    17,
+    7,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 0,
+    "appearances": null,
+    "basis": "price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     2010
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "a2f8c50597ac7137"
   },
   {
    "id": "bq_f614bbc53a5c",
@@ -39478,7 +40470,7 @@
   },
   {
    "id": "bq_f659d59f9ee9",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_3a36968e08",
    "targetDisplayNameHe": "יקיר לוסקי",
    "clueIds": [
@@ -39488,9 +40480,9 @@
     "c_a733879dae",
     "c_6e7876eb8b",
     "c_db06c0d76b",
-    "c_d918e6454b",
     "c_b58bc5b57a",
     "c_a926d83968",
+    "c_15a29df80f",
     "c_beadc41aee"
    ],
    "remaining": [
@@ -39529,7 +40521,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "8bd7f1fc409e1933"
+   "dataFingerprint": "f9aa7596975eb353"
   },
   {
    "id": "bq_f6ea1a0e9ea5",
@@ -39691,6 +40683,51 @@
     "legend": false
    },
    "dataFingerprint": "0d2737c8e6d0e905"
+  },
+  {
+   "id": "bq_f7b9895f515a",
+   "version": 1,
+   "targetPlayerId": "p_ad6d8585b7",
+   "targetDisplayNameHe": "חיים איצרין",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_ff43a6c77c",
+    "c_20d4667a98",
+    "c_6e7876eb8b",
+    "c_66da8a10ca",
+    "c_69a90520ab",
+    "c_2762e4de0d"
+   ],
+   "remaining": [
+    490,
+    191,
+    72,
+    12,
+    10,
+    7,
+    2
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 2,
+    "appearances": 1,
+    "basis": "appearances+price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     2000
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "56f4f27228b91be8"
   },
   {
    "id": "bq_f827deba8a33",
@@ -39915,7 +40952,7 @@
   },
   {
    "id": "bq_f94abcb111e0",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_5685a14a25",
    "targetDisplayNameHe": "יונתן פרבר",
    "clueIds": [
@@ -39923,8 +40960,8 @@
     "c_ff43a6c77c",
     "c_4f6aeb1898",
     "c_5b6f25e1eb",
-    "c_7966e1b550",
     "c_15a1debf2d",
+    "c_7966e1b550",
     "c_a84341ce81",
     "c_3344450c7c",
     "c_66dcd310a9"
@@ -39961,7 +40998,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "1433ea9c570f9bb5"
+   "dataFingerprint": "10c1aa6c6736c5f4"
   },
   {
    "id": "bq_fa03060622df",
@@ -40171,7 +41208,7 @@
   },
   {
    "id": "bq_fc4640e72cd0",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_7204c0e5c4",
    "targetDisplayNameHe": "שלמה פוליאקוב",
    "clueIds": [
@@ -40182,8 +41219,9 @@
     "c_6d950578ed",
     "c_c25fc298ba",
     "c_3117f48b5e",
+    "c_d918e6454b",
     "c_7ed068232e",
-    "c_937c874000"
+    "c_48931fec6c"
    ],
    "remaining": [
     490,
@@ -40194,60 +41232,6 @@
     6,
     4,
     1,
-    1
-   ],
-   "families": [
-    "A",
-    "B",
-    "C",
-    "E"
-   ],
-   "eligibleModes": [
-    "solo"
-   ],
-   "recognition": {
-    "tier": "familiar",
-    "score": 76,
-    "appearances": 74,
-    "basis": "appearances+price"
-   },
-   "tags": {
-    "origin": "israeli",
-    "decades": [
-     1920,
-     1930,
-     1940
-    ],
-    "legend": true
-   },
-   "dataFingerprint": "85124d3cbe0584fb"
-  },
-  {
-   "id": "bq_fc91d45aee6d",
-   "version": 2,
-   "targetPlayerId": "p_b118d52099",
-   "targetDisplayNameHe": "חיים גלזר",
-   "clueIds": [
-    "c_35437d68c2",
-    "c_1a4d2c3d6f",
-    "c_c38913bf6c",
-    "c_98efe905df",
-    "c_d1cc6b4a24",
-    "c_af947a14f2",
-    "c_1b881bbca9",
-    "c_274236842a",
-    "c_81310175a0",
-    "c_590d414e6c"
-   ],
-   "remaining": [
-    490,
-    139,
-    89,
-    40,
-    16,
-    13,
-    3,
-    2,
     1,
     1
    ],
@@ -40264,6 +41248,57 @@
    ],
    "recognition": {
     "tier": "familiar",
+    "score": 76,
+    "appearances": 74,
+    "basis": "appearances+price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     1920,
+     1930,
+     1940
+    ],
+    "legend": true
+   },
+   "dataFingerprint": "a7ab9044f7b4c0a4"
+  },
+  {
+   "id": "bq_fc91d45aee6d",
+   "version": 3,
+   "targetPlayerId": "p_b118d52099",
+   "targetDisplayNameHe": "חיים גלזר",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_1a4d2c3d6f",
+    "c_c38913bf6c",
+    "c_98efe905df",
+    "c_d1cc6b4a24",
+    "c_af947a14f2",
+    "c_67f07cd6cf",
+    "c_15533e724e"
+   ],
+   "remaining": [
+    490,
+    139,
+    89,
+    40,
+    16,
+    13,
+    3,
+    2
+   ],
+   "families": [
+    "A",
+    "B",
+    "C",
+    "E"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "familiar",
     "score": 74,
     "appearances": 62,
     "basis": "appearances+price"
@@ -40276,7 +41311,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "5388af3df9f6ceb3"
+   "dataFingerprint": "f046e2d8f68567fc"
   },
   {
    "id": "bq_fcb7c8e2d570",
@@ -40378,7 +41413,7 @@
   },
   {
    "id": "bq_fd7f0c65b634",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_cd9d148325",
    "targetDisplayNameHe": "יובל פילוס",
    "clueIds": [
@@ -40388,10 +41423,10 @@
     "c_1a4d2c3d6f",
     "c_3d5b96dba0",
     "c_a524c4ddc5",
-    "c_f33b154df2",
-    "c_15ee3e026c",
+    "c_bcf1af48bb",
     "c_b40e543f0e",
-    "c_f48f1e8423"
+    "c_f48f1e8423",
+    "c_f33b154df2"
    ],
    "remaining": [
     490,
@@ -40430,7 +41465,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "233964545788ffa4"
+   "dataFingerprint": "a5ef6bd4222eeff1"
   },
   {
    "id": "bq_fded73afd4a2",
@@ -40485,7 +41520,7 @@
   },
   {
    "id": "bq_fe4ed361ab36",
-   "version": 2,
+   "version": 3,
    "targetPlayerId": "p_46690b8e39",
    "targetDisplayNameHe": "אשר בלוט",
    "clueIds": [
@@ -40496,9 +41531,9 @@
     "c_1a4d2c3d6f",
     "c_02df5d8bf3",
     "c_a733879dae",
+    "c_d918e6454b",
     "c_38e41a8ae7",
-    "c_1b881bbca9",
-    "c_590d414e6c"
+    "c_1b881bbca9"
    ],
    "remaining": [
     490,
@@ -40537,11 +41572,11 @@
     ],
     "legend": true
    },
-   "dataFingerprint": "3946be94a8e046d5"
+   "dataFingerprint": "f008bd3d4bb0db2c"
   },
   {
    "id": "bq_fe51e528ba84",
-   "version": 3,
+   "version": 4,
    "targetPlayerId": "p_f47f7d2088",
    "targetDisplayNameHe": "ג'ון פיינטסיל",
    "clueIds": [
@@ -40550,10 +41585,10 @@
     "c_1a4d2c3d6f",
     "c_66da8a10ca",
     "c_a733879dae",
-    "c_6e7876eb8b",
-    "c_dfa206337e",
     "c_5a662cc649",
+    "c_dfa206337e",
     "c_b58bc5b57a",
+    "c_69a90520ab",
     "c_7afcb8cb76"
    ],
    "remaining": [
@@ -40594,7 +41629,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "231b5cddc8c1feee"
+   "dataFingerprint": "bd3fa96da17b1baf"
   },
   {
    "id": "bq_fe66148cbb5c",
@@ -40708,6 +41743,51 @@
    "dataFingerprint": "0d82fb75d0e87d10"
   },
   {
+   "id": "bq_fee29a91d810",
+   "version": 1,
+   "targetPlayerId": "p_7bc18adbdf",
+   "targetDisplayNameHe": "תומר בן יוסף",
+   "clueIds": [
+    "c_35437d68c2",
+    "c_ff43a6c77c",
+    "c_20d4667a98",
+    "c_9504e985c2",
+    "c_8d574ea53e",
+    "c_32bef9fc6e",
+    "c_0504de52c3"
+   ],
+   "remaining": [
+    490,
+    191,
+    72,
+    31,
+    18,
+    7,
+    1
+   ],
+   "families": [
+    "A",
+    "B"
+   ],
+   "eligibleModes": [
+    "solo"
+   ],
+   "recognition": {
+    "tier": "deep",
+    "score": 0,
+    "appearances": null,
+    "basis": "price"
+   },
+   "tags": {
+    "origin": "israeli",
+    "decades": [
+     2010
+    ],
+    "legend": false
+   },
+   "dataFingerprint": "f9e5bac48ebbc37e"
+  },
+  {
    "id": "bq_ff51c21121e0",
    "version": 1,
    "targetPlayerId": "p_52a1eb57ee",
@@ -40752,7 +41832,7 @@
   },
   {
    "id": "bq_ff783d5d165e",
-   "version": 1,
+   "version": 2,
    "targetPlayerId": "p_fd182dfc02",
    "targetDisplayNameHe": "מאיר בן שטרית",
    "clueIds": [
@@ -40762,6 +41842,7 @@
     "c_a524c4ddc5",
     "c_2bc3b8df60",
     "c_614fe506e6",
+    "c_f6d9bb80ce",
     "c_e2016f59ee",
     "c_ccc16fbe93"
    ],
@@ -40771,6 +41852,7 @@
     35,
     7,
     5,
+    1,
     1,
     1,
     1
@@ -40796,7 +41878,7 @@
     ],
     "legend": false
    },
-   "dataFingerprint": "f627b204f1512830"
+   "dataFingerprint": "233752609d5c7ba1"
   }
  ]
 }
