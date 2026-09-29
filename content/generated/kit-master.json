@@ -2,7 +2,7 @@
  "schemaVersion": 1,
  "counts": {
   "kits": 35,
-  "playable": 32,
+  "playable": 24,
   "exactPhoto": 12,
   "candidateOnly": 20,
   "noPhoto": 3,
@@ -165,6 +165,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -183,7 +184,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "לבן עם עיטורים אדומים בשרוול ובצווארון."
+   "noteHe": "חולצה שמנת של NIKE חלקה, צווארון עגול באדום וספונסר IBI."
   },
   {
    "id": "kit-2025-26-home",
@@ -331,6 +332,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -349,7 +351,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "אדום עם מכנס לבן וגרב אדום."
+   "noteHe": "חולצה אדומה של NIKE חלקה, צווארון עגול בשמנת וספונסר IBI."
   },
   {
    "id": "kit-2022-23-away",
@@ -515,6 +517,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -533,7 +536,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "שחור מלא עם שלושת הפסים בשרוולים."
+   "noteHe": "חולצה שחורה של adidas חלקה, צווארון עגול וספונסר הכשרה."
   },
   {
    "id": "kit-2022-23-home",
@@ -690,6 +693,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -708,7 +712,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "אדום חלק עם שלושת הפסים בשרוולים."
+   "noteHe": "חולצה אדומה של adidas חלקה, צווארון עגול בשמנת וספונסר הכשרה."
   },
   {
    "id": "kit-2020-21-away",
@@ -858,6 +862,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -876,7 +881,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "לבן עם כתפיים מודפסות."
+   "noteHe": "חולצה שמנת של MACRON עם כתפיים באפור בטון, צווארון עגול באדום וספונסר הכשרה."
   },
   {
    "id": "kit-2020-21-home",
@@ -1007,6 +1012,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -1025,7 +1031,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "כתפיים מודפסות בהיר על אדום."
+   "noteHe": "חולצה אדומה של MACRON עם כתפיים בלבן, צווארון עגול בשמנת וספונסר הכשרה."
   },
   {
    "id": "kit-2019-20-home",
@@ -1161,6 +1167,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -1179,7 +1186,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "אדום חלק לאורך כל המדים, ללא גזרה נוספת."
+   "noteHe": "חולצה אדומה של MACRON חלקה, צווארון עגול וספונסר ARKIA."
   },
   {
    "id": "kit-2018-19-away",
@@ -1327,6 +1334,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -1345,7 +1353,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "שחור עם חישוקים אפורים כהים, מכנס וגרב שחורים."
+   "noteHe": "חולצה שחורה של MACRON עם חישוקים טונליים, צווארון עגול וספונסר ARKIA."
   },
   {
    "id": "kit-2018-19-home",
@@ -1502,6 +1510,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -1520,7 +1529,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "חישוקים טונליים באדום כהה."
+   "noteHe": "חולצה אדומה של MACRON עם חישוקים טונליים, צווארון עגול וספונסר ARKIA."
   },
   {
    "id": "kit-2018-19-third",
@@ -1649,6 +1658,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -1667,7 +1677,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "פסים אדום־לבן עם פאנל חזה לבן."
+   "noteHe": "חולצה שמנת של MACRON עם פסים אנכיים רחבים באדום, צווארון עגול באדום וספונסר ARKIA."
   },
   {
    "id": "kit-2016-17-home",
@@ -1842,6 +1852,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -1860,7 +1871,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "אדום חלק, מכנס לבן."
+   "noteHe": "חולצה אדומה של NIKE חלקה, צווארון וי בשמנת וספונסר FUJICOM."
   },
   {
    "id": "kit-2016-17-third",
@@ -1990,6 +2001,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -2008,7 +2020,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "פסים אנכיים אדום־לבן."
+   "noteHe": "חולצה אדומה של NIKE עם פסים אנכיים רחבים בשמנת, צווארון עגול בשמנת וספונסר FUJICOM."
   },
   {
    "id": "kit-2015-16-home",
@@ -2162,6 +2174,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -2180,7 +2193,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "גוף אדום ושרוולים לבנים, מכנס לבן."
+   "noteHe": "חולצה אדומה של PUMA חלקה, צווארון וי בשמנת, שרוולי רגלן בשמנת וספונסר FUJITSU."
   },
   {
    "id": "kit-2014-15-away",
@@ -2338,6 +2351,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -2356,7 +2370,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "שחור מלא, שרוולים שחורים וצווארון עגול לבן."
+   "noteHe": "חולצה שחורה של umbro חלקה, צווארון עגול בשמנת וספונסר FUJICOM."
   },
   {
    "id": "kit-2014-15-home",
@@ -2504,6 +2518,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -2522,7 +2537,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "סאש לבן אלכסוני על אדום."
+   "noteHe": "חולצה אדומה של umbro עם אלכסון רחב (סאש) בשמנת, צווארון עגול בשמנת וספונסר FUJICOM."
   },
   {
    "id": "kit-2012-13-away",
@@ -2677,6 +2692,7 @@
     "playable": false,
     "reason": "sponsor-unknown"
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -2694,7 +2710,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "לבן כמעט נקי, עם סימני קאפה טונליים בכתפיים ובמכנס."
+   "noteHe": "חולצה שמנת של KAPPA חלקה, צווארון עגול."
   },
   {
    "id": "kit-2012-13-home",
@@ -2840,6 +2856,7 @@
     "playable": false,
     "reason": "sponsor-unknown"
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -2857,7 +2874,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "חישוקים לבנים על אדום, מכנס וגרב לבנים."
+   "noteHe": "חולצה אדומה של KAPPA עם חישוקים טונליים, צווארון עגול בשמנת."
   },
   {
    "id": "kit-2011-12-away",
@@ -3015,6 +3032,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -3033,7 +3051,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "לבן עם עיטורים אדומים."
+   "noteHe": "חולצה שמנת של KAPPA חלקה, צווארון עגול באדום וספונסר במחיר."
   },
   {
    "id": "kit-2011-12-home",
@@ -3193,6 +3211,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -3211,7 +3230,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "כתפיים ושרוולים לבנים."
+   "noteHe": "חולצה אדומה של KAPPA עם כתפיים בשמנת, צווארון עגול בשמנת, שרוולי רגלן בשמנת וספונסר במחיר."
   },
   {
    "id": "kit-2009-10-home",
@@ -3365,6 +3384,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -3383,7 +3403,7 @@
    "sourceTitle": "מסירת חולצות 2009/10 של צוות The Worker, 20.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "חולצת הבית של עונת הדאבל: Umbro, סמל עם שני כוכבים, SUBARU ופאנלים לבנים בצדדים."
+   "noteHe": "חולצה אדומה של umbro עם פאנלים צדדיים בשמנת, צווארון עגול בשמנת, חפתים באדום וספונסר SUBARU."
   },
   {
    "id": "kit-2008-09-away",
@@ -3541,6 +3561,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -3559,7 +3580,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "לבן עם יהלום אמברו שחור."
+   "noteHe": "חולצה שמנת של umbro חלקה, צווארון עגול בשחור וספונסר UMBRO."
   },
   {
    "id": "kit-2008-09-home",
@@ -3714,8 +3735,17 @@
     }
    },
    "gate4": {
-    "playable": true,
-    "reason": null
+    "playable": false,
+    "reason": "unresolved-period-variant"
+   },
+   "review": {
+    "conflictType": "period-variant",
+    "resolved": false,
+    "noteHe": "ויקיפועל מתעדת שינוי אמצע עונה: אמברו, ומסיבוב 8 סובארו. רשומת \"עונה + בית\" אחת לא יכולה לייצג את שתיהן.",
+    "sources": [
+     "https://wiki.red-fans.com/index.php?title=%D7%A1%D7%A4%D7%95%D7%A0%D7%A1%D7%A8"
+    ],
+    "reviewedOn": "2026-09-29"
    },
    "gate5": {
     "dnaFields": [
@@ -3735,7 +3765,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "אדום חלק עם יהלום אמברו על החזה."
+   "noteHe": "חולצה אדומה של umbro חלקה, צווארון עגול בשמנת וספונסר UMBRO."
   },
   {
    "id": "kit-2006-07-away",
@@ -3895,6 +3925,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -3913,7 +3944,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "לבן עם הבזקים אדומים בכתפיים."
+   "noteHe": "חולצה שמנת של umbro עם כתפיים באדום, צווארון עגול באדום וספונסר SUBARU."
   },
   {
    "id": "kit-2006-07-home",
@@ -4072,6 +4103,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -4090,7 +4122,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "כתפיים לבנות וחפתים לבנים."
+   "noteHe": "חולצה אדומה של umbro עם כתפיים בשמנת, צווארון עגול בשמנת, חפתים בשמנת וספונסר SUBARU."
   },
   {
    "id": "kit-2005-06-home",
@@ -4227,8 +4259,18 @@
     }
    },
    "gate4": {
-    "playable": true,
-    "reason": null
+    "playable": false,
+    "reason": "unresolved-period-variant"
+   },
+   "review": {
+    "conflictType": "period-variant",
+    "resolved": false,
+    "noteHe": "הרשומה: SUBARU לעונה שלמה. ויקיפועל: 2005 שלמה סיקסט, 2006 סובארו — עונה נמתחת על שתי שנות לוח. דרושה עדות לפי משחק/שלב.",
+    "sources": [
+     "https://wiki.red-fans.com/index.php?title=%D7%A1%D7%A4%D7%95%D7%A0%D7%A1%D7%A8",
+     "https://www.footballkitarchive.com/hapoel-tel-aviv-2005-06-home-kit-24612/"
+    ],
+    "reviewedOn": "2026-09-29"
    },
    "gate5": {
     "dnaFields": [
@@ -4248,7 +4290,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "אדום חלק, סימני קאפה על השרוולים."
+   "noteHe": "חולצה אדומה של KAPPA חלקה, צווארון עגול בשמנת וספונסר SUBARU."
   },
   {
    "id": "kit-2002-03-away",
@@ -4408,6 +4450,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -4426,7 +4469,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "לבן עם כתפיים אדומות ופס הספונסר."
+   "noteHe": "חולצה שמנת של diadora עם כתפיים באדום, צווארון עגול באדום וספונסר KETER."
   },
   {
    "id": "kit-2002-03-home",
@@ -4572,8 +4615,17 @@
     }
    },
    "gate4": {
-    "playable": true,
-    "reason": null
+    "playable": false,
+    "reason": "unresolved-source-dispute"
+   },
+   "review": {
+    "conflictType": "source-dispute",
+    "resolved": false,
+    "noteHe": "הרשומה: פס חזה לבן. תמונות 2002/03 מראות גוף אדום עם כתפיים, צדדים ושרוולים לבנים — לא פס חזה. הספונסר כתר סביר.",
+    "sources": [
+     "https://www.footballkitarchive.com/hapoel-tel-aviv-2002-03-home-kit-24614/"
+    ],
+    "reviewedOn": "2026-09-29"
    },
    "gate5": {
     "dnaFields": [
@@ -4593,7 +4645,7 @@
    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "פס לבן רחב על החזה עם הספונסר בתוכו."
+   "noteHe": "חולצה אדומה של diadora עם פס רחב בשמנת על החזה, צווארון עגול בשמנת וספונסר KETER."
   },
   {
    "id": "kit-1999-00-home",
@@ -4757,8 +4809,18 @@
     }
    },
    "gate4": {
-    "playable": true,
-    "reason": null
+    "playable": false,
+    "reason": "unresolved-source-dispute"
+   },
+   "review": {
+    "conflictType": "source-dispute",
+    "resolved": false,
+    "noteHe": "הרשומה: CAL. ויקיפועל מתעדת כתר כספונסר ראשי 1998–2000 (אופיס דיפו משני), ותמונות מראות כתר. הפסים השחורים נתמכים ויזואלית.",
+    "sources": [
+     "https://wiki.red-fans.com/index.php?title=%D7%A1%D7%A4%D7%95%D7%A0%D7%A1%D7%A8",
+     "https://www.footballkitarchive.com/hapoel-tel-aviv-1999-00-home-kit-24618/"
+    ],
+    "reviewedOn": "2026-09-29"
    },
    "gate5": {
     "dnaFields": [
@@ -4778,7 +4840,7 @@
    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "שני פסים שחורים לאורך החזית, חפתים בשחור־לבן. עונת אליפות."
+   "noteHe": "חולצה אדומה של NIKE עם שני פסים אנכיים בשחור בחזית, צווארון וי בשחור, חפתים בשחור וספונסר CAL."
   },
   {
    "id": "kit-1997-98-home",
@@ -4938,8 +5000,18 @@
     }
    },
    "gate4": {
-    "playable": true,
-    "reason": null
+    "playable": false,
+    "reason": "unresolved-unknown"
+   },
+   "review": {
+    "conflictType": "unknown",
+    "resolved": false,
+    "noteHe": "חשד חוסם: הרשומה מתארת פסים אדום־שחור, נייקי, KING. הפניות חיצוניות ותמונות מראות חולצה אדומה בעיקר עם כתפיים/שרוולים לבנים וכתר בחזית. ייתכן חולצה/עונה/פרשנות שגויה.",
+    "sources": [
+     "https://wiki.red-fans.com/index.php?title=%D7%A1%D7%A4%D7%95%D7%A0%D7%A1%D7%A8",
+     "https://www.footballkitarchive.com/hapoel-tel-aviv-1997-98-home-kit-24621/"
+    ],
+    "reviewedOn": "2026-09-29"
    },
    "gate5": {
     "dnaFields": [
@@ -4959,7 +5031,7 @@
    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "פסים אנכיים אדום־שחור עם מרקם ריסוס לבן, צווארון פולו אדום."
+   "noteHe": "חולצה אדומה של NIKE עם פסים אנכיים רחבים בשחור, צווארון פולו וספונסר KING."
   },
   {
    "id": "kit-1993-94-home",
@@ -5099,6 +5171,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -5117,7 +5190,7 @@
    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "רבעים אדומים על לבן, צווארון פולו לבן, כיתוב הספונסר בשחור."
+   "noteHe": "חולצה שמנת של diadora ברבעים באדום, צווארון פולו וספונסר מ.שקוביץ."
   },
   {
    "id": "kit-1992-93-home",
@@ -5263,8 +5336,18 @@
     }
    },
    "gate4": {
-    "playable": true,
-    "reason": null
+    "playable": false,
+    "reason": "unresolved-source-dispute"
+   },
+   "review": {
+    "conflictType": "source-dispute",
+    "resolved": false,
+    "noteHe": "SUZUKI מופיע בארכיון החולצות (Football Kit Archive), אך ויקיפועל מתארת אותו כספונסר משני/גב ולא בהכרח חזית. חסר מיקום הספונסר.",
+    "sources": [
+     "https://wiki.red-fans.com/index.php?title=%D7%A1%D7%A4%D7%95%D7%A0%D7%A1%D7%A8",
+     "https://www.footballkitarchive.com/hapoel-tel-aviv-1992-93-home-kit/"
+    ],
+    "reviewedOn": "2026-09-29"
    },
    "gate5": {
     "dnaFields": [
@@ -5284,7 +5367,7 @@
    "sourceTitle": "Football Kit Archive — 1992/93 home kit",
    "sourceUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-1992-93-home-kit/",
    "confidence": 3,
-   "noteHe": "סאש אלכסוני על אדום, צווארון פולו לבן. העונה היחידה של פומה לפני תקופת דיאדורה."
+   "noteHe": "חולצה אדומה של PUMA עם אלכסון רחב (סאש) בשמנת, צווארון פולו בשמנת וספונסר SUZUKI."
   },
   {
    "id": "kit-1988-89-home",
@@ -5412,8 +5495,17 @@
     }
    },
    "gate4": {
-    "playable": true,
-    "reason": null
+    "playable": false,
+    "reason": "unresolved-source-dispute"
+   },
+   "review": {
+    "conflictType": "source-dispute",
+    "resolved": false,
+    "noteHe": "הרשומה: VISA. ויקיפועל מתעדת Club Hotels ב-1988/89. סתירה ישירה — כנראה הזזת ספונסר בין עונות.",
+    "sources": [
+     "https://wiki.red-fans.com/index.php?title=%D7%A1%D7%A4%D7%95%D7%A0%D7%A1%D7%A8"
+    ],
+    "reviewedOn": "2026-09-29"
    },
    "gate5": {
     "dnaFields": [
@@ -5433,7 +5525,7 @@
    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "פסי שיער לבנים על אדום. בלוק הספונסר המקורי כלל צבע אסור במערכת, ולכן הספונסר נכתב כאן כטקסט בלבד."
+   "noteHe": "חולצה אדומה של adidas עם פסי שיער בשמנת, צווארון עגול בשמנת וספונסר VISA."
   },
   {
    "id": "kit-1985-86-home",
@@ -5564,6 +5656,7 @@
     "playable": true,
     "reason": null
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -5582,7 +5675,7 @@
    "sourceTitle": "מסירת חולצת 1985/86 של צוות The Worker, 20.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "חולצת בית אדומה ארוכת שרוול: צווארון לבן, שלושת פסי adidas בכתפיים, סמל התקופה, אתא ובלוק VISA של העונה."
+   "noteHe": "חולצה אדומה של adidas חלקה, צווארון פולו בשמנת, פסי כתף באדום וספונסר VISA."
   },
   {
    "id": "kit-1984-85-home",
@@ -5700,8 +5793,17 @@
     }
    },
    "gate4": {
-    "playable": true,
-    "reason": null
+    "playable": false,
+    "reason": "unresolved-source-dispute"
+   },
+   "review": {
+    "conflictType": "source-dispute",
+    "resolved": false,
+    "noteHe": "הרשומה: גלאב הוטל טבריה. ויקיפועל (היסטוריית ספונסרים) מציבה באמצע שנות ה-80 את ויזה, ואת Club Hotels מאוחר יותר. דרושה תמונת חולצה מדויקת לפני שהשאלה נשאלת.",
+    "sources": [
+     "https://wiki.red-fans.com/index.php?title=%D7%A1%D7%A4%D7%95%D7%A0%D7%A1%D7%A8"
+    ],
+    "reviewedOn": "2026-09-29"
    },
    "gate5": {
     "dnaFields": [
@@ -5721,7 +5823,7 @@
    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "אלכסונים דקים לבנים וכחולים על אדום, צווארון וי לבן."
+   "noteHe": "חולצה אדומה של adidas עם אלכסונים דקים בשמנת, צווארון וי בשמנת וספונסר גלאב הוטל טבריה."
   },
   {
    "id": "kit-1978-79-home",
@@ -5840,6 +5942,7 @@
     "playable": false,
     "reason": "maker-unknown"
    },
+   "review": null,
    "gate5": {
     "dnaFields": [
      "base",
@@ -5857,7 +5960,7 @@
    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
-   "noteHe": "גוף אדום, שרוולים לבנים, צווארון עגול לבן. הספונסר בלבן על החזה."
+   "noteHe": "חולצה אדומה חלקה, צווארון עגול בשמנת, שרוולי רגלן בשמנת וספונסר אתא."
   }
  ]
 }

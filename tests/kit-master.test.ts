@@ -65,7 +65,9 @@ describe('Kit Master', () => {
     const kit = kitRecord('kit-1999-00-home')!
     expect(kit.fields.crest.value?.key).toBe('keter-color')
     expect(kit.render.marks.crest).toBe('print')
-    expect(kit.gate4.playable).toBe(true)
+    // since the Deep QA (29.9.2026) it is held back by an OPEN dispute (sponsor CAL vs כתר), not by missing art
+    expect(kit.gate4.reason).not.toContain('crest-art-missing')
+    expect(kit.gate4.reason).toContain('unresolved-source-dispute')
     for (const row of master.kits) {
       if (row.fields.crest.value === null) expect(row.gate4.reason, row.id).toContain('crest-art-missing')
     }
@@ -98,7 +100,7 @@ describe('Kit Master', () => {
     const c = master.counts
     expect(c.playable).toBe(playableKits().length)
     expect(c.exactPhoto + c.candidateOnly + c.noPhoto).toBe(c.kits)
-    expect(c.playable).toBeGreaterThanOrEqual(30)
+    expect(c.playable).toBeGreaterThanOrEqual(20)
   })
 
   it('claims photo only where the template has geometry on disk', () => {

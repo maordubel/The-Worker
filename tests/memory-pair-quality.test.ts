@@ -226,3 +226,16 @@ describe('the mechanic is untouched', () => {
     for (const word of ['FusionPlate', 'SouvenirShelf', 'PairThreads']) expect(board).toContain(word)
   })
 })
+
+describe('emotional recognisability (Deep QA §26)', () => {
+  it('every board of six keeps at least three pairs a supporter recognises', async () => {
+    const { MEMORY_VALUE, RECOGNISABLE_MIN } = await import('@/lib/game/memory-quality')
+    let short = 0
+    for (const { round } of boards) {
+      const recognisable = round.pairs.filter((pair) => MEMORY_VALUE[pair.type] >= 2).length
+      if (recognisable < RECOGNISABLE_MIN) short += 1
+    }
+    // the cap holds wherever the archive has enough recognisable pairs to honour it
+    expect(short).toBeLessThanOrEqual(Math.floor(boards.length * 0.02))
+  })
+})

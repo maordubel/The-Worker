@@ -3,7 +3,7 @@ import 'server-only'
 import { positionOf, takeFrom } from '@/lib/rotation/deck'
 import { archive, nameOf, rng, shuffle } from './archive'
 import { currentSeasonStartYear, seasonsInSpell } from './seasons'
-import { pairStrength, themedOrder, themeOf, type MemoryPairType, type MemoryStrength } from './memory-quality'
+import { MEMORY_VALUE, pairStrength, themedOrder, themeOf, type MemoryPairType, type MemoryStrength } from './memory-quality'
 
 /**
  * Memory pairs, drawn from the archive rather than invented.
@@ -343,7 +343,7 @@ export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryW
   // in whole blocks of six, spread across kinds inside it — and only what no decade can fill a
   // board with is mixed. See `themedOrder`; it is still one fixed permutation of the pool.
   const spread = themedOrder(
-    distinct.map((candidate) => ({ ...candidate, theme: themeOf(candidate.year) })),
+    distinct.map((candidate) => ({ ...candidate, theme: themeOf(candidate.year), value: MEMORY_VALUE[candidate.type] })),
     pairs,
   )
 

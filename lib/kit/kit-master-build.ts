@@ -22,6 +22,7 @@ import supplyFile from '../../content/manual/kit-supply.json'
 import yearsFile from '../../content/manual/sponsor-years.json'
 
 import { bodyTemplateForSeason, type KitBodyTemplateId } from './body-templates'
+import { describeKit } from './describe'
 import { crestMark } from './crestMarks'
 import { markFor, type MakerMarkId } from './maker-marks'
 import { grantedMaker, grantedSponsor } from './mark-library'
@@ -49,6 +50,14 @@ export type KitMasterPhoto = {
   creditHe: string | null
   /** set on a year-only photograph: the year the source printed, never a season */
   yearRaw: number | null
+}
+
+export type KitReview = {
+  conflictType: 'source-dispute' | 'period-variant' | 'competition-variant' | 'unknown'
+  resolved: boolean
+  noteHe: string
+  sources: string[]
+  reviewedOn: string
 }
 
 export type KitMasterRecord = {
@@ -83,6 +92,8 @@ export type KitMasterRecord = {
     marks: { crest: 'print' | 'none'; maker: 'alt-set' | 'granted'; sponsor: 'lettered' | 'granted' }
   }
   gate4: { playable: boolean; reason: string | null }
+  /** an OPEN historical dispute about this shirt (Deep QA 29.9.2026) — blocks Gate 4 until resolved */
+  review: KitReview | null
   gate5: { dnaFields: string[] }
   source: FieldSource
   sourceTitle: string
@@ -296,6 +307,7 @@ type DesignRow = {
   shorts: KitColour
   socks: KitColour
   noteHe: string
+  review?: KitReview
   confidence: number
   sourceTitle: string
   sourceUrl: string | null
@@ -375,6 +387,7 @@ function record(row: DesignRow): KitMasterRecord {
   if (!fields.maker.value) reasons.push('maker-unknown')
   if (!fields.sponsor.value) reasons.push('sponsor-unknown')
   if (confidence < 2) reasons.push('low-confidence')
+  if (row.review && !row.review.resolved) reasons.push(`unresolved-${row.review.conflictType}`)
   const evidence = evidenceFor(seasonLabel, variant)
 
   return {
@@ -400,12 +413,14 @@ function record(row: DesignRow): KitMasterRecord {
       },
     },
     gate4: { playable: reasons.length === 0, reason: reasons.length ? reasons.join(',') : null },
+    review: row.review ?? null,
     gate5: { dnaFields: (Object.keys(fields) as (keyof KitMasterRecord['fields'])[]).filter((key) => fields[key].value !== null) },
     source,
     sourceTitle: row.sourceTitle,
     sourceUrl: row.sourceUrl,
     confidence,
-    noteHe: row.noteHe,
+    // generated from the same fields that draw and grade the shirt (lib/kit/describe.ts)
+    noteHe: describeKit({ base: row.base, pattern: row.pattern, patternInk: row.patternInk, sleeves: row.sleeves, sleeveInk: row.sleeveInk, collar: row.collar, collarInk: row.collarInk, makerHe: row.makerHe, sponsorHe: row.sponsorHe }),
   }
 }
 

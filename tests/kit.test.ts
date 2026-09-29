@@ -1,3 +1,4 @@
+import { kitByLegacyKey } from '@/lib/kit/kit-master'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -206,7 +207,8 @@ describe('שער 5 — האוסף', () => {
   it('marks a kit playable only when gate 4 can actually deal it', () => {
     for (const kit of catalog) {
       const complete =
-        kit.spec.sponsorHe !== null && kit.spec.makerHe !== null && kit.spec.crestKey !== null
+        kit.spec.sponsorHe !== null && kit.spec.makerHe !== null && kit.spec.crestKey !== null &&
+        !(kitByLegacyKey(kit.key)?.review && !kitByLegacyKey(kit.key)?.review?.resolved)
       expect(kit.playable, kit.key).toBe(complete)
     }
   })
