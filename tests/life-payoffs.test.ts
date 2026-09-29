@@ -138,8 +138,8 @@ describe('§18 — the themed Rumble never touches the canonical one', () => {
   // version, so a new price ladder is a new board by design. The themed mode still changes nothing.
   const CANON: Array<[number, number, string]> = [
     [12345, 0, '46863df2d11c8e0cf5f865d789332fbf823114656eb8597b144fe5d4c9d2c30a'],
-    [7, 2, 'ac90293c6208184093fc06f1d4f64799e9b3a187dedc4fd1e7d9e0870ebf0265'],
-    [2026, 1, '820f5575a141377d1e4b17747209f0dd93207efa74e1a2599158bb171ec377e8'],
+    [7, 2, '63190ad5ba6728506d106f65c706163580160da6bdba4ad164a0f41de77b6ecd'],
+    [2026, 1, '25b57ad939a3188d2aa77d9e5eaec6841069f61c15d411a7f439781e9eb42d5a'],
   ]
   const hashOf = (seed: number, cursor: number) => {
     const { draft, shuffleDraft } = royalRumbleRoundDrafts(seed, cursor)
