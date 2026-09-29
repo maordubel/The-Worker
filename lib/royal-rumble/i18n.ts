@@ -42,13 +42,11 @@ const COPY = {
   // delta 87 — the phone stage: a sheet for what used to be desktop-only fine print,
   // so the rules are reachable on a phone too, not only hidden behind `sm:block`.
   stageRulesChip: 'חוקי המשחק', stageRulesTitle: 'איך רויאל ראמבל עובד',
-  // delta 91 — Royal Rumble V2 (spec §41–§43, §50–§54, §72): FLEX, the two formations, the
+  // delta 91 — Royal Rumble V2 (spec §41–§43, §50–§54, §72): the fixed order (V3),
   // result line, the shuffle that closes after the first pick, "עוד קרב" and the recent five.
-  flex: 'FLEX', flexQuestion: 'מגן או קשר?', flexDefence: 'מגן', flexMidfield: 'קשר',
-  flexHint: 'הבחירה הזאת סוגרת את האמצע: מגן נותן חמישייה הגנתית, קשר נותן חמישייה יוצרת.',
+  fixedOrderHint: 'הסדר קבוע: שוער, מגן, שני קשרים וחלוץ. הכסף הוא ההחלטה.',
   formationDefensive: 'חמישייה הגנתית · 1–2–1–1', formationCreative: 'חמישייה יוצרת · 1–1–2–1',
   formationDefensiveHeld: 'החמישייה ההגנתית החזיקה.', formationCreativeMade: 'שני הקשרים יצרו את ההבדל.',
-  formationPending: 'הצורה נסגרת אחרי בחירה 4',
   valuePick: 'המציאה שלך: {name}.', matchHero: 'גיבור הקרב: {name}.', starPick: 'ההשקעה הגדולה החזירה: {name}.',
   shuffleBeforePick: 'שאפל רק לפני הבחירה הראשונה',
   recentTitle: 'הקרבות האחרונים', recentEmpty: 'הקרב הראשון שלך. השאר יתווספו כאן.',

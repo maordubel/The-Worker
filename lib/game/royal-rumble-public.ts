@@ -8,10 +8,9 @@
  * half (`royal-rumble.ts`, `server-only`) re-exports these types so client files keep
  * their `import type` paths.
  *
- * The draft is five slots in a fixed order — GK · DF · MF · FLEX · FW — and FLEX is the
- * one decision that shapes the five: a defender makes 1-2-1-1, a midfielder 1-1-2-1.
- * Those are the only two formations in V2 (§3); the slot rules make any completed five
- * legal by construction, so viability is purely a money question.
+ * The draft is five slots in a fixed order — GK · DF · MF · MF · FW (V3, 29.9.2026: the
+ * FLEX slot is gone). There is exactly one shape, 1-1-2-1; the slot rules make any completed
+ * five legal by construction, so viability is purely a money question.
  */
 
 export type Position = 'GK' | 'DF' | 'MF' | 'FW'
@@ -23,21 +22,17 @@ export const ROYAL_RUMBLE_OFFERS_PER_SLOT = 3
 /** the composer + pricing generation; a board dealt under another version is another board (§14, §59) */
 export const ROYAL_RUMBLE_BALANCE_VERSION = 3
 /** what a persisted Live pick carries so a V1 room is never read as V2 (§73) */
-export const ROYAL_RUMBLE_DRAFT_VERSION = 2
+export const ROYAL_RUMBLE_DRAFT_VERSION = 3
 
-export type RoyalRumbleSlotRule =
-  | { kind: 'fixed'; position: Position }
-  | { kind: 'flex'; positions: readonly ['DF', 'MF'] }
+export type RoyalRumbleSlotRule = { kind: 'fixed'; position: Position }
 
 export const ROYAL_RUMBLE_DRAFT_SLOTS: readonly RoyalRumbleSlotRule[] = [
   { kind: 'fixed', position: 'GK' },
   { kind: 'fixed', position: 'DF' },
   { kind: 'fixed', position: 'MF' },
-  { kind: 'flex', positions: ['DF', 'MF'] },
+  { kind: 'fixed', position: 'MF' },
   { kind: 'fixed', position: 'FW' },
 ]
-
-export const ROYAL_RUMBLE_FLEX_SLOT = 3
 
 export type RoyalRumblePublicPlayer = {
   slug: string
@@ -75,17 +70,20 @@ export type RoyalRumbleSelection = {
   offeredAs: Position
 }
 
-/** 1-2-1-1 (`defensive`, two defenders) or 1-1-2-1 (`creative`, two midfielders) */
+/**
+ * One shape only: 1-1-2-1. `defensive` (1-2-1-1) exists solely so a history row saved
+ * under V2 still types; nothing produces it any more.
+ */
 export type RoyalRumbleFormation = 'defensive' | 'creative'
 
 export type RoyalRumblePick = RoyalRumbleOffer | null
 
-export function slotLabel(rule: RoyalRumbleSlotRule): Position | 'FLEX' {
-  return rule.kind === 'fixed' ? rule.position : 'FLEX'
+export function slotLabel(rule: RoyalRumbleSlotRule): Position {
+  return rule.position
 }
 
 export function slotAdmits(rule: RoyalRumbleSlotRule, position: Position): boolean {
-  return rule.kind === 'fixed' ? rule.position === position : rule.positions.includes(position as 'DF' | 'MF')
+  return rule.position === position
 }
 
 export function countPicked(picks: readonly RoyalRumblePick[]): number {
@@ -131,39 +129,27 @@ export function canPickRoyalRumbleOffer(
   return minimumCompletionCost(draft, picks, slotIndex) + offer.player.price <= draft.budget
 }
 
-/** The formation the picks already decide — `null` until the FLEX card is chosen. */
-export function resolvePublicFormation(picks: readonly RoyalRumblePick[]): RoyalRumbleFormation | null {
-  const flex = picks[ROYAL_RUMBLE_FLEX_SLOT]
-  if (!flex) return null
-  return flex.offeredAs === 'DF' ? 'defensive' : 'creative'
+/** The formation is always 1-1-2-1 — known from the first pick, never a decision. */
+export function resolvePublicFormation(_picks?: readonly RoyalRumblePick[]): RoyalRumbleFormation {
+  return 'creative'
 }
 
 /** the same answer from a finished list of positions (the server's resolver, the result screen) */
 export function formationOf(positions: readonly Position[]): RoyalRumbleFormation | null {
   const count = (position: Position) => positions.filter((item) => item === position).length
   if (positions.length !== ROYAL_RUMBLE_LINEUP_SIZE || count('GK') !== 1 || count('FW') !== 1) return null
-  if (count('DF') === 2 && count('MF') === 1) return 'defensive'
-  if (count('DF') === 1 && count('MF') === 2) return 'creative'
-  return null
+  return count('DF') === 1 && count('MF') === 2 ? 'creative' : null
 }
 
 /** the little pitch in the rail and on the result: shape as five (x, y) points, attack to the end */
-export function formationShape(formation: RoyalRumbleFormation): readonly { position: Position; x: number; y: number }[] {
-  return formation === 'defensive'
-    ? [
-        { position: 'GK', x: 10, y: 50 },
-        { position: 'DF', x: 30, y: 32 },
-        { position: 'DF', x: 30, y: 68 },
-        { position: 'MF', x: 52, y: 50 },
-        { position: 'FW', x: 76, y: 50 },
-      ]
-    : [
-        { position: 'GK', x: 10, y: 50 },
-        { position: 'DF', x: 30, y: 50 },
-        { position: 'MF', x: 50, y: 32 },
-        { position: 'MF', x: 50, y: 68 },
-        { position: 'FW', x: 76, y: 50 },
-      ]
+export function formationShape(_formation?: RoyalRumbleFormation): readonly { position: Position; x: number; y: number }[] {
+  return [
+    { position: 'GK', x: 10, y: 50 },
+    { position: 'DF', x: 30, y: 50 },
+    { position: 'MF', x: 50, y: 32 },
+    { position: 'MF', x: 50, y: 68 },
+    { position: 'FW', x: 76, y: 50 },
+  ]
 }
 
 /** the wire form of the picks, in slot order */
@@ -200,8 +186,8 @@ export function toLivePicks(selection: readonly RoyalRumbleSelection[]): RoyalRu
 }
 
 /**
- * A persisted Live pick is `{ v: 2, slug, offeredAs }`. A room locked under V1 stored five
- * bare slugs; those are never reinterpreted as V2 picks — the room resolves to nothing and
+ * A persisted Live pick is `{ v: 3, slug, offeredAs }`. A room locked under V1 or V2 stored
+ * other shapes (V2 had a FLEX slot); those are never reinterpreted as V3 picks — the room resolves to nothing and
  * the pair starts a new one.
  */
 export function parseLivePicks(value: unknown): RoyalRumbleSelection[] | null {

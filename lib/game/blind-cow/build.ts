@@ -1,7 +1,9 @@
+import { fold } from '@/lib/game/roster-search'
 import { createHash } from 'node:crypto'
 
 import type { MatchRecord, MomentRecord } from '@/lib/archive/match-master-types'
 import type { PlayerMasterV2Record } from '@/lib/archive/player-identity'
+import type { PlayerRecognition } from './recognition'
 import type {
   BlindCowBank,
   BlindCowClue,
@@ -56,6 +58,10 @@ export type BuildInput = {
   teamNames: ReadonlyMap<string, string>
   /** competition slug → Hebrew name, `content/manual/competitions.json` */
   competitionNames: ReadonlyMap<string, string>
+  /** player id → Royal Rumble price + wiki appearances → tier (`recognition.ts`); absent = no tier */
+  recognition?: ReadonlyMap<string, PlayerRecognition>
+  /** player id → the title of the tune the terrace sings his song to (`player-song-tunes.json`) */
+  songTunes?: ReadonlyMap<string, string>
   playerMasterSha: string
   matchMasterSha: string
   /** the bank this build replaces — a question whose facts changed gets version + 1 */
@@ -485,6 +491,31 @@ export function buildBank(input: BuildInput): BlindCowBank {
     }
   }
 
+  /* ---- G · the terrace — the TUNE of his song, a title and never a verse (rule 12) ---- */
+  if (input.songTunes) {
+    const tuneOf = input.songTunes
+    for (const d of all) {
+      const tune = tuneOf.get(d.p.id)
+      if (!tune) continue
+      // a tune that carries his own name would give him away (validator rule) — no clue
+      const tuneText = fold(tune).toLowerCase()
+      const nameTokens = [d.p.displayName, ...d.p.aliases.he, ...d.p.aliases.latin].flatMap((n) =>
+        fold(n).toLowerCase().split(' ').filter((x) => x.length >= 3),
+      )
+      if (nameTokens.some((tok) => tuneText.split(' ').includes(tok))) continue
+      explicit(
+        `song:${tune}`,
+        {
+          clue: { type: 'song', family: 'G', labelHe: 'שיר היציע', valueHe: `היציע שר לכבודו על המנגינה של «${tune}»`, factKey: `song:${tune}`, facet: 'song', sourceRefs: ['player-song-tunes#tuneHe'], confidence: 2 },
+          phantoms: null,
+          groups: ['song'],
+        },
+        all.filter((o) => tuneOf.get(o.p.id) === tune).map((o) => o.p.id),
+        d.index,
+      )
+    }
+  }
+
   /* ---- C · achievements (squad-season attachment only) ---- */
   for (const d of all) {
     if (!d.titles.length) continue
@@ -710,6 +741,7 @@ export function buildBank(input: BuildInput): BlindCowBank {
       const fam = (facts.get(k) as Fact).clue.family
       return fam === 'D' || fam === 'E'
     })
+    const tier = input.recognition?.get(d.p.id)?.tier ?? null
     let current = everyone
     let phantoms: Set<string> | null = null
     const chosen: string[] = []
@@ -738,6 +770,10 @@ export function buildBank(input: BuildInput): BlindCowBank {
         cost += Math.max(0, (famCount[fam] ?? 0) - 2) * 0.6
         if (!famCount[fam]) cost -= 0.25
         if ((fam === 'D' || fam === 'E') && !famCount.D && !famCount.E && step >= 5) cost -= 0.4
+        // the clue order follows how well he is known: a familiar man is caught by a story (a goal,
+        // a match, a title) a step or two earlier; a song is a treat for anyone, wherever it fits
+        if (tier === 'familiar' && (fam === 'D' || fam === 'E' || fam === 'C') && step >= 3 && step <= 6) cost -= 0.3
+        if (f.clue.type === 'song') cost -= 0.35
         if (!best || cost < best.cost - 1e-9 || (Math.abs(cost - best.cost) <= 1e-9 && key < best.key)) {
           best = { key, cost, ids, ph, size }
         }
@@ -821,6 +857,12 @@ export function buildBank(input: BuildInput): BlindCowBank {
       remaining,
       families,
       eligibleModes: modes,
+      ...(input.recognition?.get(d.p.id)
+        ? (() => {
+            const r = input.recognition.get(d.p.id) as PlayerRecognition
+            return { recognition: { tier: r.tier, score: r.score, appearances: r.appearances, basis: r.basis } }
+          })()
+        : {}),
       tags: {
         origin: d.origin,
         decades: d.decades,

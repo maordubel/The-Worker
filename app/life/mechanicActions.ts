@@ -48,13 +48,13 @@ const seedOf = (seed: number) => (Number.isFinite(seed) ? Math.abs(Math.round(se
 export async function dealLifeLineup(
   seed: number,
   window: MechanicWindow,
-): Promise<(Challenge & { look: ShirtLook | null }) | null> {
+): Promise<(Challenge & { look: ShirtLook | null; keeperLook: ShirtLook | null }) | null> {
   const w = cut(window)
   if (!w?.pin) return null
   const challenge = dealChallenge(seedOf(seed), 0, { before: w.before, pin: w.pin })
   if (!challenge) return null
   const season = challenge.intro.season || challenge.kitSeason
-  return { ...challenge, look: season ? playerShirt(null, { season }) : null }
+  return { ...challenge, look: season ? playerShirt(null, { season }) : null, keeperLook: season ? playerShirt(null, { season, keeper: true }) : null }
 }
 
 /** the shop order: one shirt of a season before the year, three to five choices a step by age */

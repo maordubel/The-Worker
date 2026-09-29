@@ -51,6 +51,8 @@ const FILTERS: { id: string; key: MessageKey }[] = [
   { id: 'all', key: 'blindcow.filter.all' },
   { id: 'israeli', key: 'blindcow.filter.israeli' },
   { id: 'foreign', key: 'blindcow.filter.foreign' },
+  { id: 'familiar', key: 'blindcow.filter.familiar' as MessageKey },
+  { id: 'deep', key: 'blindcow.filter.deep' as MessageKey },
   { id: 'legend', key: 'blindcow.filter.legend' },
   { id: 'hardcore', key: 'blindcow.filter.hardcore' },
   { id: '1950', key: 'blindcow.filter.1950' },

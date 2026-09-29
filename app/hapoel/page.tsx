@@ -44,7 +44,6 @@ import { gateMetadata } from '@/lib/seo'
 export const metadata: Metadata = gateMetadata('hapoel')
 
 /** the exhibit of the day turns over at midnight in Tel Aviv, not in UTC */
-export const revalidate = 3600
 
 function HallBar({ n, id, title, latin }: { n: number; id: string; title: string; latin: string }) {
   return (
@@ -73,7 +72,11 @@ const HALLS = [
   { id: 'club-gates', key: 'hapoel.gates' as MessageKey },
 ]
 
-export default function HapoelPage() {
+const DOORS = ['players', 'honours', 'crest', 'songs'] as const
+type Door = (typeof DOORS)[number]
+
+export default function HapoelPage({ searchParams }: { searchParams?: { door?: string } }) {
+  const door: Door | null = DOORS.find((d) => d === searchParams?.door) ?? null
   // each shelf leads to its newest cup in the archive — only where the graph resolves it
   const cupboard = honours().map((line) => {
     const newest = line.won.at(-1)
@@ -108,12 +111,12 @@ export default function HapoelPage() {
         {t('hapoel.lede')}
       </p>
 
-      <div className="mt-3">
+      {door === null && <div className="mt-3">
         <PlayerCensus census={census} />
-      </div>
+      </div>}
 
       {/* the four other numbers, all counted — plaques under the big one */}
-      <dl className="mt-2 grid grid-cols-4 border-rule border-ink">
+      {door === null && <dl className="mt-2 grid grid-cols-4 border-rule border-ink">
         {[
           { k: 'hapoel.count.trophies' as MessageKey, v: counts.trophies },
           { k: 'hapoel.count.kits' as MessageKey, v: counts.kits },
@@ -127,23 +130,45 @@ export default function HapoelPage() {
             <dt className="mt-1 font-body text-[10.5px] leading-tight text-muted">{t(stat.k)}</dt>
           </div>
         ))}
-      </dl>
+      </dl>}
 
-      {/* the halls — one tap to any of them */}
-      <nav aria-label={t('hapoel.halls')} className="-mx-gutter mt-3 overflow-x-auto px-gutter">
-        <ul className="flex gap-1.5 pb-1">
-          {HALLS.map((hall) => (
-            <li key={hall.id} className="shrink-0">
-              <a href={`#${hall.id}`} className="flex min-h-tap items-center border-hair border-ink/50 bg-sheet px-3 font-body text-[13px] font-extrabold text-ink">
-                {t(hall.key)}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {/* the front door: four doors, each with a small look inside, and the archive as the main one */}
+      {door === null && (
+        <>
+          <Link href="/archive" className="mt-3 flex min-h-tap flex-col justify-center border-rule border-ink bg-ink px-3 py-3 text-paper">
+            <span className="font-body text-[11px] font-extrabold tracking-[0.1em] text-concrete">{t('hapoel.archiveDoor.kicker')}</span>
+            <span className="mt-0.5 font-display text-[24px] leading-tight">{t('hapoel.archiveDoor')}</span>
+            <span className="mt-1 font-body text-[13px] font-extrabold text-paper">{t('hapoel.archiveDoor.go')} ←</span>
+          </Link>
+          <nav aria-label={t('hapoel.halls')} className="mt-2">
+            <ul className="grid grid-cols-2 gap-2">
+              {DOORS.map((d) => (
+                <li key={d}>
+                  <Link href={`/hapoel?door=${d}`} data-hapoel-door={d} className="flex h-full min-h-tap flex-col border-rule border-ink bg-sheet p-3">
+                    <span className="font-display text-[20px] leading-tight text-ink">{t(`hapoel.door.${d}` as MessageKey)}</span>
+                    <span className="mt-1 font-body text-[12px] leading-snug text-muted">
+                      {d === 'players' && <>{t('hapoel.preview.players', { n: String(roster.all.length) })}</>}
+                      {d === 'honours' && cupboard[0] && <bdi>{cupboard[0].nameHe} · {cupboard[0].won.length}</bdi>}
+                      {d === 'crest' && crests.length > 0 && <bdi>{t('hapoel.preview.crest', { n: String(crests.length) })}</bdi>}
+                      {d === 'songs' && songs.terrace[0] && <bdi>{songs.terrace[0].titleHe}</bdi>}
+                    </span>
+                    <span className="mt-auto pt-2 font-body text-[12.5px] font-extrabold text-red">{t('hapoel.door.go')} ←</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </>
+      )}
+      {door !== null && (
+        <Link href="/hapoel" className="mt-3 flex min-h-tap items-center border-hair border-ink/50 bg-sheet px-3 font-body text-[13px] font-extrabold text-ink">
+          → {t('hapoel.door.back')}
+        </Link>
+      )}
 
       {/* the exhibit of the day, and the door to the whole archive */}
-      <section aria-label={t('hapoel.featured')} className="mt-3 grid gap-2 sm:grid-cols-2">
+      {door === null && (
+      <section aria-label={t('hapoel.featured')} className="mt-2">
         {featured && (
           <Link href={featured.href} data-hapoel="featured" className="flex min-h-tap flex-col justify-center border-rule border-ink bg-sheet px-3 py-3">
             <span className="font-body text-[11px] font-extrabold tracking-[0.1em] text-red">{t('hapoel.featured')}</span>
@@ -158,14 +183,11 @@ export default function HapoelPage() {
             <span className="mt-1 font-body text-[13px] font-extrabold text-red">{t('hapoel.inArchive')} ←</span>
           </Link>
         )}
-        <Link href="/archive" className="flex min-h-tap flex-col justify-center border-rule border-ink bg-ink px-3 py-3 text-paper">
-          <span className="font-body text-[11px] font-extrabold tracking-[0.1em] text-concrete">{t('hapoel.archiveDoor.kicker')}</span>
-          <span className="mt-0.5 font-display text-[24px] leading-tight">{t('hapoel.archiveDoor')}</span>
-          <span className="mt-1 font-body text-[13px] font-extrabold text-paper">{t('hapoel.archiveDoor.go')} ←</span>
-        </Link>
       </section>
+      )}
 
       {/* ---------------------------------------------------------------- the cupboard */}
+      {door === 'honours' && (
       <section className="mt-stack scroll-mt-4" aria-labelledby="club-honours">
         <HallBar n={1} id="club-honours" title={t('hapoel.honours')} latin="HONOURS" />
         <p className="mt-2 max-w-prose font-body text-step--1 leading-relaxed text-muted">
@@ -205,8 +227,10 @@ export default function HapoelPage() {
           ))}
         </ul>
       </section>
+      )}
 
       {/* ------------------------------------------------------------------- the badge */}
+      {door === 'crest' && (
       <section className="mt-stack scroll-mt-4" aria-labelledby="club-badge">
         <HallBar n={2} id="club-badge" title={t('hapoel.crests')} latin="THE BADGE" />
         <p className="mt-2 max-w-prose font-body text-step--1 leading-relaxed text-muted">
@@ -259,8 +283,10 @@ export default function HapoelPage() {
           <span aria-hidden="true" className="text-red">←</span>
         </Link>
       </section>
+      )}
 
       {/* ------------------------------------------------------------------- the songs */}
+      {door === 'songs' && (
       <section className="mt-stack scroll-mt-4" aria-labelledby="club-songs">
         <HallBar n={3} id="club-songs" title={t('hapoel.songs')} latin="THE SONGBOOK" />
         <p className="mt-2 max-w-prose font-body text-step--1 leading-relaxed text-muted">
@@ -310,14 +336,18 @@ export default function HapoelPage() {
           ),
         )}
       </section>
+      )}
 
       {/* ----------------------------------------------------------------- the players */}
+      {door === 'players' && (
       <section className="mt-stack scroll-mt-4" aria-labelledby="club-players">
         <HallBar n={4} id="club-players" title={t('hapoel.players')} latin="EVERY NAME" />
         <PlayerFinder roster={roster} />
       </section>
+      )}
 
       {/* ------------------------------------------------------------------- the gates */}
+      {door === null && (
       <section className="mt-stack scroll-mt-4" aria-labelledby="club-gates">
         <HallBar n={5} id="club-gates" title={t('hapoel.gates')} latin="PLAY IT" />
         <p className="mt-2 max-w-prose font-body text-step--1 leading-relaxed text-muted">
@@ -341,6 +371,7 @@ export default function HapoelPage() {
           ))}
         </ul>
       </section>
+      )}
 
       <ReportLink />
     </Screen>

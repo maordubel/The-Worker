@@ -15,7 +15,6 @@ import {
   ROYAL_RUMBLE_BALANCE_VERSION,
   ROYAL_RUMBLE_BUDGET,
   ROYAL_RUMBLE_DRAFT_SLOTS,
-  ROYAL_RUMBLE_FLEX_SLOT,
   ROYAL_RUMBLE_LINEUP_SIZE,
   ROYAL_RUMBLE_OFFERS_PER_SLOT,
   slotAdmits,
@@ -35,7 +34,6 @@ export {
   ROYAL_RUMBLE_BALANCE_VERSION,
   ROYAL_RUMBLE_BUDGET,
   ROYAL_RUMBLE_DRAFT_SLOTS,
-  ROYAL_RUMBLE_FLEX_SLOT,
   ROYAL_RUMBLE_LINEUP_SIZE,
   ROYAL_RUMBLE_OFFERS_PER_SLOT,
 } from './royal-rumble-public'
@@ -487,7 +485,7 @@ export function rumbleDepth(window: RumbleWindow): number {
 
 /**
  * Can a board be composed at all over this window (§32)? Three men per fixed position,
- * and enough DISTINCT defenders and midfielders for DF · MF · FLEX to be nine different
+ * and enough DISTINCT defenders and midfielders for DF · MF · MF to be nine different
  * cards — a two-way man counts once.
  */
 export function canDealRoyalRumble(window?: RumbleWindow): boolean {
@@ -503,14 +501,14 @@ export function royalRumblePlayerCount(): number {
 /* ------------------------------------------------------------------ the board composer */
 
 export type RoyalRumbleBoardMood = 'balanced' | 'star-heavy' | 'value' | 'tight' | 'wild'
-type SlotKind = Position | 'FLEX'
+type SlotKind = Position
 type PriceProfile = readonly [RoyalRumblePrice, RoyalRumblePrice, RoyalRumblePrice]
 
 const MOODS: readonly RoyalRumbleBoardMood[] = ['balanced', 'balanced', 'star-heavy', 'value', 'tight', 'wild']
 
 /**
  * Offer price profiles per slot character (§17–§18). Internal, never shown. GK is value ·
- * solid · premium; DF balanced; MF temptation; FLEX both tactical and financial; FW the
+ * solid · premium; DF balanced; MF temptation (both midfield slots); FW the
  * emotional squeeze at the end of the money.
  */
 const PROFILES: Record<RoyalRumbleBoardMood, Record<SlotKind, readonly PriceProfile[]>> = {
@@ -518,35 +516,30 @@ const PROFILES: Record<RoyalRumbleBoardMood, Record<SlotKind, readonly PriceProf
     GK: [[1, 3, 4], [2, 3, 4], [1, 2, 4], [2, 3, 5]],
     DF: [[2, 3, 4], [2, 3, 3], [1, 3, 4], [2, 4, 4]],
     MF: [[2, 3, 4], [1, 3, 5], [2, 4, 4], [3, 3, 4]],
-    FLEX: [[2, 3, 4], [1, 3, 4], [2, 3, 3], [2, 4, 4]],
     FW: [[1, 3, 5], [2, 4, 5], [2, 3, 4], [3, 4, 4]],
   },
   'star-heavy': {
     GK: [[1, 3, 5], [2, 4, 5], [1, 3, 4]],
     DF: [[1, 4, 5], [2, 4, 4], [1, 3, 5]],
     MF: [[2, 4, 5], [1, 3, 5], [1, 4, 4]],
-    FLEX: [[2, 3, 5], [1, 3, 4], [1, 4, 5]],
     FW: [[2, 4, 5], [1, 3, 5], [2, 4, 4]],
   },
   value: {
     GK: [[1, 2, 4], [1, 3, 5], [1, 2, 3]],
     DF: [[1, 3, 4], [1, 2, 4], [2, 2, 5]],
     MF: [[1, 4, 5], [1, 3, 4], [2, 2, 5]],
-    FLEX: [[1, 3, 4], [1, 2, 4], [2, 2, 5]],
     FW: [[1, 3, 5], [1, 4, 4], [2, 2, 5]],
   },
   tight: {
     GK: [[2, 3, 4], [3, 3, 4], [2, 2, 4]],
     DF: [[2, 3, 4], [3, 3, 4], [2, 4, 4]],
     MF: [[3, 3, 4], [2, 4, 4], [2, 3, 5]],
-    FLEX: [[2, 3, 4], [3, 3, 4], [2, 4, 4]],
     FW: [[3, 3, 4], [2, 4, 4], [3, 4, 5]],
   },
   wild: {
     GK: [[1, 3, 5], [1, 2, 5], [1, 4, 4]],
     DF: [[1, 3, 5], [1, 2, 4], [1, 4, 5]],
     MF: [[1, 3, 5], [2, 2, 5], [1, 4, 4]],
-    FLEX: [[1, 2, 5], [1, 3, 4], [1, 4, 5]],
     FW: [[1, 2, 5], [1, 3, 5], [2, 2, 4]],
   },
 }
@@ -560,8 +553,6 @@ export type RoyalRumbleBoardQuality = {
   valueCards: number
   fiveCards: number
   samePriceSlots: number
-  formationA: number
-  formationB: number
   deadPrefixes: number
   /** of the stages after the first pick, the share where two or more cards still lead somewhere */
   openShare: number
@@ -594,8 +585,6 @@ export function evaluateRoyalRumbleBoard(slots: readonly RoyalRumbleDraftSlot[],
   let total = 0
   let cheapest = Number.POSITIVE_INFINITY
   let dearest = 0
-  let formationA = 0
-  let formationB = 0
   const walk = (index: number, spent: number, gk: number, df: number, mf: number, fw: number): void => {
     if (index === size) {
       total += 1
@@ -603,8 +592,6 @@ export function evaluateRoyalRumbleBoard(slots: readonly RoyalRumbleDraftSlot[],
       dearest = Math.max(dearest, spent)
       if (spent <= budget && size === ROYAL_RUMBLE_LINEUP_SIZE && gk === 1 && fw === 1) {
         legalLineups += 1
-        if (df === 1 && mf === 2) formationA += 1
-        if (df === 2 && mf === 1) formationB += 1
       }
       return
     }
@@ -675,8 +662,6 @@ export function evaluateRoyalRumbleBoard(slots: readonly RoyalRumbleDraftSlot[],
     valueCards,
     fiveCards,
     samePriceSlots,
-    formationA,
-    formationB,
     deadPrefixes,
     openShare,
     score,
@@ -693,7 +678,7 @@ function acceptable(quality: RoyalRumbleBoardQuality, slots: readonly RoyalRumbl
   if (new Set(slugs).size !== slugs.length) return false
   if (slots.some((slot) => slot.offers.some((offer) => !slotAdmits(slot.rule, offer.offeredAs)))) return false
   if (quality.cheapest > ROYAL_RUMBLE_BUDGET) return false
-  if (quality.formationA < 1 || quality.formationB < 1) return false
+  if (quality.legalLineups < 1) return false
   if (quality.deadPrefixes > 0) return false
   if (strict && (quality.legalRatio < 0.3 || quality.legalRatio > 0.65)) return false
   return true
@@ -721,7 +706,7 @@ function takeAt(
   return undefined
 }
 
-/** one candidate board, from one attempt's sub-seed — profiles, FLEX composition, cards */
+/** one candidate board, from one attempt's sub-seed — profiles, cards */
 function composeOnce(seed: number, attempt: number, window: RumbleWindow | undefined, simple: boolean, mood: RoyalRumbleBoardMood): Board | null {
   const random = mulberry32(subSeed(seed, 0x1009 + attempt * 7919))
   const used = new Set<string>()
@@ -729,15 +714,11 @@ function composeOnce(seed: number, attempt: number, window: RumbleWindow | undef
 
   for (let index = 0; index < ROYAL_RUMBLE_DRAFT_SLOTS.length; index += 1) {
     const rule = ROYAL_RUMBLE_DRAFT_SLOTS[index]!
-    const kind: SlotKind = rule.kind === 'fixed' ? rule.position : 'FLEX'
+    const kind: SlotKind = rule.position
     const profiles = simple ? [[1, 2, 3] as const, [1, 3, 4] as const, [2, 3, 4] as const] : PROFILES[mood][kind]
     const profile = pickOne(profiles, random) ?? ([1, 3, 4] as const)
     const prices = shuffle(profile, random)
-    // FLEX is not a flat pool (§19): two midfielders and a defender, or two defenders and one
-    const positions: Position[] =
-      rule.kind === 'fixed'
-        ? [rule.position, rule.position, rule.position]
-        : shuffle(random() < 0.5 ? ['MF', 'MF', 'DF'] : ['DF', 'DF', 'MF'], random)
+    const positions: Position[] = [rule.position, rule.position, rule.position]
     const offers: RoyalRumbleOffer[] = []
     for (let card = 0; card < ROYAL_RUMBLE_OFFERS_PER_SLOT; card += 1) {
       const offeredAs = positions[card]!
@@ -926,13 +907,12 @@ export function resolveFormation(selected: readonly { offeredAs: Position }[]): 
 const OPPONENT_CANDIDATES = 24
 
 function composeOpponentCandidate(random: () => number, window?: RumbleWindow): ValidatedRoyalRumblePick[] | null {
-  const flexAs: Position = random() < 0.5 ? 'DF' : 'MF'
   const used = new Set<string>()
   const team: ValidatedRoyalRumblePick[] = []
   let spent = 0
   for (let index = 0; index < ROYAL_RUMBLE_DRAFT_SLOTS.length; index += 1) {
     const rule = ROYAL_RUMBLE_DRAFT_SLOTS[index]!
-    const position = rule.kind === 'fixed' ? rule.position : flexAs
+    const position = rule.position
     const remainingSlots = ROYAL_RUMBLE_DRAFT_SLOTS.length - index - 1
     const maxPrice = ROYAL_RUMBLE_BUDGET - spent - remainingSlots
     const legal = poolFor(position, window).filter((player) => !used.has(player.slug) && player.price <= maxPrice)
@@ -988,12 +968,15 @@ export function auditOpponent(seed: number, window?: RumbleWindow): { cost: numb
 
 /* ------------------------------------------------------------------ the match */
 
-/** two shapes on the grass (§39): 1-2-1-1 and 1-1-2-1, each visible in where the men stand */
+/** one shape on the grass: 1-1-2-1 */
 function baseShape(side: 'us' | 'them', team: readonly ValidatedRoyalRumblePick[], formation: RoyalRumbleFormation): RoyalRumblePitchPlayer[] {
-  const spots: Record<Position, Array<{ x: number; y: number }>> =
-    formation === 'defensive'
-      ? { GK: [{ x: 10, y: 50 }], DF: [{ x: 28, y: 34 }, { x: 28, y: 66 }], MF: [{ x: 50, y: 50 }], FW: [{ x: 72, y: 50 }] }
-      : { GK: [{ x: 10, y: 50 }], DF: [{ x: 28, y: 50 }], MF: [{ x: 47, y: 34 }, { x: 47, y: 66 }], FW: [{ x: 70, y: 50 }] }
+  void formation
+  const spots: Record<Position, Array<{ x: number; y: number }>> = {
+    GK: [{ x: 10, y: 50 }],
+    DF: [{ x: 28, y: 50 }],
+    MF: [{ x: 47, y: 34 }, { x: 47, y: 66 }],
+    FW: [{ x: 70, y: 50 }],
+  }
   const taken: Record<Position, number> = { GK: 0, DF: 0, MF: 0, FW: 0 }
   return team.map(({ player, offeredAs }) => {
     const spot = spots[offeredAs][taken[offeredAs]] ?? { x: 50, y: 50 }

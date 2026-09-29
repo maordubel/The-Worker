@@ -4,12 +4,23 @@
  */
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
+import Module from 'node:module'
 import { join } from 'node:path'
 
 import type { BuildInput } from '@/lib/game/blind-cow/build'
 import type { BlindCowBank } from '@/lib/game/blind-cow/types'
+import { buildRecognition } from '@/lib/game/blind-cow/recognition'
 
 export const ROOT = join(__dirname, '..', '..')
+
+// `server-only` is a bundler guard with no Node entry; the stub the tests use stands in for it
+type Resolver = (request: string, ...rest: unknown[]) => string
+const loader = Module as unknown as { _resolveFilename: Resolver }
+const resolveOriginal = loader._resolveFilename
+loader._resolveFilename = function (this: unknown, request: string, ...rest: unknown[]) {
+  if (request === 'server-only') return join(ROOT, 'tests/stubs/server-only.ts')
+  return resolveOriginal.call(this, request, ...rest)
+}
 export const BANK_PATH = join(ROOT, 'content/generated/blind-cow-bank.json')
 export const SQL_PATH = join(ROOT, 'supabase/migrations/20260924090000_worker_blind_cow.sql')
 
@@ -29,8 +40,22 @@ export function readInputs(previous: BlindCowBank | null = readBank()): BuildInp
       teamNames.set(e.id.slice('team:football:'.length), e.titleHe)
     }
   }
+  const prices = new Map(Object.entries(JSON.parse(read('content/generated/player-prices.json')).prices as Record<string, number>))
+  const appearances = new Map(
+    (JSON.parse(read('content/manual/player-appearances.json')).records as { playerId: string; appearances: number }[]).map((r) => [r.playerId, r.appearances]),
+  )
+  const recognition = buildRecognition(
+    (pm.players as { id: string; slug: string; kind: string }[])
+      .filter((p) => p.kind === 'player' && prices.has(p.slug))
+      .map((p) => ({ playerId: p.id, price: prices.get(p.slug) as 1 | 2 | 3 | 4 | 5, appearances: appearances.get(p.id) ?? null })),
+  )
+  const songTunes = new Map(
+    (JSON.parse(read('content/manual/player-song-tunes.json')).records as { playerId: string; tuneHe: string }[]).map((r) => [r.playerId, r.tuneHe]),
+  )
   return {
     players: pm.players,
+    recognition,
+    songTunes,
     matches: mm.matches,
     moments: mm.moments,
     teamNames,
