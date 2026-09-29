@@ -66,8 +66,10 @@
     "blind-cow:build": "tsx scripts/blind-cow/build-bank.ts",
     "rumble:audit": "tsx scripts/royal-rumble/audit.ts",
     "players:appearances": "tsx scripts/players/extract-appearances.ts",
+    "players:league-appearances": "tsx scripts/players/extract-league-appearances.ts",
     "rumble:report": "tsx scripts/royal-rumble/owner-report.ts",
-    "blind-cow:validate": "tsx scripts/blind-cow/validate-bank.ts"
+    "blind-cow:validate": "tsx scripts/blind-cow/validate-bank.ts",
+    "players:career-clubs": "tsx scripts/players/extract-career-clubs.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

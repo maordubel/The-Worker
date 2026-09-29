@@ -62,6 +62,8 @@ export type BuildInput = {
   recognition?: ReadonlyMap<string, PlayerRecognition>
   /** player id → the title of the tune the terrace sings his song to (`player-song-tunes.json`) */
   songTunes?: ReadonlyMap<string, string>
+  /** player id → reviewed clubs other than Hapoel Tel Aviv (`player-career-clubs.json`, the infobox `מועדונים`) */
+  careerClubs?: ReadonlyMap<string, readonly string[]>
   playerMasterSha: string
   matchMasterSha: string
   /** the bank this build replaces — a question whose facts changed gets version + 1 */
@@ -513,6 +515,29 @@ export function buildBank(input: BuildInput): BlindCowBank {
         all.filter((o) => tuneOf.get(o.p.id) === tune).map((o) => o.p.id),
         d.index,
       )
+    }
+  }
+
+  /* ---- B · the other clubs (infobox `מועדונים`, reviewed names only) ---- */
+  if (input.careerClubs) {
+    const clubsOf = input.careerClubs
+    for (const d of all) {
+      const nameTokens = [d.p.displayName, ...d.p.aliases.he, ...d.p.aliases.latin].flatMap((n) =>
+        fold(n).toLowerCase().split(' ').filter((x) => x.length >= 3),
+      )
+      for (const club of clubsOf.get(d.p.id) ?? []) {
+        if (fold(club).toLowerCase().split(' ').some((tok) => nameTokens.includes(tok))) continue
+        explicit(
+          `club:${club}`,
+          {
+            clue: { type: 'club', family: 'B', labelHe: 'מועדון אחר', valueHe: `שיחק גם ב${club}`, factKey: `club:${club}`, facet: 'club', sourceRefs: ['player-career-clubs#clubs'], confidence: 2 },
+            phantoms: null,
+            groups: ['club'],
+          },
+          all.filter((o) => clubsOf.get(o.p.id)?.includes(club)).map((o) => o.p.id),
+          d.index,
+        )
+      }
     }
   }
 
