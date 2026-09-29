@@ -3,6 +3,7 @@ import 'server-only'
 import { archive, nameOf } from '../../archive'
 import { isContested } from '../conflicts'
 import { fact, sourceOf, type Draft, type Template } from '../draft'
+import { CLUB } from '@/lib/club/context'
 
 /** התארים, הסמל והרגעים — the club's own chronology. */
 
@@ -66,7 +67,7 @@ export const HISTORY_TEMPLATES: Template[] = [
             legacyKey: `trophy:${row.competitionSlug}:${row.seasonLabel}`,
             template: 'trophy-season',
             type: 'year',
-            prompt: `הפועל תל אביב זכתה ב${nameOf.competition(row.competitionSlug)} פעם אחת בלבד. באיזו עונה?`,
+            prompt: `${CLUB.names.he} זכתה ב${nameOf.competition(row.competitionSlug)} פעם אחת בלבד. באיזו עונה?`,
             answer: row.seasonLabel,
             pool: seasons,
             source: sourceOf(row),
@@ -97,7 +98,7 @@ export const HISTORY_TEMPLATES: Template[] = [
           legacyKey: `double:${season}`,
           template: 'double',
           type: 'mcq',
-          prompt: `בעונת ${season} עשתה הפועל תל אביב דאבל. באיזה תואר זכתה מלבד האליפות?`,
+          prompt: `בעונת ${season} עשתה ${CLUB.names.he} דאבל. באיזה תואר זכתה מלבד האליפות?`,
           answer: correct,
           pool: competitions,
           source: sourceOf(other),
@@ -130,7 +131,7 @@ export const HISTORY_TEMPLATES: Template[] = [
           legacyKey: `trophy-count:${slug}`,
           template: 'trophy-count',
           type: 'mcq',
-          prompt: `בכמה פעמים זכתה הפועל תל אביב ב${nameOf.competition(slug)}?`,
+          prompt: `בכמה פעמים זכתה ${CLUB.names.he} ב${nameOf.competition(slug)}?`,
           answer: String(count),
           pool: [count - 2, count - 1, count + 1, count + 2, count + 4].map(String),
           source: sourceOf(row),

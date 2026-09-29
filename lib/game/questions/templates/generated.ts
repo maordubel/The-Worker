@@ -11,6 +11,7 @@ import { crestFact, momentFact, trophyFact } from './history'
 import { kitSupplyFact } from './kits'
 import { isDerby } from './matches'
 import { shirtFact } from './numbers'
+import { CLUB } from '@/lib/club/context'
 
 /**
  * השאלות שנבנות מעובדות — true/false, order and match, all derived from rows the
@@ -102,7 +103,7 @@ export function generatedTemplates(openThrough: number): Template[] {
             key: `tf-trophy:${row.competitionSlug}:${row.seasonLabel}`,
             template: 'tf-trophy',
             type: 'tf',
-            prompt: `הפועל תל אביב זכתה ב${competition} בעונת ${season}.`,
+            prompt: `${CLUB.names.he} זכתה ב${competition} בעונת ${season}.`,
             answer: truth ? 'true' : 'false',
             source: sourceOf(row),
             explanation: truth
@@ -135,7 +136,7 @@ export function generatedTemplates(openThrough: number): Template[] {
             key: `tf-euro:${tie.slug}`,
             template: 'tf-euro',
             type: 'tf',
-            prompt: `בעונת ${season} שיחקה הפועל תל אביב באירופה מול ${tie.opponentHe}.`,
+            prompt: `בעונת ${season} שיחקה ${CLUB.names.he} באירופה מול ${tie.opponentHe}.`,
             answer: truth ? 'true' : 'false',
             source: sourceOf(tie),
             explanation: `${tie.opponentHe} · ${tie.competitionHe} · ${tie.stageHe} · ${tie.seasonLabel} · ${tie.aggregateHe}`,
@@ -177,7 +178,7 @@ export function generatedTemplates(openThrough: number): Template[] {
             key: `tf-kit:${season}`,
             template: 'tf-kit',
             type: 'tf',
-            prompt: `${truth ? maker : other} הלבישה את הפועל תל אביב בעונת ${season}.`,
+            prompt: `${truth ? maker : other} הלבישה את ${CLUB.names.he} בעונת ${season}.`,
             answer: truth ? 'true' : 'false',
             source: sourceOf(spell),
             explanation: `${maker} · ${season}`,
@@ -289,7 +290,7 @@ export function generatedTemplates(openThrough: number): Template[] {
             key: `tf-derby:${match.seasonLabel}|${match.competitionSlug}|${match.stage ?? ''}|${match.playedOn ?? ''}`,
             template: 'tf-derby',
             type: 'tf',
-            prompt: `הפועל תל אביב ניצחה את ${nameOf.club(opponentOf(match))} בדרבי — ${where}.`,
+            prompt: `${CLUB.names.he} ניצחה את ${nameOf.club(opponentOf(match))} בדרבי — ${where}.`,
             answer: won ? 'true' : 'false',
             source: sourceOf(match),
             explanation: `הפועל ${ours} · ${nameOf.club(DERBY_RIVAL ?? '')} ${theirs} · ${match.playedOn ?? match.seasonLabel}`,

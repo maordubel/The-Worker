@@ -1,4 +1,5 @@
 import { BRAND, SITE_LABEL } from '@/lib/brand'
+import { CLUB } from '@/lib/club/context'
 import { COLOUR_VAR, type KitSpec } from '@/lib/kit/spec'
 
 /**
@@ -460,8 +461,9 @@ function foot(
   ctx.font = '400 22px Heebo, sans-serif'
   ctx.fillStyle = tone.text
   const clubBase = base - 56
-  ctx.fillText('הפועל תל אביב · 1923', textRight, clubBase)
-  recordInk(ctx, 'club', 'הפועל תל אביב · 1923', textRight, clubBase)
+  const clubLine = `${CLUB.names.he} · ${CLUB.founded}`
+  ctx.fillText(clubLine, textRight, clubBase)
+  recordInk(ctx, 'club', clubLine, textRight, clubBase)
 
   // THE ADDRESS — full width, on the plate colour, in the Latin caps face the rest of
   // the system uses for Latin. The one line on the card a reader has to act on.

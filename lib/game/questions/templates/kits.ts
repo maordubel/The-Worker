@@ -3,6 +3,7 @@ import 'server-only'
 import { archive, nameOf } from '../../archive'
 import { seasonsInSpell, spellCoversSeason } from '../../seasons'
 import { fact, sourceOf, type Draft, type Template } from '../draft'
+import { CLUB } from '@/lib/club/context'
 
 /**
  * החולצות — who made the shirt and whose name was on its chest. The thirty-three kits
@@ -64,7 +65,7 @@ export function kitTemplates(openThrough: number): Template[] {
             legacyKey: `kit-maker-season:${row.seasonLabel}`,
             template: 'kit-maker-season',
             type: 'mcq',
-            prompt: `מי הלבישה את הפועל תל אביב בעונת ${row.seasonLabel}?`,
+            prompt: `מי הלבישה את ${CLUB.names.he} בעונת ${row.seasonLabel}?`,
             answer: row.makerHe as string,
             pool: makers,
             source: sourceOf(row),
@@ -114,7 +115,7 @@ export function kitTemplates(openThrough: number): Template[] {
               legacyKey: `kit:${spell.manufacturerSlug}:${season}`,
               template: 'kit-maker',
               type: 'mcq',
-              prompt: `איזה יצרן חתום על מדי הפועל תל אביב בעונת ${season}?`,
+              prompt: `איזה יצרן חתום על מדי ${CLUB.names.he} בעונת ${season}?`,
               answer: correct,
               pool: makers,
               source: sourceOf(spell),
@@ -173,7 +174,7 @@ export function kitTemplates(openThrough: number): Template[] {
             legacyKey: `sponsor-year:${row.yearLabelRaw}`,
             template: 'sponsor-year',
             type: 'mcq',
-            prompt: `מי היה נותן החסות הראשי על חולצת הפועל תל אביב בשנת ${row.yearLabelRaw}?`,
+            prompt: `מי היה נותן החסות הראשי על חולצת ${CLUB.names.he} בשנת ${row.yearLabelRaw}?`,
             answer: row.mainSponsorHe,
             pool: sponsors,
             source: sourceOf(row),
@@ -199,7 +200,7 @@ export function kitTemplates(openThrough: number): Template[] {
               legacyKey: `maker-year:${row.yearLabelRaw}`,
               template: 'maker-year',
               type: 'mcq',
-              prompt: `איזה מותג ייצר את מדי הפועל תל אביב בשנת ${row.yearLabelRaw}?`,
+              prompt: `איזה מותג ייצר את מדי ${CLUB.names.he} בשנת ${row.yearLabelRaw}?`,
               answer: row.manufacturerHe as string,
               pool: makers,
               source: sourceOf(row),

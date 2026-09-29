@@ -6,6 +6,7 @@ import { allPlayers, type PlayerMasterRecord } from '@/lib/archive/player-master
 import { shuffle } from '../../archive'
 import { fact, hash, seeded, type Draft, type Template } from '../draft'
 import type { SourceRef } from '../types'
+import { CLUB } from '@/lib/club/context'
 
 /**
  * השחקנים — from the Player Master, and only what it can stand behind.
@@ -119,7 +120,7 @@ export const PLAYER_TEMPLATES: Template[] = [
             key: `player-position:${player.record.id}`,
             template: 'player-position',
             type: 'mcq',
-            prompt: `באיזה תפקיד שיחק ${player.name} בהפועל תל אביב?`,
+            prompt: `באיזה תפקיד שיחק ${player.name} ב${CLUB.names.he}?`,
             answer: player.position as string,
             pool: LABELS,
             source: SOURCE,
@@ -140,7 +141,7 @@ export const PLAYER_TEMPLATES: Template[] = [
           key: `player-decade:${player.record.id}`,
           template: 'player-decade',
           type: 'mcq',
-          prompt: `באיזה עשור התחיל ${player.name} לשחק בהפועל תל אביב?`,
+          prompt: `באיזה עשור התחיל ${player.name} לשחק ב${CLUB.names.he}?`,
           answer: decadeLabel(player.from),
           pool: decades,
           source: SOURCE,
@@ -170,7 +171,7 @@ export const PLAYER_TEMPLATES: Template[] = [
             key: `player-position-tf:${player.record.id}`,
             template: 'player-position-tf',
             type: 'tf',
-            prompt: `${player.name} שיחק בהפועל תל אביב בתפקיד ${claimed}.`,
+            prompt: `${player.name} שיחק ב${CLUB.names.he} בתפקיד ${claimed}.`,
             answer: truth ? 'true' : 'false',
             source: SOURCE,
             explanation: `${player.name} · ${player.position} · ${player.from}–${player.to}`,

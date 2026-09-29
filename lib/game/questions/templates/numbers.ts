@@ -5,6 +5,7 @@ import { findPlayer } from '@/lib/archive/player-master'
 import { archive, footballPeople, shuffle } from '../../archive'
 import { shirtConflict } from '../conflicts'
 import { fact, seeded, sourceOf, yearOf, type Draft, type Template } from '../draft'
+import { CLUB } from '@/lib/club/context'
 
 /**
  * ארכיון החולצות — "who wore 11 in 2019/20" is the question the corpus was always going
@@ -112,7 +113,7 @@ export const NUMBER_TEMPLATES: Template[] = [
           key: `number-era:${season}`,
           template: 'number-era',
           type: 'multi',
-          prompt: `בחרו שלושה — מי היו בסגל הפועל תל אביב בעונת ${season}?`,
+          prompt: `בחרו שלושה — מי היו בסגל ${CLUB.names.he} בעונת ${season}?`,
           answer: names,
           distractors: absent,
           source: sourceOf(squad[0] ?? FALLBACK_SOURCE),
@@ -217,7 +218,7 @@ export const NUMBER_TEMPLATES: Template[] = [
           key: `shirt-multi:${number}`,
           template: 'shirt-multi',
           type: 'multi',
-          prompt: `בחרו שלושה — מי לבשו את חולצת מספר ${number} של הפועל תל אביב?`,
+          prompt: `בחרו שלושה — מי לבשו את חולצת מספר ${number} של ${CLUB.names.he}?`,
           answer: wore,
           distractors: neverWore,
           source: sourceOf(

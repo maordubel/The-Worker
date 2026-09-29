@@ -2,6 +2,7 @@ import 'server-only'
 
 import { archive } from '../../archive'
 import { fact, sourceOf, type Draft, type Template } from '../draft'
+import { CLUB } from '@/lib/club/context'
 
 /**
  * מי שחצה, מי שנאמר עליו, ומי שאמר — the crossings, the enemies' sourced facts and the
@@ -34,7 +35,7 @@ export const PEOPLE_TEMPLATES: Template[] = [
           legacyKey: `crossing-club:${row.slug}`,
           template: 'crossing-club',
           type: 'mcq',
-          prompt: `לאן עבר ${row.personNameHe} מהפועל תל אביב?`,
+          prompt: `לאן עבר ${row.personNameHe} מ${CLUB.names.he}?`,
           answer: row.toClubHe as string,
           pool: clubs,
           source: sourceOf(row),
