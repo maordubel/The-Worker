@@ -576,6 +576,7 @@ export function BlindCowGame({
   /* ---------------------------------------------------------------- lobby */
 
   const dailyLabel = daily ? (daily.status === 'solved' ? t('blindcow.daily.done') : daily.status === 'playing' ? t('blindcow.daily') : t('blindcow.daily.played')) : t('blindcow.daily')
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const openDaily = () => (daily ? resume(daily, 'daily') : void begin('daily'))
 
   return (
@@ -597,51 +598,6 @@ export function BlindCowGame({
       </div>
 
       <div className="shrink-0 md:mx-auto md:max-w-[560px]">
-        <div className="mb-1.5">
-          <p className="sr-only">{t('blindcow.filter.label')}</p>
-          <ul className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1" aria-label={t('blindcow.filter.label')}>
-            {(livedOpen ? [FILTERS[0]!, LIVED_FILTER, ...FILTERS.slice(1)] : FILTERS).map((f) => (
-              <li key={f.id} className="shrink-0">
-                <button
-                  type="button"
-                  aria-pressed={filter === f.id}
-                  onClick={(e) => {
-                    setFilter(f.id)
-                    setError(null)
-                    firePickFxAt(e.currentTarget, { tone: 'ink', haptic: 'tap' })
-                  }}
-                  className={`flex min-h-tap items-center whitespace-nowrap border-hair px-2.5 font-body text-[12px] font-extrabold transition-colors duration-press motion-reduce:transition-none ${
-                    filter === f.id ? 'border-red bg-red text-paper' : 'border-ink/50 bg-sheet text-ink'
-                  }`}
-                >
-                  {t(f.key)}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-        {error && (
-          <p className="pb-1 text-center font-body text-[11px] font-extrabold text-sign" role="status">
-            {error}
-          </p>
-        )}
-        <ul className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1.5">
-          <li className="shrink-0">
-            <button type="button" onClick={openDaily} disabled={busy} className={`flex min-h-tap items-center border-rule border-ink px-3 font-body text-[12.5px] font-extrabold ${preferDaily ? 'bg-ink text-paper' : 'bg-paper text-ink'}`}>
-              {dailyLabel}
-            </button>
-          </li>
-          <li className="shrink-0">
-            <button type="button" onClick={() => setDuelSheet(true)} className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink">
-              {t('blindcow.duel')}
-            </button>
-          </li>
-          <li className="shrink-0">
-            <button type="button" onClick={() => setHowto(true)} className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink">
-              {t('blindcow.howto')}
-            </button>
-          </li>
-        </ul>
         {solo ? (
           <div className="grid grid-cols-[1.35fr_1fr] gap-1.5">
             <PrimaryButton onClick={() => resume(solo, 'solo')}>{t('blindcow.resume')}</PrimaryButton>
@@ -658,6 +614,65 @@ export function BlindCowGame({
             {t('blindcow.play')}
           </PrimaryButton>
         )}
+        {error && (
+          <p className="pb-1 text-center font-body text-[11px] font-extrabold text-sign" role="status">
+            {error}
+          </p>
+        )}
+        <ul className="-mx-1 flex gap-1.5 overflow-x-auto px-1 py-1.5">
+          <li className="shrink-0">
+            <button type="button" onClick={openDaily} disabled={busy} className={`flex min-h-tap items-center border-rule border-ink px-3 font-body text-[12.5px] font-extrabold ${preferDaily ? 'bg-ink text-paper' : 'bg-paper text-ink'}`}>
+              {dailyLabel}
+            </button>
+          </li>
+          <li className="shrink-0">
+            <button type="button" onClick={() => setDuelSheet(true)} className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink">
+              {t('blindcow.duel')}
+            </button>
+          </li>
+          <li className="shrink-0">
+            <button type="button" onClick={() => setHowto(true)} className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink">
+              {t('blindcow.howto')}
+            </button>
+          </li>
+        </ul>
+        <div className="mb-1.5">
+          <button
+            type="button"
+            aria-expanded={filtersOpen}
+            onClick={() => setFiltersOpen((v) => !v)}
+            data-blindcow="filter-toggle"
+            className="flex min-h-tap w-full items-center justify-between border-hair border-ink/40 bg-sheet px-2.5 font-body text-[12px] font-extrabold text-ink"
+          >
+            <span>{filter === 'all' ? t('blindcow.filter.optional') : `${t('blindcow.filter.label')}: ${t((FILTERS.find((f) => f.id === filter) ?? LIVED_FILTER).key)}`}</span>
+            <span aria-hidden="true">{filtersOpen ? '▴' : '▾'}</span>
+          </button>
+          {filtersOpen && (
+            <>
+            <p className="sr-only">{t('blindcow.filter.label')}</p>
+            <ul className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1" aria-label={t('blindcow.filter.label')}>
+              {(livedOpen ? [FILTERS[0]!, LIVED_FILTER, ...FILTERS.slice(1)] : FILTERS).map((f) => (
+                <li key={f.id} className="shrink-0">
+                  <button
+                    type="button"
+                    aria-pressed={filter === f.id}
+                    onClick={(e) => {
+                      setFilter(f.id)
+                      setError(null)
+                      firePickFxAt(e.currentTarget, { tone: 'ink', haptic: 'tap' })
+                    }}
+                    className={`flex min-h-tap items-center whitespace-nowrap border-hair px-2.5 font-body text-[12px] font-extrabold transition-colors duration-press motion-reduce:transition-none ${
+                      filter === f.id ? 'border-red bg-red text-paper' : 'border-ink/50 bg-sheet text-ink'
+                    }`}
+                  >
+                    {t(f.key)}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            </>
+          )}
+        </div>
       </div>
 
       <SlideSheet open={howto} onClose={() => setHowto(false)} title={t('blindcow.howto')} latin={t('blindcow.latin.howto')} size="auto">

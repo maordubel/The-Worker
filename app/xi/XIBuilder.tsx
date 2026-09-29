@@ -20,7 +20,7 @@ import { PickRail, flyShirt, shirtTitle, type RailItem } from '@/components/rost
 import type { ShirtLook, Wardrobe } from '@/lib/kit/playerShirt'
 import type { Formation, PitchSlot } from '@/lib/game/lineup'
 import type { RosterEntry, RosterIndex } from '@/lib/game/allTimeXI'
-import { NO_FILTER, slotStatusOf, type RosterFilter } from '@/lib/game/roster-search'
+import { NO_FILTER, slotStatusOf, type RosterFilter, compactName } from '@/lib/game/roster-search'
 import type { ShirtBoard } from '@/lib/xi/board'
 import {
   CHALLENGES,
@@ -593,7 +593,7 @@ export function XIBuilder({
     advanceFrom(slotId)
     haptic('tap')
     sayPicked()
-    window.setTimeout(() => firePickFxAt(document.querySelector(`[data-drop="${slotId}"]`), { label: entry.familyHe }), 0)
+    window.setTimeout(() => firePickFxAt(document.querySelector(`[data-drop="${slotId}"]`), { label: compactName(entry.nameHe) }), 0)
   }
 
   /**
@@ -617,14 +617,14 @@ export function XIBuilder({
       patch((current) => ({ ...current, twelfth: entry }))
       setDrawer(null)
       haptic('tap')
-      firePickFx(window.innerWidth / 2, window.innerHeight / 2, { label: entry.familyHe })
+      firePickFx(window.innerWidth / 2, window.innerHeight / 2, { label: compactName(entry.nameHe) })
       return
     }
     if (drawer === 'cut') {
       patch((current) => ({ ...current, cut: entry }))
       setDrawer(null)
       haptic('tap')
-      firePickFx(window.innerWidth / 2, window.innerHeight / 2, { label: entry.familyHe, tone: 'sign' })
+      firePickFx(window.innerWidth / 2, window.innerHeight / 2, { label: compactName(entry.nameHe), tone: 'sign' })
       return
     }
     if (selected === null) return
@@ -647,8 +647,8 @@ export function XIBuilder({
     sayPicked()
     // every placement carries the stamp — one hit, wherever the pick came from (delta 87);
     // from the rail, the shirt first FLIES into the slot (delta 88)
-    if (from) flyShirt(from, `[data-drop="${slotId}"]`, entry.familyHe)
-    else window.setTimeout(() => firePickFxAt(document.querySelector(`[data-drop="${slotId}"]`), { label: entry.familyHe }), 0)
+    if (from) flyShirt(from, `[data-drop="${slotId}"]`, compactName(entry.nameHe))
+    else window.setTimeout(() => firePickFxAt(document.querySelector(`[data-drop="${slotId}"]`), { label: compactName(entry.nameHe) }), 0)
   }
 
   function remove(slotId: string) {
@@ -805,7 +805,7 @@ export function XIBuilder({
       const foreign = slotStatusOf(entry) === 'foreign'
       return {
         key: rosterKey(entry),
-        family: entry.familyHe,
+        family: compactName(entry.nameHe),
         given: entry.givenHe,
         years: spell ? spanOf(spell) : null,
         look: lookFor(entry, spell),
@@ -972,7 +972,7 @@ export function XIBuilder({
             const entry = sheet.picks[slot.slotId]
             if (!entry) return null
             const roleHe = sheet.captain === slot.slotId ? t('xi.card.captain', { role: slot.roleHe }) : slot.roleHe
-            return { roleHe, nameHe: entry.familyHe, x: slot.x, y: slot.y }
+            return { roleHe, nameHe: compactName(entry.nameHe), x: slot.x, y: slot.y }
           })
           .filter((slot): slot is NonNullable<typeof slot> => slot !== null),
         stats: [],
@@ -1359,7 +1359,7 @@ export function XIBuilder({
                     className="flex min-h-tap items-center border-hair border-ink/40 bg-paper px-2.5 font-body text-[11.5px] font-extrabold text-ink disabled:opacity-40"
                   >
                     <span aria-hidden="true" className="me-1">★</span>
-                    {entry.familyHe}
+                    {compactName(entry.nameHe)}
                   </button>
                   <button
                     type="button"
@@ -1515,7 +1515,7 @@ export function XIBuilder({
                   */}
                   {slotVersions.length > 1 && (
                     <div className="mt-2">
-                      <p className="font-body text-[10.5px] font-extrabold text-muted">{voiceAction(1, 'version', { name: occupant.familyHe })}</p>
+                      <p className="font-body text-[10.5px] font-extrabold text-muted">{voiceAction(1, 'version', { name: compactName(occupant.nameHe) })}</p>
                       <div className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
                         {slotVersions.map((version) => {
                           const live = sheet.versions[openSlot.slotId] === version.id
@@ -1663,7 +1663,7 @@ export function XIBuilder({
                       <span aria-hidden="true" className="me-1">
                         ★
                       </span>
-                      {entry.familyHe}
+                      {compactName(entry.nameHe)}
                     </button>
                     <button
                       type="button"
@@ -1797,9 +1797,9 @@ export function XIBuilder({
 
 /** The share card's foot line on the best sheet: the twelfth man and the last man cut. */
 function benchLine(twelfth: RosterEntry | null, cut: RosterEntry | null): string | null {
-  if (twelfth && cut) return t('xi.card.bench', { twelfth: twelfth.familyHe, cut: cut.familyHe })
-  if (twelfth) return t('xi.card.twelfth', { twelfth: twelfth.familyHe })
-  if (cut) return t('xi.card.cut', { cut: cut.familyHe })
+  if (twelfth && cut) return t('xi.card.bench', { twelfth: compactName(twelfth.nameHe), cut: compactName(cut.nameHe) })
+  if (twelfth) return t('xi.card.twelfth', { twelfth: compactName(twelfth.nameHe) })
+  if (cut) return t('xi.card.cut', { cut: compactName(cut.nameHe) })
   return null
 }
 
@@ -1901,7 +1901,7 @@ function ChallengeLine({
   const rule = ruleLabel(verdict.challenge, decades)
   const names = slots
     .filter((slot) => verdict.broken.includes(slot.slotId))
-    .map((slot) => picks[slot.slotId]?.familyHe)
+    .map((slot) => (picks[slot.slotId] ? compactName(picks[slot.slotId]!.nameHe) : undefined))
     .filter((name): name is string => Boolean(name))
   return (
     <p
@@ -2017,7 +2017,7 @@ function XIPitch({
                 compact ? 'text-[9.5px]' : 'text-[10.5px]'
               } ${live ? 'border-rule border-ink text-red' : 'border-ink'} ${off ? 'line-through' : ''}`}
             >
-              {entry.familyHe}
+              {compactName(entry.nameHe)}
             </span>
             {season && !compact && (
               <span className="block border-hair border-ink/30 bg-sheet/90 px-1 font-mono text-[9px] leading-tight text-muted">
@@ -2208,7 +2208,7 @@ function SlotToken({
           look={look}
           spec={NEUTRAL_SHIRT_SPEC}
           title={look ? shirtTitle(look) : undefined}
-          name={entry.familyHe}
+          name={compactName(entry.nameHe)}
           sub={seasonLabel || undefined}
           live={live}
           captain={captain}
@@ -2292,7 +2292,7 @@ function SlotDetail({
       <p className="font-body text-step--1 text-ink">{occupant.nameHe}</p>
       {slotVersions && slotVersions.length > 1 && (
         <div className="mt-2">
-          <p className="font-body text-[10.5px] font-extrabold text-muted">{voiceAction(1, 'version', { name: occupant.familyHe })}</p>
+          <p className="font-body text-[10.5px] font-extrabold text-muted">{voiceAction(1, 'version', { name: compactName(occupant.nameHe) })}</p>
           <div className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
             {slotVersions.map((version) => {
               const live = sheet.versions[slot.slotId] === version.id

@@ -56,6 +56,26 @@ export const TYPE_STRENGTH: Record<MemoryPairType, MemoryStrength> = {
   'candidate-votes': 2,
 }
 
+/**
+ * Deep QA 29.9.2026 §26 — how RECOGNISABLE a pair is to a supporter, apart from how strong its
+ * evidence is. A trophy and its season, a night and its year: 3 (iconic). A tie and a goal:
+ * 2 (recognisable). A crest's years, a maker's span, a candidate's votes: 1 (archival) — valid,
+ * and kept, but never six of them on one board.
+ */
+export type MemoryValue = 1 | 2 | 3
+export const MEMORY_VALUE: Record<MemoryPairType, MemoryValue> = {
+  'trophy-season': 3,
+  'moment-year': 3,
+  'goal-year': 2,
+  'tie-season': 2,
+  'crest-years': 1,
+  'maker-span': 1,
+  'candidate-votes': 1,
+}
+/** a board of `size` keeps at least this many pairs with a value of 2 or more */
+export const RECOGNISABLE_MIN = 3
+const archivalCap = (size: number) => Math.max(0, size - RECOGNISABLE_MIN)
+
 /** the fields a candidate must carry for its strength to be judged */
 export type Judgeable = {
   type: MemoryPairType
@@ -113,7 +133,7 @@ export function coherenceOf(themes: readonly string[]): number {
  * spread across kinds again. The result is one fixed permutation: the rotation slices it into
  * consecutive windows exactly as it sliced the old one, so two boards of a lap never share a pair.
  */
-export function themedOrder<T extends { theme: string; kind: string }>(items: readonly T[], size: number): T[] {
+export function themedOrder<T extends { theme: string; kind: string; value?: number }>(items: readonly T[], size: number): T[] {
   const byTheme = new Map<string, T[]>()
   for (const item of items) byTheme.set(item.theme, [...(byTheme.get(item.theme) ?? []), item])
 
@@ -128,7 +148,31 @@ export function themedOrder<T extends { theme: string; kind: string }>(items: re
     blocks.push(...cut.blocks)
     rest.push(...cut.rest)
   }
-  return [...blocks, ...spreadKinds(rest)]
+  return limitArchival([...blocks, ...spreadKinds(rest)], size)
+}
+
+/**
+ * The mixed stream is sliced into boards too: no window of `size` may hold more than the archival
+ * cap. A surplus archival pair swaps with the next recognisable one further on (same decade first) — a permutation,
+ * so the rotation's disjoint windows survive.
+ */
+function limitArchival<T extends { value?: number; theme?: string }>(items: readonly T[], size: number): T[] {
+  const out = [...items]
+  const cap = archivalCap(size)
+  const archival = (item: T) => (item.value ?? 2) <= 1
+  for (let start = 0; start < out.length; start += size) {
+    const end = Math.min(out.length, start + size)
+    if (end - start < size) break
+    for (let i = start; i < end && out.slice(start, end).filter(archival).length > cap; i += 1) {
+      if (!archival(out[i]!)) continue
+      // prefer a partner from the SAME stretch of history, so the board keeps its decade
+      let swap = out.findIndex((item, at) => at >= end && !archival(item) && item.theme === out[i]!.theme)
+      if (swap < 0) swap = out.findIndex((item, at) => at >= end && !archival(item))
+      if (swap < 0) break
+      ;[out[i], out[swap]] = [out[swap]!, out[i]!]
+    }
+  }
+  return out
 }
 
 /** No more than this many of one kind on a themed board — one question is not a memory board. */
@@ -139,7 +183,7 @@ export const KIND_CAP = 3
  * passing over the kinds in turn; when the theme can no longer fill a board under the cap, what
  * is left (the half-drawn board included) is handed back for the mixed stream.
  */
-function cutBlocks<T extends { kind: string }>(group: readonly T[], size: number): { blocks: T[]; rest: T[] } {
+function cutBlocks<T extends { kind: string; value?: number }>(group: readonly T[], size: number): { blocks: T[]; rest: T[] } {
   const queues = new Map<string, T[]>()
   for (const item of group) queues.set(item.kind, [...(queues.get(item.kind) ?? []), item])
   const blocks: T[] = []

@@ -27,7 +27,7 @@ import {
   type LockerName,
   type Placement,
 } from '@/lib/game/lineup-sheet'
-import { splitName } from '@/lib/game/roster-search'
+import { splitName, compactName } from '@/lib/game/roster-search'
 import type { LineupWindow, MatchIntro } from '@/lib/game/lineup'
 import type { KitSpec } from '@/lib/kit/spec'
 import type { Embedded } from '@/lib/mechanics/types'
@@ -211,7 +211,7 @@ export function LineupBoard({
     setActive(null)
     setNote(null)
     haptic('tap')
-    const family = splitName(nameOf.get(playerId) ?? '').familyHe
+    const family = compactName(nameOf.get(playerId) ?? '')
     // from the rail the shirt FLIES into the band, then the stamp (delta 88)
     if (from) flyShirt(from, `[data-drop="band-${line}"]`, family)
     else firePickFxAt(document.querySelector(`[data-drop="band-${line}"]`), { label: family })
@@ -320,7 +320,7 @@ export function LineupBoard({
         const parts = splitName(locker.nameHe)
         return {
           key: locker.id,
-          family: parts.familyHe,
+          family: compactName(locker.nameHe),
           given: parts.givenHe,
           look: look ?? { kind: 'engine', spec: kit ?? NEUTRAL_SHIRT_SPEC, seasonLabel: kitSeason ?? '', approx: false },
           taken: used.has(locker.id),

@@ -5,16 +5,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { KitShirt } from '@/components/kit/KitShirt'
 import { Num } from '@/components/ui/Num'
 import { RosterFilters } from '@/components/roster/RosterFilters'
-import {
-  byInitial,
-  filterRoster,
-  isFiltered,
-  NO_FILTER,
-  searchRoster,
-  slotStatusOf,
-  type RosterFilter,
-  type Searchable,
-} from '@/lib/game/roster-search'
+import { byInitial, filterRoster, isFiltered, NO_FILTER, searchRoster, slotStatusOf, type RosterFilter, type Searchable, compactName } from '@/lib/game/roster-search'
 import type { RosterIndex } from '@/lib/game/allTimeXI'
 import type { KitSpec } from '@/lib/kit/spec'
 import type { ShirtLook } from '@/lib/kit/playerShirt'
@@ -385,7 +376,7 @@ function RosterBody({
                           <span aria-hidden="true" className="me-1">
                             ★
                           </span>
-                          {entry.familyHe}
+                          {compactName(entry.nameHe)}
                         </button>
                         <button
                           type="button"
@@ -640,7 +631,7 @@ function NameRow({
         )}
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="flex min-w-0 items-baseline gap-2">
-            <span className="font-sign text-step-0 leading-tight text-ink">{entry.familyHe}</span>
+            <span className="font-sign text-step-0 leading-tight text-ink">{compactName(entry.nameHe)}</span>
             {entry.givenHe !== '' && (
               <span className="min-w-0 truncate font-body text-[12px] leading-tight text-muted">{entry.givenHe}</span>
             )}

@@ -63,12 +63,14 @@ type Weights = Record<keyof RatingFactors, number>
 export const POSITION_WEIGHTS: Record<Position, Weights> = {
   FW: { peak: 0.2, longevity: 0.1, output: 0.3, honours: 0.15, bigGames: 0.15, legacy: 0.1 },
   MF: { peak: 0.15, longevity: 0.15, output: 0.2, honours: 0.2, bigGames: 0.15, legacy: 0.15 },
-  DF: { peak: 0.1, longevity: 0.25, output: 0.1, honours: 0.25, bigGames: 0.15, legacy: 0.15 },
-  GK: { peak: 0.15, longevity: 0.3, output: 0, honours: 0.3, bigGames: 0.15, legacy: 0.1 },
+  // Deep QA 29.9.2026 §13.1–13.2: a defender's history is longevity, captaincy, titles and
+  // starts — not goals × a multiplier; a keeper is what he lasted and won, not one title period
+  DF: { peak: 0.05, longevity: 0.3, output: 0.05, honours: 0.28, bigGames: 0.2, legacy: 0.12 },
+  GK: { peak: 0.1, longevity: 0.35, output: 0, honours: 0.25, bigGames: 0.2, legacy: 0.1 },
 }
 
 /** goals are asked of a striker, sometimes of a midfielder, rarely of a defender, never of a keeper */
-const GOAL_SCALE: Record<Position, number> = { FW: 1, MF: 1.5, DF: 3.5, GK: 0 }
+const GOAL_SCALE: Record<Position, number> = { FW: 1, MF: 1.5, DF: 2, GK: 0 }
 
 const NEUTRAL = 0.4
 
@@ -135,8 +137,17 @@ function densityRank(rows: readonly RatingEvidence[], measure: (row: RatingEvide
   return out
 }
 
-const bigGameMeasure = (row: RatingEvidence) => row.moments + 2 * row.lineups
-const legacyMeasure = (row: RatingEvidence) => row.songs * 3 + (row.captain ? 2 : 0) + (row.numberHolding ? 1 : 0) + Math.min(3, row.shirtSeasons)
+/**
+ * §13.3 — a lineup row is a DOCUMENTED START, not a big match: it counts once, while a recorded
+ * moment (a goal that decided something, a final, a European night) counts double.
+ */
+const bigGameMeasure = (row: RatingEvidence) => 2 * row.moments + row.lineups
+/**
+ * §13.4 — songs are fan legacy, not football power: one point each (was three), so a cult hero
+ * stays loved without becoming artificially stronger. The captain's armband and a number kept
+ * for life weigh more than a verse.
+ */
+const legacyMeasure = (row: RatingEvidence) => row.songs + (row.captain ? 3 : 0) + (row.numberHolding ? 1 : 0) + Math.min(3, row.shirtSeasons)
 
 export function rateAll(rows: readonly RatingEvidence[], nudge: (slug: string) => number = () => 0): Map<string, Rated> {
   const position = (row: RatingEvidence) => row.position
@@ -144,13 +155,13 @@ export function rateAll(rows: readonly RatingEvidence[], nudge: (slug: string) =
   const peakOf = (row: RatingEvidence) => {
     const seasons = Math.max(1, row.seasons)
     // a keeper (and, in part, a back) is measured by how often his years ended in a title
-    return row.position === 'GK' ? row.titles / seasons : (goalsOf(row) / seasons) * 3 + (row.position === 'DF' ? (row.titles / seasons) * 2 : 0)
+    return row.position === 'GK' ? row.titles / seasons : (goalsOf(row) / seasons) * 3 + (row.position === 'DF' ? (row.titles / seasons) * 4 : 0)
   }
 
   const peak = rankWithin(rows, position, peakOf)
   const longevity = rankWithin(rows, position, (row) => Math.min(row.seasons, 16))
   const output = rankWithin(rows, position, goalsOf)
-  const honours = rankWithin(rows, position, (row) => row.titles + (row.captain ? 0.5 : 0))
+  const honours = rankWithin(rows, position, (row) => row.titles + (row.captain ? 1 : 0))
   const bigGames = densityRank(rows, bigGameMeasure)
   const legacy = densityRank(rows, legacyMeasure)
 

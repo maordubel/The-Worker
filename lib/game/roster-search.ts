@@ -37,19 +37,53 @@ export function nameCore(name: string): string {
 
 export type NameParts = { givenHe: string; familyHe: string; initial: string }
 
+import nameParts from '@/content/manual/player-name-parts.json'
+
+/** A surname particle is part of the family name, never a middle name. */
+const PARTICLES = new Set(['בן', 'בר', 'דה', 'דל', 'אבו', 'בית', 'דוס', 'ואן', 'פון'])
+const REVIEWED = nameParts.names as Record<string, { givenHe: string; familyHe: string }>
+
 /**
  * Split a name into given and family.
  *
- * The last word is the family name, which is right for every name in this roster —
- * including the two-word family names, where the first of the two reads as a middle name
- * and costs nothing. Where there is only one word it IS the family name; a mononym is
- * looked up by the only thing it has.
+ * 1. A REVIEWED row (`content/manual/player-name-parts.json`) wins — כהן צדק, אבו אל היג'א,
+ *    מאיר אהרן מליקה are not derivable from the string.
+ * 2. Otherwise a surname particle (בן / דה / אבו …) before the last word belongs to the family:
+ *    "דדי בן דיין" is דדי + בן דיין, never "דדי בן" + דיין (Deep QA, 29.9.2026).
+ * 3. Otherwise the last word is the family name; one word is a mononym and is its own family.
+ *
+ * This only splits what is DISPLAYED and searched. Identity is the player id; nothing
+ * rebuilds a name by joining these parts.
  */
 export function splitName(name: string): NameParts {
-  const parts = nameCore(name).split(/\s+/).filter(Boolean)
-  const familyHe = parts.length > 1 ? (parts[parts.length - 1] as string) : (parts[0] ?? name)
-  const givenHe = parts.length > 1 ? parts.slice(0, -1).join(' ') : ''
+  const core = nameCore(name)
+  const reviewed = REVIEWED[core]
+  if (reviewed) return { ...reviewed, initial: fold(reviewed.familyHe)[0] ?? '·' }
+  const parts = core.split(/\s+/).filter(Boolean)
+  let take = parts.length > 1 ? 1 : 0
+  if (parts.length > 2 && PARTICLES.has(parts[parts.length - 2] as string)) take = 2
+  const familyHe = parts.length > 1 ? parts.slice(-take).join(' ') : (parts[0] ?? name)
+  const givenHe = parts.length > 1 ? parts.slice(0, -take).join(' ') : ''
   return { givenHe, familyHe, initial: fold(familyHe)[0] ?? '·' }
+}
+
+const SHARED = new Set(nameParts.sharedFamilies as string[])
+
+/** Is this family name worn by more than one man in the archive? (Folded; see the drift guard in tests.) */
+export function isSharedFamily(familyHe: string): boolean {
+  return SHARED.has(fold(familyHe))
+}
+
+/**
+ * The name a COMPACT surface prints (a pitch chip, a rail card, a stamp).
+ *
+ * The family name where it is his alone — `סיני`, `בן דיין`, `דה סילבה` — and the FULL name
+ * where anybody else shares it: fifteen Cohens must never read as fifteen `כהן`. Decided over
+ * the whole archive, never guessed per screen, so the same man prints the same on every surface.
+ */
+export function compactName(nameHe: string): string {
+  const { familyHe } = splitName(nameHe)
+  return isSharedFamily(familyHe) ? nameCore(nameHe) : familyHe
 }
 
 export type Searchable = {
@@ -245,6 +279,8 @@ function scoreName(nameHe: string, familyHe: string, givenHe: string, folded: st
   if (family === folded) return 100
   if (family.startsWith(folded)) return 90
   if (given.startsWith(folded)) return 70
+  // the last word of a compound family: 'דיין' finds בן דיין, one step under the full surname
+  if (family.split(' ').some((word) => word === folded)) return 85
   if (family.includes(folded)) return 50
   // any word in the name starting with the term — catches a two-word family name
   if (whole.split(' ').some((word) => word.startsWith(folded))) return 40

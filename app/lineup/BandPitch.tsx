@@ -8,7 +8,7 @@ import { ShirtToken } from '@/components/stage/ShirtToken'
 import { PlayerShirt } from '@/components/stage/PlayerShirt'
 import { dropZone, useDragSource } from '@/components/stage/useDrag'
 import { Num } from '@/components/ui/Num'
-import { splitName } from '@/lib/game/roster-search'
+import { splitName, compactName } from '@/lib/game/roster-search'
 import { LINES, type Line, type PlacementStatus } from '@/lib/game/lineup-sheet'
 import type { KitSpec } from '@/lib/kit/spec'
 import type { ShirtLook } from '@/lib/kit/playerShirt'
@@ -154,7 +154,7 @@ function Man({
   active: boolean
   onTap?: (playerId: string) => void
 }) {
-  const family = splitName(man.nameHe).familyHe
+  const family = compactName(man.nameHe)
   const body = (
     <span className={`flex flex-col items-center gap-0.5 ${man.ghost ? '' : 'animate-slam-solid'}`}>
       <span
@@ -322,7 +322,7 @@ function ManToken({
   onTap: (playerId: string) => void
   onDrop: (line: Line, payload: string) => void
 }) {
-  const family = splitName(man.nameHe).familyHe
+  const family = compactName(man.nameHe)
   const drag = useDragSource({
     payload: `man:${man.playerId}`,
     onDrop: (zone) => {

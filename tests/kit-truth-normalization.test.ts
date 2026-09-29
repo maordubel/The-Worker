@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { dealKitRound, gradeKitField, gradeKitPuzzle } from '@/lib/game/kitBuild'
 import { STEP_ORDER, type KitStep } from '@/lib/game/kit-build-run'
-import { kitRecord, playableKits, type KitMasterRecord } from '@/lib/kit/kit-master'
+import { kitRecord, kitRecords, playableKits, type KitMasterRecord } from '@/lib/kit/kit-master'
 import { canonMaker, canonSponsor, colourFamily, judge, sameColour } from '@/lib/kit/truth'
 
 /**
@@ -62,7 +62,8 @@ describe('field-level grading on real shirts', () => {
   })
 
   it('2008/09: the maker is umbro however it is written, and the sponsor is judged apart', () => {
-    const kit = playableKits().find((row) => row.id === 'kit-2008-09-home')!
+    // held out of gate 4 by an open period-variant dispute, but its fields still grade
+    const kit = kitRecords().find((row) => row.id === 'kit-2008-09-home')!
     for (const spelling of ['umbro', 'UMBRO', 'Umbro', 'אמברו']) {
       expect(gradeKitField(kit, { makerHe: spelling }, 'maker').ok, spelling).toBe(true)
       expect(gradeKitField(kit, { sponsorHe: spelling }, 'sponsor').ok, spelling).toBe(true)
