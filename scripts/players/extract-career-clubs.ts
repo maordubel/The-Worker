@@ -35,7 +35,8 @@ async function main() {
   const seen = new Set<string>()
   for (const page of pages) {
     const text = page.revisions[0]?.slots.main.content ?? ''
-    const m = text.match(/\n\|\s*מועדונים\s*=(.*?)(?=\n\|[^\n=]{1,30}=|\n\}\})/s)
+    // two spellings of the field occur across the wiki's templates: `מועדונים` and `מועדונים כשחקן`
+    const m = text.match(/\n\|\s*מועדונים(?: כשחקן)?\s*=(.*?)(?=\n\|[^\n=]{1,30}=|\n\}\})/s)
     if (!m) continue
     let raw = m[1]!.trim()
     if (!raw || raw === '-') continue
