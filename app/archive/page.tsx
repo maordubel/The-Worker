@@ -4,6 +4,7 @@ import { ArchiveApp } from '@/components/archive/ArchiveApp'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { SongLine } from '@/components/voice/SongLine'
 import { Screen } from '@/components/ui/Screen'
+import { playerCensus } from '@/lib/club/census'
 import { decades } from '@/lib/archive/graph'
 import { archiveFigures, detailOf, kitShelf, longDateHe, todayDecks } from '@/lib/archive/wing'
 import { todayInIsrael } from '@/lib/date/israel'
@@ -51,6 +52,7 @@ export default function ArchivePage({
         cursor={round.cursor}
         initial={initial}
         shelf={shelf}
+        census={playerCensus()}
         atMissing={at !== null && initial === null}
         figures={t('archive.figures', {
           columns: String(figures.columns),

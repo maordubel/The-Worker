@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition, type ReactNode } from 'react'
 
+import { PlayerCensus } from '@/components/club/PlayerCensus'
 import { RecordRun } from '@/components/play/RecordRun'
+import { SlideSheet } from '@/components/stage/SlideSheet'
+import type { Census } from '@/lib/club/census'
 import { firePickFx } from '@/components/stage/PickFx'
 import { Num } from '@/components/ui/Num'
 import { describeIds, digBox, openEntity, rabbit, searchArchive, seasonDeck } from '@/app/archive/actions'
@@ -65,6 +68,7 @@ export function ArchiveApp({
   report,
   song,
   shelf,
+  census,
 }: {
   decks: Record<TodayChip, ArchiveCard[]>
   todayHe: string
@@ -80,7 +84,10 @@ export function ArchiveApp({
   song?: ReactNode
   /** Gate 5's "full collection" (`/archive?show=kits`): every canonical kit, opened as the deck */
   shelf?: ArchiveCard[]
+  /** how many men wore the shirt, counted from the Player Master — the plate the landing opens */
+  census?: Census
 }) {
+  const [censusOpen, setCensusOpen] = useState(false)
   const firstChip = decks.today.length ? 'today' : 'know'
   const [chip, setChip] = useState<TodayChip | null>(shelf && shelf.length > 0 ? null : firstChip)
   const [deck, setDeck] = useState<ArchiveCard[]>(shelf && shelf.length > 0 ? shelf : decks[firstChip])
@@ -484,6 +491,30 @@ export function ArchiveApp({
           </p>
         )}
       </section>
+
+      {census && (
+        <button
+          type="button"
+          data-archive="census-open"
+          onClick={() => setCensusOpen(true)}
+          className="museum-stage mt-1.5 flex min-h-tap shrink-0 items-center justify-between gap-3 border-rule border-ink px-3 text-paper"
+        >
+          <span className="font-poster text-[26px] leading-none" dir="ltr">
+            <Num>{census.total}</Num>
+          </span>
+          <span className="min-w-0 flex-1 truncate text-start font-body text-[13px] font-extrabold">{t('census.title')}</span>
+          <span aria-hidden="true">←</span>
+        </button>
+      )}
+      {census && (
+        <SlideSheet open={censusOpen} onClose={() => setCensusOpen(false)} title={t('census.kicker')} latin="EVERY NAME" size="auto">
+          <PlayerCensus census={census} compact />
+          <a href="/hapoel#club-players" className="mt-2 flex min-h-tap items-center justify-between border-rule border-ink bg-sheet px-3 font-body text-[14px] font-extrabold text-ink">
+            <span>{t('census.allNames')}</span>
+            <span aria-hidden="true" className="text-red">←</span>
+          </a>
+        </SlideSheet>
+      )}
 
       <p className="mt-1.5 shrink-0 truncate border-t-hair border-ink/30 pt-1.5 font-body text-[10px] leading-relaxed text-muted [@media(max-height:700px)]:hidden md:mt-stack md:!block md:whitespace-normal md:pt-2 md:text-[11px]">
         {figures} <span className="font-mono text-[9px] tabular-nums"><Num>{`#${seed}·${cursor}`}</Num></span>

@@ -2,6 +2,7 @@ export type RoyalRumbleMessageKey = keyof typeof COPY
 
 const COPY = {
   title: 'רויאל ראמבל',
+  moneyLeft: 'נשאר בקופה',
   description: 'בנה חמישיית הפועל בתקציב מוגבל, חשוף את היריבה וצא לקרב 5 על 5.',
   sub: '5 נגד 5 · תקציב 15 מיליון · הציון האמיתי נשאר סודי',
   goalkeeper: 'שוער', defence: 'הגנה', midfield: 'קישור', attack: 'התקפה',

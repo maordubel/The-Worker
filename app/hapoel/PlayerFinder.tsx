@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 import { Num } from '@/components/ui/Num'
@@ -135,7 +136,8 @@ function PlayerRow({ entry }: { entry: Searchable }) {
       : null
 
   return (
-    <li className="flex items-baseline gap-2 border-b-hair border-ink/20 py-2">
+    <li className="border-b-hair border-ink/20">
+     <Link href={`/archive?at=${encodeURIComponent(entry.slug)}`} className="flex min-h-tap items-baseline gap-2 py-2">
       <span className="font-sign text-step-0 leading-tight text-ink">{entry.familyHe}</span>
       {entry.givenHe !== '' && (
         <span className="min-w-0 truncate font-body text-[12px] leading-tight text-muted">
@@ -155,6 +157,7 @@ function PlayerRow({ entry }: { entry: Searchable }) {
           </span>
         )}
       </span>
+     </Link>
     </li>
   )
 }
