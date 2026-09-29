@@ -2,6 +2,7 @@ import 'server-only'
 
 import { archive } from '../../archive'
 import { fact, sourceOf, stripThe, type Draft, type Template } from '../draft'
+import { CLUB } from '@/lib/club/context'
 
 /**
  * הלילות האירופיים — the European record read as TIES rather than fixtures: a two-legged
@@ -35,7 +36,7 @@ export const EUROPE_TEMPLATES: Template[] = [
           legacyKey: `euro-opponent:${tie.slug}`,
           template: 'euro-opponent',
           type: 'mcq',
-          prompt: `מול מי שיחקה הפועל תל אביב ב${stripThe(tie.stageHe)} של ${tie.competitionHe}, עונת ${tie.seasonLabel}?`,
+          prompt: `מול מי שיחקה ${CLUB.names.he} ב${stripThe(tie.stageHe)} של ${tie.competitionHe}, עונת ${tie.seasonLabel}?`,
           answer: tie.opponentHe,
           pool: opponents,
           source: sourceOf(tie),
@@ -59,7 +60,7 @@ export const EUROPE_TEMPLATES: Template[] = [
           legacyKey: `euro-round:${tie.slug}`,
           template: 'euro-round',
           type: 'mcq',
-          prompt: `באיזה שלב פגשה הפועל תל אביב את ${tie.opponentHe} בעונת ${tie.seasonLabel}?`,
+          prompt: `באיזה שלב פגשה ${CLUB.names.he} את ${tie.opponentHe} בעונת ${tie.seasonLabel}?`,
           answer: tie.stageHe,
           pool: stages,
           source: sourceOf(tie),
@@ -84,7 +85,7 @@ export const EUROPE_TEMPLATES: Template[] = [
           legacyKey: `euro-season:${tie.slug}`,
           template: 'euro-season',
           type: 'year',
-          prompt: `באיזו עונה שיחקה הפועל תל אביב מול ${tie.opponentHe} ב${stripThe(tie.competitionHe)}?`,
+          prompt: `באיזו עונה שיחקה ${CLUB.names.he} מול ${tie.opponentHe} ב${stripThe(tie.competitionHe)}?`,
           answer: tie.seasonLabel,
           pool: seasons,
           source: sourceOf(tie),
@@ -143,7 +144,7 @@ export const EUROPE_TEMPLATES: Template[] = [
             legacyKey: `euro-venue:${tie.slug}`,
             template: 'euro-venue',
             type: 'mcq',
-            prompt: `איפה שיחקה הפועל תל אביב את משחק ה"בית" מול ${tie.opponentHe} בעונת ${tie.seasonLabel}?`,
+            prompt: `איפה שיחקה ${CLUB.names.he} את משחק ה"בית" מול ${tie.opponentHe} בעונת ${tie.seasonLabel}?`,
             answer: tie.homeAbroadHe as string,
             pool: places,
             source: sourceOf(tie),

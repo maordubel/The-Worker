@@ -39,3 +39,10 @@ Generated files (`content/generated/*`) are a build of the above; a second club 
 
 ## 5 · Rules from this session that already comply
 Recognition weight, prices and the other-clubs clue derive from data (`player-prices.json`, `player-league-appearances.json`, `player-career-clubs.json`); a missing field stays null and the clue is not built. The Royal Rumble price list remains hand-set for Hapoel and must be a per-club input.
+
+## 6 · Done on 29.9.2026 (non-breaking; generated files byte-identical)
+1. **ClubContext** — `content/clubs/<id>/club.json` (manifest) + `lib/club/context.ts` (`CLUB`, `CLUBS`, `hasModule`, `fillClub` with `{club} {short} {city} {founded}`). The 25 question prompts in `lib/game/questions/templates/*` and the share-card club line now read it. `tests/club-context.test.ts` ties it to `clubs.json` (identity, derby rival — rule 13).
+5. **Modules** — `modules` list in the manifest and `hasModule()`; nothing gated yet (all on for Hapoel), so behaviour is unchanged.
+4. **Source adapter contract** — `scripts/ingest/adapter.ts` (`ClubSourceAdapter`, `AdapterResult` with `skipped`/`blocked`, rules 2/6/11).
+6. **Ratchet guard** — `tests/club-agnostic.test.ts` + `tests/fixtures/club-literals-baseline.json` (19 files, 75 lines of literals in shared dirs). New literals fail the build; retiring one lowers the number.
+Not done (needs a decision or an owner step): `club_id` on `worker_*` tables (touches the shared Supabase project, an owner-run migration); `{club}` message keys with an English locale (the prompts still build Hebrew in code); moving `content/manual` under `content/clubs/<id>/` (a large path change across ~100 readers).

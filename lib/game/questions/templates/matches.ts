@@ -6,6 +6,7 @@ import { DERBY_RIVAL, US, archive, footballPeople, nameOf, opponentOf } from '..
 import { matchConflict } from '../conflicts'
 import { fact, sourceOf, type Draft, type Template } from '../draft'
 import type { QTopic } from '../types'
+import { CLUB } from '@/lib/club/context'
 
 /**
  * המשחקים — 3,063 fixtures, and the three things the old bank got wrong about them.
@@ -170,7 +171,7 @@ export const MATCH_TEMPLATES: Template[] = [
             legacyKey: `score:${row.seasonLabel}:${row.homeClubSlug}:${row.awayClubSlug}`,
             template: 'score',
             type: 'mcq',
-            prompt: `כמה שערים הבקיעה הפועל תל אביב ${homeAway} מול ${nameOf.club(opponentOf(row))} — ${where(row)}?`,
+            prompt: `כמה שערים הבקיעה ${CLUB.names.he} ${homeAway} מול ${nameOf.club(opponentOf(row))} — ${where(row)}?`,
             answer: String(ours),
             pool: ['0', '1', '2', '3', '4', '5'],
             source: sourceOf(row),
