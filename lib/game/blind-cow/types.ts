@@ -27,6 +27,7 @@ export type ClueType =
   | 'moment'
   | 'stat'
   | 'song'
+  | 'club'
 
 /** A — identity · B — career at the club · C — achievements · D — match · E — goal/moment · F — stat · G — the terrace (his song's tune) */
 export type ClueFamily = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G'

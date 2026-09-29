@@ -41,9 +41,12 @@ export function readInputs(previous: BlindCowBank | null = readBank()): BuildInp
     }
   }
   const prices = new Map(Object.entries(JSON.parse(read('content/generated/player-prices.json')).prices as Record<string, number>))
-  const appearances = new Map(
-    (JSON.parse(read('content/manual/player-appearances.json')).records as { playerId: string; appearances: number }[]).map((r) => [r.playerId, r.appearances]),
-  )
+  // Two documented counts, each a lower bound of the real career total: the infobox `הופעות`
+  // and the wiki's league-appearance table. The larger is the better lower bound.
+  const appearances = new Map<string, number>()
+  const lift = (id: string, n: number) => appearances.set(id, Math.max(appearances.get(id) ?? 0, n))
+  for (const r of JSON.parse(read('content/manual/player-appearances.json')).records as { playerId: string; appearances: number }[]) lift(r.playerId, r.appearances)
+  for (const r of JSON.parse(read('content/manual/player-league-appearances.json')).records as { playerId: string; leagueAppearances: number }[]) lift(r.playerId, r.leagueAppearances)
   const recognition = buildRecognition(
     (pm.players as { id: string; slug: string; kind: string }[])
       .filter((p) => p.kind === 'player' && prices.has(p.slug))
@@ -52,10 +55,14 @@ export function readInputs(previous: BlindCowBank | null = readBank()): BuildInp
   const songTunes = new Map(
     (JSON.parse(read('content/manual/player-song-tunes.json')).records as { playerId: string; tuneHe: string }[]).map((r) => [r.playerId, r.tuneHe]),
   )
+  const careerClubs = new Map(
+    (JSON.parse(read('content/manual/player-career-clubs.json')).records as { playerId: string; clubs: string[] }[]).filter((r) => r.clubs.length).map((r) => [r.playerId, r.clubs] as const),
+  )
   return {
     players: pm.players,
     recognition,
     songTunes,
+    careerClubs,
     matches: mm.matches,
     moments: mm.moments,
     teamNames,

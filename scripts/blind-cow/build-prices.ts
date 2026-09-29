@@ -4,7 +4,6 @@ import { join } from 'node:path'
 import './inputs'
 import { ROOT } from './inputs'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const engine = require('../../lib/game/royal-rumble') as typeof import('@/lib/game/royal-rumble')
 const prices: Record<string, number> = {}
 for (const p of engine.royalRumbleAuditView().players) prices[p.slug] = p.price
