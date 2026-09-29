@@ -2285,6 +2285,24 @@
    ],
    "confidence": 2,
    "noteHe": "תאום PNG קטן (עד 320×320, 128 צבעים) לכל אחד מ-168 תצלומי החולצות, בשביל כרטיסי השיתוף של שער 8 — מנוע ה-OG לא קורא WebP. אותם פיקסלים של הארכיון, מוקטנים; בלי ציון צבע ובלי הסרת צהוב (החריג של public/kits/). נבנה מחדש ב-scripts/og/kit-thumbs.py."
+  },
+  {
+   "key": "gate-arena-logos",
+   "kind": "logo",
+   "origin": "owner-upload",
+   "folder": "public/brand/gates",
+   "match": [
+    "*.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "ידע אישי — צוות The Worker, 29.9.2026 (סמל פרה עיוורת, סמל רויאל ראמבל)",
+   "treatment": [
+    "resize",
+    "yellow-clean",
+    "encode-webp-lossless"
+   ],
+   "confidence": 2,
+   "noteHe": "שני הסמלים של שערים 9 ו-10, ציור של הבעלים על רקע שחור. הוקטנו ל-1200px, נוקו מצהוב, והרקע השחור הוסר לשקיפות אמיתית (RGBA), וקודדו WebP חסר אובדן — הצהוב נמדד על הפענוח (0 פיקסלים, lib/isYellow.ts). מוצגים בתוך שערים 9 ו-10 בלבד."
   }
  ]
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { GateLogo } from '@/components/gates/GateLogo'
 import { useEffect, useMemo, useState, type MouseEvent } from 'react'
 
 import { RecordRun } from '@/components/play/RecordRun'
@@ -976,6 +977,7 @@ function RoyalRumbleRunInner({
 
       <SlideSheet open={rulesOpen} onClose={() => setRulesOpen(false)} title={t('stageRulesTitle')} latin="RULES">
         <div className="flex flex-col gap-3">
+          <div className="bc-stage flex justify-center border-rule border-ink"><GateLogo logo="royal-rumble" className="h-[110px] w-auto" /></div>
           <p className="font-body text-[13px] leading-relaxed text-ink">{t('heroBody')}</p>
           <div className="grid gap-2">
             <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('rulePrice')}</p>
