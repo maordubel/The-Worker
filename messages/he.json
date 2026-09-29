@@ -978,5 +978,10 @@
   "hapoel.archiveDoor": "משחקים, שחקנים, שערים ועיתונות",
   "hapoel.archiveDoor.go": "לארכיון החי",
   "hapoel.kitsDoor": "האוסף המלא בארכיון · {n} חולצות",
-  "census.allNames": "כל השמות במוזיאון"
+  "census.allNames": "כל השמות במוזיאון",
+  "gate.logo.blindcow": "הסמל של פרה עיוורת — פרה עם כיסוי עיניים אדום",
+  "gate.logo.rumble": "הסמל של רויאל ראמבל — כוכב אדום, יציע ודגלים",
+  "arena.skip": "הקש כדי להיכנס",
+  "arena.line.cow": "BLIND COW · WEST STAND",
+  "arena.line.rumble": "ROYAL RUMBLE · ENTER THE ARENA"
 }

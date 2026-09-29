@@ -1,5 +1,6 @@
 'use client'
 
+import { GateLogo } from '@/components/gates/GateLogo'
 import { useState } from 'react'
 
 import type { RoyalRumbleDraft } from '@/lib/game/royal-rumble'
@@ -40,6 +41,9 @@ export function RoyalRumbleMode({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col md:block md:flex-none">
+      <div data-rumble="marquee" className="bc-stage mx-auto mb-1.5 flex w-full max-w-5xl shrink-0 justify-center overflow-hidden border-rule border-ink [@media(max-height:680px)]:hidden md:mb-2">
+        <GateLogo logo="royal-rumble" className="h-[84px] w-auto sm:h-[120px]" />
+      </div>
       {mode === 'solo' && <LivedRumbleDoor />}
       <nav
         className="mx-auto mb-1.5 grid max-w-5xl shrink-0 grid-cols-2 border-rule border-ink bg-paper md:mb-2"

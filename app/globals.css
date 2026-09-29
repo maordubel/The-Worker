@@ -1527,3 +1527,29 @@ select {
     radial-gradient(rgb(var(--paper) / 0.07) 0.9px, transparent 1.2px);
   background-size: auto, 7px 7px;
 }
+
+/* ARENA ENTRANCE — begin (gates 9 and 10, 29.9.2026)
+   The tunnel walk: an ink plate, a vermilion beam that sweeps once, the logo rising out of the
+   dark. Shell tokens only. The component is not even mounted under reduced motion; the guard
+   below is for the case where the preference flips while it plays. */
+.arena-entrance { background-image: radial-gradient(ellipse 80% 55% at 50% 50%, rgb(var(--red) / 0.28), transparent 70%); }
+.arena-beam {
+  background: linear-gradient(100deg, transparent 38%, rgb(var(--paper) / 0.14) 50%, transparent 62%);
+  transform: translateX(-120%);
+  animation: arenaBeam 1.5s 0.25s cubic-bezier(.2,.7,.2,1) forwards;
+}
+.arena-logo { opacity: 0; transform: scale(0.8); filter: blur(6px); animation: arenaRise 0.9s 0.3s cubic-bezier(.16,1,.3,1) forwards; }
+.arena-entrance-rumble .arena-logo { transform: scale(1.25); }
+.arena-line { opacity: 0; animation: arenaFade 0.6s 1.1s ease-out forwards; }
+.arena-scarf { height: 22%; background: repeating-linear-gradient(90deg, rgb(var(--red)) 0 28px, rgb(var(--paper)) 28px 56px); opacity: 0.9; }
+.arena-scarf-a { top: 6%; transform: translateX(-110%); animation: arenaScarfIn 0.7s 0.1s cubic-bezier(.2,.8,.2,1) forwards; }
+.arena-scarf-b { bottom: 6%; transform: translateX(110%); animation: arenaScarfIn 0.7s 0.2s cubic-bezier(.2,.8,.2,1) forwards; }
+@keyframes arenaBeam { to { transform: translateX(120%); } }
+@keyframes arenaRise { to { opacity: 1; transform: scale(1); filter: blur(0); } }
+@keyframes arenaFade { to { opacity: 1; } }
+@keyframes arenaScarfIn { to { transform: translateX(0); opacity: 0.16; } }
+@media (prefers-reduced-motion: reduce) {
+  .arena-beam, .arena-scarf { animation: none; display: none; }
+  .arena-logo, .arena-line { animation: none; opacity: 1; transform: none; filter: none; }
+}
+/* ARENA ENTRANCE — end */

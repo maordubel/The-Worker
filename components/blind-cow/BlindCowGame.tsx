@@ -28,6 +28,7 @@ import {
 } from '@/app/blind-cow/actions'
 
 import { ClueStack } from './ClueStack'
+import { GateLogo } from '@/components/gates/GateLogo'
 import { CowMark } from './CowMark'
 import { GuessDrawer } from './GuessDrawer'
 import { LiveRoom } from './LiveRoom'
@@ -457,7 +458,9 @@ export function BlindCowGame({
           <p className="font-latin text-[10px] font-bold tracking-[0.22em] text-red" dir="ltr">
             {t('blindcow.latin.duel')}
           </p>
-          <CowMark className="text-[88px] [@media(max-height:680px)]:text-[60px]" />
+          <div className="bc-stage flex w-full max-w-[420px] justify-center border-rule border-ink px-3 py-2">
+            <GateLogo logo="blind-cow" className="w-[min(100%,300px)]" />
+          </div>
           <p className="font-display text-[28px] leading-none text-ink">
             {duel?.joined ? t('blindcow.duel.title') : t('blindcow.duel.invited')}
           </p>
@@ -587,7 +590,7 @@ export function BlindCowGame({
         <p className="relative font-latin text-[10px] font-bold tracking-[0.22em] text-paper/70" dir="ltr">
           {t('blindcow.latin.gate')}
         </p>
-        <CowMark dark className="text-[min(40vw,150px)] [@media(max-height:680px)]:text-[84px]" />
+        <GateLogo logo="blind-cow" className="relative w-[min(92%,440px)] [@media(max-height:680px)]:w-[min(78%,300px)]" />
         <h2 className="relative font-display text-[36px] leading-none text-paper [@media(max-height:680px)]:text-[28px]">{t('blindcow.lobby.title')}</h2>
         <p className="relative max-w-[30ch] font-body text-[13.5px] leading-snug text-paper/85">{t('blindcow.lobby.lede')}</p>
         <p className="relative border-t-hair border-paper/30 pt-1 font-mono text-[11px] tabular-nums text-concrete">{t('blindcow.lobby.count', { n: String(bankSize) })}</p>

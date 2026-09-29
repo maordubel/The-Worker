@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 
+import { ArenaEntrance } from '@/components/gates/ArenaEntrance'
 import { BlindCowGame } from '@/components/blind-cow/BlindCowGame'
 import { Screen } from '@/components/ui/Screen'
 import { BANK, searchEntries, todayInIsrael } from '@/lib/game/blind-cow/bank'
@@ -55,6 +56,7 @@ export default function BlindCowPage({ searchParams }: { searchParams: { duel?: 
   const token = typeof searchParams.duel === 'string' && /^[0-9a-f]{32}$/.test(searchParams.duel) ? searchParams.duel : null
   return (
     <Screen title={t('screen.blindcow.title')} sub={t('screen.blindcow.sub')} stage>
+      <ArenaEntrance logo="blind-cow" />
       <BlindCowGame
         entries={searchEntries()}
         bankSize={BANK.counts.solo}
