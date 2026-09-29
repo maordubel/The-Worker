@@ -25,7 +25,10 @@ import { SongLine } from '@/components/voice/SongLine'
  * band at the start, the thing itself beside it; from `md` they are three TILES side by
  * side, slot on top, the line under it, the door at the foot.
  */
-export function DailyCard({ daily }: { daily: Daily }) {
+export function DailyCard({ daily, variant = 'full' }: { daily: Daily; variant?: 'compact' | 'full' }) {
+  // compact = the home page's card (owner fix pass, 29.9.2026): today's name, ONE thing to do
+  // now, how far the day got, and a disclosure for the other two. Full = every row at once.
+  const [open, setOpen] = useState(false)
   const [done, setDone] = useState<Set<DailySlot>>(() => new Set())
   const [souvenir, setSouvenir] = useState(false)
   const [closed, setClosed] = useState(false)
@@ -73,6 +76,48 @@ export function DailyCard({ daily }: { daily: Daily }) {
   const recap = recapKey(count)
   const discover = daily.items[2]
 
+  const recapBlock = recap ? (
+        <div className="border-t-hair border-ink/40 px-3 py-2" data-daily="recap">
+          <p className="font-display text-[16px] leading-tight text-ink md:text-[18px]">{t(recap)}</p>
+          {/* §3 — one line from the terrace on the recap, the same song all day */}
+          <SongLine surface="daily" seed={daily.date} className="mt-0.5" />
+          {count === DAILY_SLOTS.length ? (
+            <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-3">
+              <button
+                type="button"
+                disabled={souvenir}
+                onClick={() => {
+                  emit({ type: 'collected', set: 'daily.days', ids: [daily.date] })
+                  updateDay(daily.date, (day) => ({ ...day, souvenir: true }))
+                  setSouvenir(true)
+                }}
+                className="flex min-h-tap items-center justify-center border-rule border-ink bg-red px-3 font-body text-[14px] font-extrabold text-paper disabled:bg-sheet disabled:text-ink"
+              >
+                {souvenir ? t('daily.recap.saved') : t('daily.recap.souvenir')}
+              </button>
+              <Link
+                href={discover.href}
+                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-3 font-body text-[14px] font-extrabold text-ink"
+              >
+                {t('daily.recap.archive')}
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  updateDay(daily.date, (day) => ({ ...day, closed: true }))
+                  setClosed(true)
+                }}
+                className="flex min-h-tap items-center justify-center border-rule border-ink/40 bg-sheet px-3 font-body text-[14px] font-extrabold text-ink"
+              >
+                {t('daily.recap.close')}
+              </button>
+            </div>
+          ) : (
+            <p className="mt-0.5 font-body text-[12px] text-muted">{t('daily.optional')}</p>
+          )}
+        </div>
+      ) : null
+
   if (closed) {
     return (
       <section aria-label={t('daily.title')} data-daily="closed" className="flex items-center justify-between gap-3 border-hair border-ink/40 bg-sheet px-3 py-1.5">
@@ -87,6 +132,40 @@ export function DailyCard({ daily }: { daily: Daily }) {
         >
           {t('daily.reopen')}
         </button>
+      </section>
+    )
+  }
+
+  const compact = variant === 'compact' && !open
+  const current = daily.items.find((item) => !done.has(item.slot)) ?? daily.items[0]
+
+  if (compact) {
+    return (
+      <section aria-labelledby="daily-title" data-daily={daily.theme ? 'theme' : 'rotation'} data-daily-variant="compact" className="border-rule border-ink bg-paper">
+        <header className="flex items-baseline justify-between gap-3 border-b-hair border-ink/40 bg-ink px-3 py-1.5">
+          <h2 id="daily-title" className="font-display text-[17px] leading-tight text-paper">
+            {t('daily.title')}
+          </h2>
+          <p className="shrink-0 font-body text-[12px] font-extrabold text-paper" aria-live="polite">
+            {t('daily.progress', { n: String(count) })}
+          </p>
+        </header>
+        {daily.theme && (
+          <p className="border-b-hair border-ink/40 bg-sheet px-3 py-1 font-body text-[11.5px] font-extrabold text-red">
+            {t('daily.theme.kicker')} · <bdi>{daily.theme.subjectHe}</bdi>
+          </p>
+        )}
+        <DailyRow item={current} done={done.has(current.slot)} showAgo={!daily.theme} compact />
+        <button
+          type="button"
+          aria-expanded={false}
+          onClick={() => setOpen(true)}
+          className="flex min-h-tap w-full items-center justify-between gap-2 border-t-hair border-ink/40 bg-sheet px-3 font-body text-[13px] font-extrabold text-ink"
+        >
+          <span>{t('daily.more')}</span>
+          <span aria-hidden="true">↓</span>
+        </button>
+        {count === DAILY_SLOTS.length && recapBlock}
       </section>
     )
   }
@@ -136,52 +215,23 @@ export function DailyCard({ daily }: { daily: Daily }) {
         ))}
       </ol>
 
-      {recap && (
-        <div className="border-t-hair border-ink/40 px-3 py-2" data-daily="recap">
-          <p className="font-display text-[16px] leading-tight text-ink md:text-[18px]">{t(recap)}</p>
-          {/* §3 — one line from the terrace on the recap, the same song all day */}
-          <SongLine surface="daily" seed={daily.date} className="mt-0.5" />
-          {count === DAILY_SLOTS.length ? (
-            <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-3">
-              <button
-                type="button"
-                disabled={souvenir}
-                onClick={() => {
-                  emit({ type: 'collected', set: 'daily.days', ids: [daily.date] })
-                  updateDay(daily.date, (day) => ({ ...day, souvenir: true }))
-                  setSouvenir(true)
-                }}
-                className="flex min-h-tap items-center justify-center border-rule border-ink bg-red px-3 font-body text-[14px] font-extrabold text-paper disabled:bg-sheet disabled:text-ink"
-              >
-                {souvenir ? t('daily.recap.saved') : t('daily.recap.souvenir')}
-              </button>
-              <Link
-                href={discover.href}
-                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-3 font-body text-[14px] font-extrabold text-ink"
-              >
-                {t('daily.recap.archive')}
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  updateDay(daily.date, (day) => ({ ...day, closed: true }))
-                  setClosed(true)
-                }}
-                className="flex min-h-tap items-center justify-center border-rule border-ink/40 bg-sheet px-3 font-body text-[14px] font-extrabold text-ink"
-              >
-                {t('daily.recap.close')}
-              </button>
-            </div>
-          ) : (
-            <p className="mt-0.5 font-body text-[12px] text-muted">{t('daily.optional')}</p>
-          )}
-        </div>
+      {recapBlock}
+      {variant === 'compact' && (
+        <button
+          type="button"
+          aria-expanded
+          onClick={() => setOpen(false)}
+          className="flex min-h-tap w-full items-center justify-between gap-2 border-t-hair border-ink/40 bg-sheet px-3 font-body text-[13px] font-extrabold text-ink"
+        >
+          <span>{t('daily.less')}</span>
+          <span aria-hidden="true">↑</span>
+        </button>
       )}
     </section>
   )
 }
 
-function DailyRow({ item, done, showAgo }: { item: DailyItem; done: boolean; showAgo: boolean }) {
+function DailyRow({ item, done, showAgo, compact = false }: { item: DailyItem; done: boolean; showAgo: boolean; compact?: boolean }) {
   const line = item.promptKey ? t(item.promptKey, item.promptVars ?? undefined) : item.subjectHe
   const ago = showAgo && item.yearsAgo !== null && item.yearsAgo > 0 ? agoKey(item.yearsAgo) : null
   return (
@@ -198,7 +248,7 @@ function DailyRow({ item, done, showAgo }: { item: DailyItem; done: boolean; sho
           done ? 'bg-ink text-paper' : 'bg-red text-paper'
         }`}
       >
-        <span>{t(SLOT_KEY[item.slot])}</span>
+        <span>{compact && !done ? t('daily.now') : t(SLOT_KEY[item.slot])}</span>
         <span aria-hidden="true" className="hidden md:inline">
           {done ? '●' : '○'}
         </span>

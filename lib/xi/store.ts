@@ -31,7 +31,7 @@
 import { todayInIsrael } from '@/lib/date/israel'
 import { ownerSpelling } from '@/lib/canon/spelling'
 import type { Formation } from '@/lib/game/lineup'
-import { isChallenge, type ChallengeId } from './challenge'
+import { cleanDecades, isChallenge, type ChallengeId } from './challenge'
 
 const KEY = 'worker.xi.v1'
 
@@ -66,6 +66,8 @@ export type SavedXI = {
   shortlist?: string[]
   /** the rule the sheet is being built under (`lib/xi/challenge.ts`); absent = free */
   challenge?: ChallengeId
+  /** the decades of a decade mission (`challenge: 'span'`); absent otherwise */
+  decades?: number[]
   /**
    * The Manager Prompt this sheet accepted (`lib/xi/prompt.ts`): the seed and cursor that dealt
    * it, so the share link can hand the SAME prompt over — never the picks. Absent = none.
@@ -145,6 +147,7 @@ export class LocalXIStore implements XIStore {
             ? sheet.shortlist.filter((slug): slug is string => typeof slug === 'string')
             : [],
           ...(isChallenge(sheet.challenge) ? { challenge: sheet.challenge } : {}),
+          ...(cleanDecades(sheet.decades).length > 0 ? { decades: cleanDecades(sheet.decades) } : {}),
           ...(promptOf(sheet.prompt) ? { prompt: promptOf(sheet.prompt) as { seed: number; cursor: number } } : {}),
           ...(Array.isArray(sheet.forbidden)
             ? { forbidden: sheet.forbidden.filter((id): id is string => typeof id === 'string').slice(0, 5) }
@@ -214,6 +217,7 @@ export function restore(
   cut: string | null
   shortlist: string[]
   challenge: ChallengeId
+  decades: number[]
   prompt: { seed: number; cursor: number } | null
   forbidden: string[]
 } | null {
@@ -244,6 +248,7 @@ export function restore(
     cut: sheet.cut ?? null,
     shortlist: sheet.shortlist ?? [],
     challenge: sheet.challenge ?? 'free',
+    decades: cleanDecades(sheet.decades),
     prompt: sheet.prompt ?? null,
     forbidden: sheet.forbidden ?? [],
   }
@@ -326,6 +331,7 @@ export function migrateSheet(sheet: SavedXI, resolve: RefResolver): { sheet: Sav
       ...(cut !== undefined ? { cut } : {}),
       shortlist,
       ...(sheet.challenge !== undefined ? { challenge: sheet.challenge } : {}),
+      ...(cleanDecades(sheet.decades).length > 0 ? { decades: cleanDecades(sheet.decades) } : {}),
       ...(sheet.prompt ? { prompt: sheet.prompt } : {}),
       ...(sheet.forbidden
         ? { forbidden: sheet.forbidden.map((ref) => one(ref)).filter((id): id is string => typeof id === 'string') }

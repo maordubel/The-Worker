@@ -7,7 +7,8 @@ import { t as rumbleText } from '@/lib/royal-rumble/i18n'
 import { voiceAction } from '@/lib/voice'
 
 import { archive } from './archive'
-import { ROYAL_RUMBLE_PRICE_OVERRIDES } from './royal-rumble-prices'
+import { ROYAL_RUMBLE_CANONICAL_FIVES, ROYAL_RUMBLE_FIVE_COUNT, ROYAL_RUMBLE_PRICE_OVERRIDES } from './royal-rumble-prices'
+import { eraOf, rateAll, type RatingConfidence, type RatingEvidence, type RatingFactors } from './royal-rumble-rating'
 import {
   formationOf,
   minimumCompletionCost,
@@ -110,18 +111,21 @@ export function priceForRating(rating: number): RoyalRumblePrice {
   return 1
 }
 
-/** the pool-wide target (§10) as cumulative shares — €1 15% · €2 25% · €3 30% · €4 20% · €5 10% */
-const PRICE_CUMULATIVE: readonly number[] = [0.15, 0.4, 0.7, 0.9, 1]
+/**
+ * The AUTOMATED ladder as cumulative shares — €1 15% · €2 25% · €3 32% · €4 28% (V3). It stops
+ * at €4 on purpose: €5 is the ten canonical players and nothing a percentile can reach, so no
+ * rebalance can ever mint an eleventh. €4 is the large elite tier.
+ */
+const PRICE_CUMULATIVE: readonly number[] = [0.15, 0.4, 0.72, 1]
+
+/** the floor of the elite tier: below this hidden rating a man is never an automated €4 */
+export const MIN_RATING_FOR_FOUR = 45
 
 function priceForPercentile(percentile: number): RoyalRumblePrice {
   for (let tier = 0; tier < PRICE_CUMULATIVE.length; tier += 1) {
     if (percentile < (PRICE_CUMULATIVE[tier] ?? 1)) return (tier + 1) as RoyalRumblePrice
   }
-  return 5
-}
-
-function clampRating(value: number): number {
-  return Math.max(9, Math.min(99, Math.round(value)))
+  return 4
 }
 
 /**
@@ -168,16 +172,12 @@ export type RoyalRumbleEvidence = {
 }
 
 /**
- * Historical rating V2 (spec §11).
- *
- * V1 was evidence-driven but leaned on longevity and on how densely the archive happens
- * to document a decade. V2 keeps every input and moves the weight: continuity ~25,
- * documented impact ~30 (scorer rows scaled by position — a defender's goal is worth a
- * striker's three), honours ~18, supporter legacy ~12, big moments ~12, a small position
- * correction, and the private ±2. Sparse older sources are never filled by guessing —
- * that is what the canonical overrides are for.
+ * The evidence of one man and his FAME (the market's reading, which sets the price ladder).
+ * The hidden RATING is no longer computed here: it is `rateAll` in `royal-rumble-rating.ts`,
+ * position-normalized over the whole pool (Gate 9 V3). Fame keeps its V2 shape — the years,
+ * the honours and the songs — so price and rating stay two readings of the same evidence.
  */
-function historicalRating(player: PlayerMasterRecord, position: Position): { rating: number; fame: number; evidence: RoyalRumbleEvidence } {
+function evidenceOf(player: PlayerMasterRecord, position: Position): { fame: number; evidence: RoyalRumbleEvidence; input: RatingEvidence } {
   const names = namesOf(player)
   const slugs = [player.slug, ...player.slugAliases]
   const spellSeasons = player.spells.reduce((sum, spell) => sum + spell.seasons.length, 0)
@@ -194,30 +194,13 @@ function historicalRating(player: PlayerMasterRecord, position: Position): { rat
   const moments = countRecordedBigMoments(slugs, names)
 
   const goalScale = position === 'FW' ? 0.55 : position === 'MF' ? 0.85 : position === 'DF' ? 1.6 : 0
-  // impact is a RATE as much as a total: fifty goals in four seasons is a peak, thirty in
-  // thirteen is a career — the rating honours the peak, the price (fame, below) the career
-  const goalsPerSeason = seasons > 0 ? goals / seasons : 0
-  const longevity = Math.min(18, seasons * 2)
-  const impact = Math.min(36, goalsPerSeason * goalScale * 3.6 + Math.min(10, goals * goalScale * 0.3) + Math.min(6, lineups * 2))
-  const honours = Math.min(16, titles * 4)
-  const legacy = Math.min(
-    12,
-    Math.min(8, songs * 6) +
-      (player.clubNumbersUndated.length > 0 ? 2 : 0) +
-      (player.currentSquad?.captain ? 2 : 0) +
-      Math.min(3, shirtSeasons),
-  )
-  const bigMoments = Math.min(12, moments * 3)
   const positionBalance = position === 'GK' ? 5 : position === 'DF' ? 2 : 0
-
   const nudge = privateNudge(player.slug)
-  const rating = clampRating(9 + longevity + impact + honours + legacy + bigMoments + positionBalance + nudge)
   /*
    * The PRICE is a market, and a market remembers differently from a record (§9: "how hard
    * it is to get him into the five", not "his score"). Fame leans on the years, the
-   * honours and the songs; the rating leans on documented impact. A short-peak scorer
-   * therefore rates above his price — the bargain a supporter's memory finds — and a
-   * long-serving name costs a little more than he plays. Same evidence, two readings.
+   * honours and the songs; the rating leans on position-normalized impact. A short-peak
+   * scorer therefore rates above his price — the bargain a supporter's memory finds.
    */
   const fame =
     9 +
@@ -228,21 +211,35 @@ function historicalRating(player: PlayerMasterRecord, position: Position): { rat
     Math.min(5, moments * 2) +
     positionBalance +
     nudge
-  return { rating, fame, evidence: { seasons, titles, goals, lineups, shirtSeasons, songs, moments } }
+  return {
+    fame,
+    evidence: { seasons, titles, goals, lineups, shirtSeasons, songs, moments },
+    input: {
+      slug: player.slug,
+      position,
+      fromYear: player.years.from,
+      seasons,
+      titles,
+      goals,
+      lineups,
+      shirtSeasons,
+      songs,
+      moments,
+      captain: Boolean(player.currentSquad?.captain),
+      numberHolding: player.clubNumbersUndated.length > 0,
+    },
+  }
 }
 
-type PoolRow = RatedPlayer & { fame: number; evidence: RoyalRumbleEvidence; suggested: RoyalRumblePrice; calibrated: RoyalRumblePrice; overridden: boolean }
-
-/**
- * The evidence score is bottom-heavy — seven men in ten have a season or two and no
- * scorer row — so read as-is it made a €3 barely stronger than a €1 and 3+3+3+3+3 a
- * losing five against 5+4+3+2+1. The hidden rating is therefore the evidence score
- * spread by RANK over 9–99 (seven tenths rank, three tenths the raw score, so the icons
- * keep their gap at the top): history still decides the order, the scale is what makes
- * every budget strategy of §8 a real strategy.
- */
-function spreadRating(evidenceScore: number, percentile: number): number {
-  return clampRating(9 + 90 * (0.7 * percentile + 0.3 * ((evidenceScore - 9) / 90)))
+type PoolRow = RatedPlayer & {
+  fame: number
+  evidence: RoyalRumbleEvidence
+  factors: RatingFactors
+  confidence: RatingConfidence
+  suggested: RoyalRumblePrice
+  calibrated: RoyalRumblePrice
+  overridden: boolean
+  overrideReasonHe: string | null
 }
 
 let poolCache: PoolRow[] | null = null
@@ -271,44 +268,82 @@ function percentiles(rows: readonly { slug: string; rating: number }[]): Map<str
 function pool(): PoolRow[] {
   if (poolCache) return poolCache
 
-  const rated: Array<Omit<PoolRow, 'suggested' | 'calibrated' | 'price' | 'overridden'>> = []
+  const fives = new Map(ROYAL_RUMBLE_CANONICAL_FIVES.map((row) => [row.slug, row.reasonHe]))
+  const stray = Object.entries(ROYAL_RUMBLE_PRICE_OVERRIDES).filter(([, price]) => price === 5)
+  if (stray.length > 0) throw new Error(`Royal Rumble: a €5 override is not allowed — ${stray.map(([slug]) => slug).join(', ')} belongs in ROYAL_RUMBLE_CANONICAL_FIVES`)
+
+  const base: Array<{ slug: string; nameHe: string; position: Position; positions: Position[]; fromYear: number | null; toYear: number | null; fame: number; evidence: RoyalRumbleEvidence; input: RatingEvidence }> = []
   for (const player of allPlayers()) {
     if (player.kind !== 'player') continue
     const position = player.positions.codes[0]
     if (!position) continue
-    const { rating, fame, evidence } = historicalRating(player, position)
-    rated.push({
+    const { fame, evidence, input } = evidenceOf(player, position)
+    base.push({
       slug: player.slug,
       nameHe: player.displayName,
       position,
       positions: [...player.positions.codes],
       fromYear: player.years.from,
       toYear: player.years.to,
-      rating,
       fame,
       evidence,
+      input,
     })
   }
 
-  const evidenceRank = percentiles(rated)
-  for (const row of rated) row.rating = spreadRating(row.rating, evidenceRank.get(row.slug) ?? 0)
+  // hidden strength: position-normalized over the whole pool, then spread over 9–99 (V3)
+  const ratings = rateAll(base.map((row) => row.input), privateNudge)
 
-  // the price ladder is FAME's, not the rating's (see `historicalRating`)
-  const famed = rated.map((row) => ({ slug: row.slug, rating: row.fame, position: row.position }))
+  // the price ladder is FAME's, not the rating's (see `evidenceOf`)
+  const famed = base.map((row) => ({ slug: row.slug, rating: row.fame, position: row.position }))
   const global = percentiles(famed)
   const byPosition = new Map<Position, Map<string, number>>()
   for (const position of POSITIONS) {
     byPosition.set(position, percentiles(famed.filter((row) => row.position === position)))
   }
+  // no era is premium by longevity alone: fame is also ranked among his own era's men (V3)
+  const byEra = new Map<string, Map<string, number>>()
+  for (const era of ['early', 'middle', 'late'] as const) {
+    byEra.set(era, percentiles(famed.filter((row) => eraOf(base.find((b) => b.slug === row.slug)?.fromYear ?? null) === era)))
+  }
 
-  poolCache = rated.map((row) => {
+  poolCache = base.map((row) => {
+    const rated = ratings.get(row.slug)!
     const suggested = priceForPercentile(global.get(row.slug) ?? 0)
     const positional = byPosition.get(row.position)?.get(row.slug) ?? global.get(row.slug) ?? 0
-    // position calibration (§15): mostly his own position's ladder, a little of the pool's
-    const calibrated = priceForPercentile(0.15 * (global.get(row.slug) ?? 0) + 0.85 * positional)
+    const within = byEra.get(eraOf(row.fromYear))?.get(row.slug) ?? global.get(row.slug) ?? 0
+    // position calibration (§15) and era balance (V3): his own position's ladder, his own era's, a little of the pool's
+    const ladder = priceForPercentile(0.15 * (global.get(row.slug) ?? 0) + 0.5 * positional + 0.35 * within)
+    // economy adjustment: fame may over-read a long squad-row career — a €4 must also play like one
+    const calibrated: RoyalRumblePrice = ladder === 4 && rated.rating < MIN_RATING_FOR_FOUR ? 3 : ladder
+    const canonical = fives.get(row.slug)
     const override = ROYAL_RUMBLE_PRICE_OVERRIDES[row.slug]
-    return { ...row, suggested, calibrated, price: override ?? calibrated, overridden: override !== undefined }
+    const price: RoyalRumblePrice = canonical !== undefined ? 5 : ((override ?? calibrated) as RoyalRumblePrice)
+    return {
+      slug: row.slug,
+      nameHe: row.nameHe,
+      position: row.position,
+      positions: row.positions,
+      fromYear: row.fromYear,
+      toYear: row.toYear,
+      rating: rated.rating,
+      fame: row.fame,
+      evidence: row.evidence,
+      factors: rated.factors,
+      confidence: rated.confidence,
+      suggested,
+      calibrated,
+      price,
+      overridden: canonical !== undefined || override !== undefined,
+      overrideReasonHe: canonical !== undefined ? `€5 קנוני — ${canonical}` : override !== undefined ? `נעילה ידנית ל-€${override}` : null,
+    }
   })
+  const fiveCount = poolCache.filter((row) => row.price === 5).length
+  if (fiveCount !== ROYAL_RUMBLE_FIVE_COUNT) {
+    const missing = [...fives.keys()].filter((slug) => !poolCache!.some((row) => row.slug === slug))
+    poolCache = null
+    throw new Error(`Royal Rumble: exactly ${ROYAL_RUMBLE_FIVE_COUNT} players cost €5, found ${fiveCount}${missing.length ? ` — not in the pool: ${missing.join(', ')}` : ''}`)
+  }
   poolsByWindow.clear()
   return poolCache
 }
@@ -706,7 +741,11 @@ function composeOnce(seed: number, attempt: number, window: RumbleWindow | undef
     const offers: RoyalRumbleOffer[] = []
     for (let card = 0; card < ROYAL_RUMBLE_OFFERS_PER_SLOT; card += 1) {
       const offeredAs = positions[card]!
-      const player = takeAt(positionPool(offeredAs, window), prices[card]!, used, random)
+      // only ten men cost €5, so a profile's "5" is a chance of one of them, not a promise —
+      // otherwise the same ten headline every board
+      const wanted = prices[card]!
+      const tier: RoyalRumblePrice = wanted === 5 && random() >= FIVE_SHARE ? 4 : wanted
+      const player = takeAt(positionPool(offeredAs, window), tier, used, random)
       if (!player) return null
       used.add(player.slug)
       offers.push({ player: publicPlayer(player), offeredAs })
@@ -717,6 +756,9 @@ function composeOnce(seed: number, attempt: number, window: RumbleWindow | undef
 }
 
 const ATTEMPTS = 40
+
+/** how often a profile's €5 slot is really a €5 — the ten are rare on purpose */
+const FIVE_SHARE = 0.45
 
 /**
  * The board of one seed (§16, §25): choose a profile · build every slot · evaluate the
@@ -1243,7 +1285,18 @@ export function playRoyalRumble(seed: number, selection: readonly RoyalRumbleSel
  * call it from a server action or a page.
  */
 export function royalRumbleAuditView(): {
-  players: Array<RoyalRumblePublicPlayer & { rating: number; suggested: RoyalRumblePrice; calibrated: RoyalRumblePrice; overridden: boolean; evidence: RoyalRumbleEvidence }>
+  players: Array<
+    RoyalRumblePublicPlayer & {
+      rating: number
+      suggested: RoyalRumblePrice
+      calibrated: RoyalRumblePrice
+      overridden: boolean
+      overrideReasonHe: string | null
+      evidence: RoyalRumbleEvidence
+      factors: RatingFactors
+      confidence: RatingConfidence
+    }
+  >
   compose: (seed: number, window?: RumbleWindow, only?: RoyalRumbleBoardMood) => ReturnType<typeof composeRoyalRumbleBoard>
   power: (selection: readonly RoyalRumbleSelection[], seed: number, window?: RumbleWindow) => number | null
 } {
@@ -1254,7 +1307,10 @@ export function royalRumbleAuditView(): {
       suggested: row.suggested,
       calibrated: row.calibrated,
       overridden: row.overridden,
+      overrideReasonHe: row.overrideReasonHe,
       evidence: row.evidence,
+      factors: row.factors,
+      confidence: row.confidence,
     })),
     compose: composeRoyalRumbleBoard,
     power: (selection, seed, window) => {

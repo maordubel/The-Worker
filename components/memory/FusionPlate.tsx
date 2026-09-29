@@ -86,6 +86,11 @@ export function FusionPlate({
               <Face value={pair.b} />
             </p>
             <p className="mt-1 font-body text-[11px] leading-snug text-muted">{pair.kind}</p>
+            {pair.factHe && (
+              <p data-memory="fact" className="mt-1.5 font-body text-[12px] leading-snug text-ink">
+                {pair.factHe}
+              </p>
+            )}
           </div>
         </div>
 

@@ -17,6 +17,7 @@
   "away89.mine.stadiums": "אצטדיונים",
   "away89.mine.matches": "משחקים",
   "away89.mine.empty": "עוד לא סימנת אף משחק. בכל תחנה במסע יש כפתור „הייתי שם” — סמנו את המשחקים שנסעתם אליהם, והמסע שלכם ייספר כאן.",
+  "away89.mine.ticked": "{n} מתוך {total} ביקורים סומנו — „הייתי שם”",
   "away89.mine.span": "מ-{from} עד {to}",
   "away89.mine.oneYear": "ב-{y}",
   "away89.share.line": "המסע שלי עם הפועל: {countries} מדינות · {stadiums} אצטדיונים · {matches} משחקים בחוץ. ואתם?",

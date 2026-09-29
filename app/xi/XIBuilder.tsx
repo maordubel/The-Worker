@@ -24,6 +24,11 @@ import { NO_FILTER, slotStatusOf, type RosterFilter } from '@/lib/game/roster-se
 import type { ShirtBoard } from '@/lib/xi/board'
 import {
   CHALLENGES,
+  SPAN_DECADES,
+  SPAN_DEFAULT,
+  SPAN_MAX,
+  decadeWord,
+  toggleDecade,
   challengeStatus,
   type ManFacts,
   chooseSpell,
@@ -115,6 +120,8 @@ type Sheet = {
   shortlist: RosterEntry[]
   /** the rule this sheet is built under */
   challenge: ChallengeId
+  /** the decades of the decade mission — empty for every other rule */
+  decades: number[]
   /** the Manager Prompt accepted for this sheet — its seed and cursor, never the picks */
   prompt: { seed: number; cursor: number } | null
   /** ids: "the five you picked before", frozen when `fresh5` was accepted */
@@ -134,6 +141,7 @@ function emptySheet(formation: Formation): Sheet {
     cut: null,
     shortlist: [],
     challenge: 'free',
+    decades: [],
     prompt: null,
     forbidden: [],
   }
@@ -141,6 +149,24 @@ function emptySheet(formation: Formation): Sheet {
 
 /** The device's own deck of Manager Prompts (rule 31) — kept apart from any round deck. */
 const PROMPT_DECK = '/xi#prompt'
+
+/**
+ * The name a rule is shown under. A decade mission is named by what it asks for —
+ * "שנות ה־90 + שנות ה־2000" — so the mission stays legible the whole time it is active.
+ */
+function ruleLabel(challenge: ChallengeId, decades: readonly number[]): string {
+  if (challenge === 'span' && decades.length > 0) {
+    return t('xi.challenge.span.named', {
+      decades: decades.map((decade) => t('xi.challenge.span.decade', { d: decadeWord(decade) })).join(' + '),
+    })
+  }
+  return t(`xi.challenge.${challenge}` as MessageKey)
+}
+
+/** What choosing a rule does to the sheet's decades: a decade mission opens on one. */
+function withChallenge(current: Sheet, next: ChallengeId): Sheet {
+  return { ...current, challenge: next, decades: next === 'span' ? [...SPAN_DEFAULT] : [], prompt: null, forbidden: [] }
+}
 
 const REFUSAL_KEY: Record<Refusal, MessageKey> = {
   'no-record': 'xi.challenge.hidden.noRecord',
@@ -274,6 +300,7 @@ export function XIBuilder({
             .map((id) => byId.get(id))
             .filter((entry): entry is RosterEntry => entry !== undefined),
           challenge: restored.challenge,
+          decades: restored.decades,
           prompt: restored.prompt,
           forbidden: restored.forbidden,
         }
@@ -301,6 +328,7 @@ export function XIBuilder({
       ...(sheet.cut ? { cut: rosterKey(sheet.cut) } : {}),
       shortlist: sheet.shortlist.map((entry) => rosterKey(entry)),
       ...(sheet.challenge !== 'free' ? { challenge: sheet.challenge } : {}),
+      ...(sheet.challenge === 'span' && sheet.decades.length > 0 ? { decades: sheet.decades } : {}),
       ...(sheet.prompt ? { prompt: sheet.prompt } : {}),
       ...(sheet.forbidden.length > 0 ? { forbidden: sheet.forbidden } : {}),
     }),
@@ -414,7 +442,10 @@ export function XIBuilder({
         })),
     [sheet.formation, sheet.picks, spellAt, manOf],
   )
-  const verdict = useMemo(() => challengeStatus(sheet.challenge, rows), [sheet.challenge, rows])
+  const verdict = useMemo(
+    () => challengeStatus(sheet.challenge, rows, 11, { allowedDecades: sheet.decades }),
+    [sheet.challenge, sheet.decades, rows],
+  )
   const broken = useMemo(() => new Set(verdict.broken), [verdict.broken])
 
   /* ------------------------------------------------------------- the mechanics */
@@ -436,10 +467,11 @@ export function XIBuilder({
         {},
         takenDecades(rows, selected),
         manOf(entry),
+        { allowedDecades: sheet.decades },
       )
       return answer.ok ? null : answer.why
     },
-    [drawer, sheet.challenge, spellsOf, rows, selected, manOf],
+    [drawer, sheet.challenge, sheet.decades, spellsOf, rows, selected, manOf],
   )
 
   /** The spell a pick would stand for under the drawer's filters and the challenge. */
@@ -452,10 +484,11 @@ export function XIBuilder({
         { year: filter.year, decade: filter.decade, fallbackId: shirts.defaultVersion[entry.slug] ?? null },
         drawer === 'slot' ? takenDecades(rows, selected) : new Set(),
         manOf(entry),
+        { allowedDecades: sheet.decades },
       )
       return answer.ok ? answer.spell : null
     },
-    [drawer, sheet.challenge, spellsOf, shirts.defaultVersion, rows, selected, manOf],
+    [drawer, sheet.challenge, sheet.decades, spellsOf, shirts.defaultVersion, rows, selected, manOf],
   )
 
   const rowInfo = useCallback(
@@ -545,6 +578,7 @@ export function XIBuilder({
       { year: filter.year, decade: filter.decade, fallbackId: shirts.defaultVersion[entry.slug] ?? null },
       takenDecades(rows, slotId),
       manOf(entry),
+      { allowedDecades: sheet.decades },
     )
     if (!answer.ok) {
       haptic('miss')
@@ -699,9 +733,9 @@ export function XIBuilder({
         .filter((why) => (counts[why] ?? 0) > 0)
         .map((why) => t(REFUSAL_KEY[why], { n: String(counts[why]) }))
       if (parts.length === 0) return null
-      return `${t('xi.challenge.hidden', { rule: t(`xi.challenge.${sheet.challenge}` as MessageKey) })} ${parts.join(' · ')}`
+      return `${t('xi.challenge.hidden', { rule: ruleLabel(sheet.challenge, sheet.decades) })} ${parts.join(' · ')}`
     },
-    [sheet.challenge],
+    [sheet.challenge, sheet.decades],
   )
 
   const drawerNode = drawer && !phone ? (
@@ -1008,7 +1042,7 @@ export function XIBuilder({
   }
 
   function dropPrompt() {
-    patch((current) => ({ ...current, challenge: 'free', prompt: null, forbidden: [] }))
+    patch((current) => withChallenge(current, 'free'))
     haptic('tap')
   }
 
@@ -1264,13 +1298,15 @@ export function XIBuilder({
           <div className="mt-3">
             <ChallengePicker
               value={sheet.challenge}
+              decades={sheet.decades}
+              onDecades={(next) => patch((current) => ({ ...current, decades: next }))}
               onChange={(next) => {
                 haptic('tap')
-                patch((current) => ({ ...current, challenge: next, prompt: null, forbidden: [] }))
+                patch((current) => withChallenge(current, next))
               }}
             />
           </div>
-          <ChallengeLine verdict={verdict} picks={sheet.picks} slots={sheet.formation.slots} />
+          <ChallengeLine verdict={verdict} decades={sheet.decades} picks={sheet.picks} slots={sheet.formation.slots} />
           <p className="mt-3 font-body text-[11px] leading-snug text-muted">
             {t('xi.dna.line', {
               spread: String(dna.spread),
@@ -1423,9 +1459,11 @@ export function XIBuilder({
           {!embedded && (
           <ChallengePicker
             value={sheet.challenge}
+            decades={sheet.decades}
+            onDecades={(next) => patch((current) => ({ ...current, decades: next }))}
             onChange={(next) => {
               haptic('tap')
-              patch((current) => ({ ...current, challenge: next, prompt: null, forbidden: [] }))
+              patch((current) => withChallenge(current, next))
             }}
           />
           )}
@@ -1444,7 +1482,7 @@ export function XIBuilder({
             onTap={tapSlot}
           />
 
-          <ChallengeLine verdict={verdict} picks={sheet.picks} slots={sheet.formation.slots} />
+          <ChallengeLine verdict={verdict} decades={sheet.decades} picks={sheet.picks} slots={sheet.formation.slots} />
 
           {/* the tip line — what the pitch is asking for right now, never a blank screen */}
           <p className="mt-2 border-hair border-ink/30 bg-sheet px-3 py-2 font-body text-[12px] leading-snug text-ink">
@@ -1488,6 +1526,7 @@ export function XIBuilder({
                             {},
                             takenDecades(rows, openSlot.slotId),
                             manOf(occupant),
+                            { allowedDecades: sheet.decades },
                           ).ok
                           return (
                             <button
@@ -1595,6 +1634,7 @@ export function XIBuilder({
                             {},
                             takenDecades(rows, selected),
                             manOf(entry),
+                            { allowedDecades: sheet.decades },
                           ).ok)
                       }
                       onClick={() => {
@@ -1606,6 +1646,7 @@ export function XIBuilder({
                           { fallbackId: shirts.defaultVersion[entry.slug] ?? null },
                           takenDecades(rows, selected),
                           manOf(entry),
+                          { allowedDecades: sheet.decades },
                         )
                         if (!spell.ok) return
                         const slotId = selected
@@ -1734,6 +1775,7 @@ export function XIBuilder({
           captain={sheet.captain}
           broken={broken}
           verdict={verdict}
+          decades={sheet.decades}
           dna={dna}
           twelfthHe={sheet.twelfth?.nameHe ?? null}
           cutHe={sheet.cut?.nameHe ?? null}
@@ -1785,7 +1827,17 @@ function spanOf(spell: Spell): string | null {
 }
 
 /** Six rules and "free". A chip row, and the chosen rule's sentence under it. */
-function ChallengePicker({ value, onChange }: { value: ChallengeId; onChange: (next: ChallengeId) => void }) {
+function ChallengePicker({
+  value,
+  decades,
+  onChange,
+  onDecades,
+}: {
+  value: ChallengeId
+  decades: readonly number[]
+  onChange: (next: ChallengeId) => void
+  onDecades: (next: number[]) => void
+}) {
   return (
     <div className="mt-2">
       <p className="font-body text-[10.5px] font-extrabold tracking-wide text-muted">{t('xi.challenge.title')}</p>
@@ -1805,6 +1857,29 @@ function ChallengePicker({ value, onChange }: { value: ChallengeId; onChange: (n
           </button>
         ))}
       </div>
+      {value === 'span' && (
+        <div role="group" aria-label={t('xi.challenge.span.pick')} className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
+          {SPAN_DECADES.map((decade) => {
+            const on = decades.includes(decade)
+            // the last decade cannot be switched off (a mission asks for one), and a fourth is refused
+            const locked = (on && decades.length === 1) || (!on && decades.length >= SPAN_MAX)
+            return (
+              <button
+                key={decade}
+                type="button"
+                aria-pressed={on}
+                disabled={locked}
+                onClick={() => onDecades(toggleDecade(decades, decade))}
+                className={`flex min-h-[40px] shrink-0 items-center border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none ${
+                  on ? 'border-red bg-red text-paper' : 'border-ink/40 bg-paper text-ink'
+                }`}
+              >
+                {t('xi.challenge.span.chip', { d: decadeWord(decade) })}
+              </button>
+            )
+          })}
+        </div>
+      )}
       <p className="mt-0.5 font-body text-[11px] leading-snug text-muted">{t(`xi.challenge.${value}.desc` as MessageKey)}</p>
     </div>
   )
@@ -1813,15 +1888,17 @@ function ChallengePicker({ value, onChange }: { value: ChallengeId; onChange: (n
 /** Met / not met, and which slots break the rule — named, never scored. */
 function ChallengeLine({
   verdict,
+  decades,
   picks,
   slots,
 }: {
   verdict: ChallengeStatus
+  decades: readonly number[]
   picks: Record<string, RosterEntry>
   slots: readonly PitchSlot[]
 }) {
   if (verdict.challenge === 'free') return null
-  const rule = t(`xi.challenge.${verdict.challenge}` as MessageKey)
+  const rule = ruleLabel(verdict.challenge, decades)
   const names = slots
     .filter((slot) => verdict.broken.includes(slot.slotId))
     .map((slot) => picks[slot.slotId]?.familyHe)
@@ -2226,6 +2303,7 @@ function SlotDetail({
                 {},
                 takenDecades(rows, slot.slotId),
                 manOf(occupant),
+                { allowedDecades: sheet.decades },
               ).ok
               return (
                 <button
@@ -2327,6 +2405,7 @@ function Poster({
   captain,
   broken,
   verdict,
+  decades,
   dna,
   twelfthHe,
   cutHe,
@@ -2343,6 +2422,7 @@ function Poster({
   captain: string | null
   broken: ReadonlySet<string>
   verdict: ChallengeStatus
+  decades: readonly number[]
   dna: ReturnType<typeof xiDna>
   twelfthHe: string | null
   cutHe: string | null
@@ -2355,7 +2435,7 @@ function Poster({
 }) {
   const dialogRef = useDialog<HTMLDivElement>(onClose)
   const captainHe = captain ? (picks[captain]?.nameHe ?? null) : null
-  const rule = t(`xi.challenge.${verdict.challenge}` as MessageKey)
+  const rule = ruleLabel(verdict.challenge, decades)
   return (
     <div
       ref={dialogRef}

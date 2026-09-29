@@ -216,6 +216,14 @@ export function walkable(confidence: ConfidenceWord): boolean {
 export const SUPPORTER_TYPES: ReadonlySet<EntityType> = new Set<EntityType>(['fans', 'song'])
 
 /** "an object" of a gate-13 rule — a shirt, a crest, a maker's mark, a trophy */
+/**
+ * What the archive says about a shirt beyond its season and variant. Present ONLY for a kit
+ * Gate 4 does not deal — for a shirt the game asks about, the maker, the sponsor and the photograph
+ * are the puzzle's answer sheet, and they live behind the shield in `/kits/archive` (brief §15).
+ * A field the record does not hold is null, never a guess (rule 11).
+ */
+export type KitFacts = { makerHe: string | null; sponsorHe: string | null; photo: string | null }
+
 export const OBJECT_TYPES: ReadonlySet<EntityType> = new Set<EntityType>(['kit', 'object', 'trophy'])
 
 /** can bridge eras under a `forward` time rule */
@@ -462,7 +470,7 @@ export type WhatBlock =
   | { kind: 'quote'; quote: string | null; byline: string; words: number }
   | { kind: 'person'; from: number | null; to: number | null; seasons: number; numbers: string[]; goals: number; positions: string[] }
   | { kind: 'season'; matches: number; trophies: string[] }
-  | { kind: 'kit'; seasonLabel: string; variant: string; playable: boolean }
+  | { kind: 'kit'; seasonLabel: string; variant: string; playable: boolean; facts: KitFacts | null }
   | { kind: 'crest'; text: string | null; note: string | null; imageKey: string | null }
   | { kind: 'spells'; spells: string[]; nameEn: string | null }
   | { kind: 'song'; originalTitle: string | null; originalArtist: string | null; lyricsBy: string | null }

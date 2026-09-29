@@ -3,6 +3,33 @@ import type { RoyalRumblePrice } from './royal-rumble-public'
 export { ROYAL_RUMBLE_BALANCE_VERSION } from './royal-rumble-public'
 
 /**
+ * THE TEN (Gate 9 V3, 29.9.2026) — the only players who cost €5M. A reviewed list, not a
+ * quota: the pipeline ranks and prices everybody else in €1–€4 and has no way to create an
+ * eleventh (`pool()` throws if an override or a rounding ever tries). Chosen by one
+ * question — who is named first by a supporter of any era — checked against the documented
+ * evidence (`npm run rumble:audit` prints it) and spread across eras and all four positions
+ * so €5 is a choice at every line of the five. To change the ten, change this list and the
+ * exact-set test beside it; both are decisions for the owner.
+ *
+ * `reasonHe` is what the audit prints beside a canonical five — the evidence in the archive,
+ * never a superlative.
+ */
+export const ROYAL_RUMBLE_CANONICAL_FIVES: ReadonlyArray<{ slug: string; reasonHe: string }> = [
+  { slug: 'יעקב-חודורוב', reasonHe: 'שוער · 15 עונות מתועדות · 2 תארים' },
+  { slug: 'שמעון-גרשון', reasonHe: 'בלם · 10 עונות · 5 תארים · 3 הרכבים מתועדים' },
+  { slug: 'ריפעת-טורק', reasonHe: '12 עונות מתועדות · 2 תארים' },
+  { slug: 'משה-סיני', reasonHe: '110 שערים מתועדים · 13 עונות, 4 תארים' },
+  { slug: 'יוסי-אבוקסיס', reasonHe: '12 עונות · 4 תארים · 30 שערים מתועדים' },
+  { slug: 'סלים-טועמה', reasonHe: '7 תארים · 10 עונות · 57 שערים מתועדים' },
+  { slug: 'ערן-זהבי', reasonHe: '4 עונות · 4 תארים · 35 שערים · 13 רגעים מתועדים' },
+  { slug: 'שייע-פייגנבוים', reasonHe: '85 שערים מתועדים · חלוץ 13 עונות' },
+  { slug: 'גילי-לנדאו', reasonHe: '16 עונות · 51 שערים מתועדים · שער הניצחון של 24.5.1986' },
+  { slug: 'שבתאי-לוי', reasonHe: '67 שערים מתועדים · 12 עונות' },
+]
+
+export const ROYAL_RUMBLE_FIVE_COUNT = 10
+
+/**
  * Canonical price overrides — the LAST step of the price pipeline (spec §12–§13):
  *
  *     historicalRating → suggested price → position calibration → canonical override
@@ -17,10 +44,9 @@ export { ROYAL_RUMBLE_BALANCE_VERSION } from './royal-rumble-public'
  * for icons, sparse data, short peaks and automated mispricing — not for hand-pricing the
  * archive).
  *
- * Three groups, 25.9.2026:
- *  · ICONS pinned at €5, so a future rebalance of the evidence weights cannot quietly
- *    make Sinai a €4 — the men a supporter names first, across the eras.
- *  · EVIDENCE-INFLATED €5 → €4: founding-era rows where longevity is the only fact on
+ * Three groups (V3, 29.9.2026 — no override may be a €5; `CANONICAL_FIVES` is the only door):
+ *  · ICONS one notch under the ten, pinned at €4 — the large elite tier.
+ *  · EVIDENCE-INFLATED → €4: founding-era rows where longevity is the only fact on
  *    file, one-spell peaks the scorer table over-rewards, and current-squad men with no
  *    honours yet. A "major Hapoel player" price is the honest one, and it is what makes
  *    €5 rare (§10: 8–12%).
@@ -29,23 +55,14 @@ export { ROYAL_RUMBLE_BALANCE_VERSION } from './royal-rumble-public'
  *    "רגע — הוא רק €2M? אני לוקח" the spec is after.
  */
 export const ROYAL_RUMBLE_PRICE_OVERRIDES: Readonly<Record<string, RoyalRumblePrice>> = {
-  // icons — pinned
-  'משה-סיני': 5,
-  'ריפעת-טורק': 5,
-  'שייע-פייגנבוים': 5,
-  'יעקב-חודורוב': 5,
-  'גילי-לנדאו': 5,
-  'שבתאי-לוי': 5,
-  'יוסי-אבוקסיס': 5,
-  'סלים-טועמה': 5,
-  'וואליד-באדיר': 5,
-  'שמעון-גרשון': 5,
-  'ערן-זהבי': 5,
-  'וינסנט-אניימה': 5,
-  'יחזקאל-חזום': 5,
-  'רחביה-רוזנבוים': 5,
-  'אריה-בזרנו': 5,
-  'שביט-אלימלך': 5,
+  // the ten greatest are CANONICAL_FIVES below, never an override: an override cannot be a €5
+  // the icons the terrace names first, one notch under the ten — €4 is the large elite tier
+  'יחזקאל-חזום': 4,
+  'רחביה-רוזנבוים': 4,
+  'וואליד-באדיר': 4,
+  'וינסנט-אניימה': 4,
+  'אריה-בזרנו': 4,
+  'שביט-אלימלך': 4,
   // evidence-inflated — founding era, longevity only
   'וילי-ברגר': 4,
   'משה-פוליאקוב': 4,

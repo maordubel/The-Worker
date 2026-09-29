@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { kitRecord } from '@/lib/kit/kit-master'
+
 import { linksForEntity } from '@/lib/links'
 import { actionsFor } from '@/lib/links/actions'
 
@@ -431,6 +433,25 @@ export function seasonCards(label: string): ArchiveCard[] {
   return inSeason(label).slice(0, 40).map(cardOf)
 }
 
+const VARIANT_ORDER: Record<string, number> = { home: 0, away: 1, third: 2, gk: 3 }
+
+/**
+ * הארון המלא — every canonical kit the archive holds, one card each, oldest first and home
+ * before away inside a season. `/archive?show=kits` (Gate 5's "full collection"). It reads the
+ * graph's own kit entities — which the graph builds from the Kit Master — so there is no
+ * second historical-kit list to drift (`tests/kit-collection-route.test.ts` holds the two equal).
+ */
+export function kitShelf(): ArchiveCard[] {
+  return graph.entities
+    .filter((e) => e.type === 'kit' && e.sport === 'football')
+    .sort(
+      (a, b) =>
+        (a.year ?? 0) - (b.year ?? 0) ||
+        (VARIANT_ORDER[String(a.attrs.variant ?? a.kind)] ?? 9) - (VARIANT_ORDER[String(b.attrs.variant ?? b.kind)] ?? 9),
+    )
+    .map(cardOf)
+}
+
 export function searchCards(query: string, type: EntityType | null): ArchiveCard[] {
   return search(query, { types: type ? [type] : undefined, limit: 24 }).map(cardOf)
 }
@@ -488,8 +509,24 @@ function whatOf(e: GraphEntity): WhatBlock {
       const trophies = neighbors(e.id, { types: ['trophy'] }).map(({ other }) => other.titleHe)
       return { kind: 'season', matches, trophies }
     }
-    case 'kit':
-      return { kind: 'kit', seasonLabel: e.seasonLabel ?? '', variant: String(a.variant ?? e.kind ?? 'home'), playable: a.playable === true }
+    case 'kit': {
+      const record = kitRecord(e.id)
+      return {
+        kind: 'kit',
+        seasonLabel: e.seasonLabel ?? '',
+        variant: String(a.variant ?? e.kind ?? 'home'),
+        playable: a.playable === true,
+        // a shirt Gate 4 deals keeps its answers off this screen (see KitFacts)
+        facts:
+          record && !record.gate4.playable
+            ? {
+                makerHe: record.fields.maker.value?.name ?? null,
+                sponsorHe: record.fields.sponsor.value?.name ?? null,
+                photo: record.evidence.exactPhoto?.src ?? null,
+              }
+            : null,
+      }
+    }
     case 'object':
       if (e.kind === 'crest')
         return { kind: 'crest', text: typeof a.text === 'string' ? a.text : null, note: typeof a.note === 'string' ? a.note : null, imageKey: typeof a.imageKey === 'string' ? a.imageKey : null }

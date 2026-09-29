@@ -613,6 +613,11 @@ export function MemoryBoard({
                   >
                     <MuralFace pair={pair} href={links[pair.id]} />
                     <span className="w-full basis-full font-body text-[11px] leading-tight text-muted">{pair.kind}</span>
+                    {pair.factHe && (
+                      <span className="w-full basis-full font-body text-[11.5px] leading-snug text-ink" data-memory-fact={pair.id}>
+                        {pair.factHe}
+                      </span>
+                    )}
                     {livedPair(pair.id) && (
                       <span className="w-full basis-full font-body text-[11px] font-extrabold leading-tight text-red" data-memory-lived={pair.id}>
                         {t('redworld.memory.lived')}

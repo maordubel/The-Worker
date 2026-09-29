@@ -386,7 +386,34 @@ function What({ what }: { what: WhatBlock }) {
     case 'kit':
       return (
         <>
-          <p className={p}>{t('archive.what.kit.note')}</p>
+          <p className={p}>{t(what.facts ? 'archive.what.kit.noteOpen' : 'archive.what.kit.note')}</p>
+          {what.facts && (
+            <dl className="mt-2 grid gap-1 font-body text-[13.5px] text-ink" data-archive="kit-facts">
+              {what.facts.makerHe && (
+                <div className="flex gap-2">
+                  <dt className="text-muted">{t('archive.what.kit.maker')}</dt>
+                  <dd>{what.facts.makerHe}</dd>
+                </div>
+              )}
+              {what.facts.sponsorHe && (
+                <div className="flex gap-2">
+                  <dt className="text-muted">{t('archive.what.kit.sponsor')}</dt>
+                  <dd>{what.facts.sponsorHe}</dd>
+                </div>
+              )}
+              {what.facts.photo && (
+                <div className="mt-1 flex h-40 items-center justify-center bg-sheet">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- the archive ships the bytes it measured (rule 69) */}
+                  <img data-archive-photo="" src={what.facts.photo} alt="" className="max-h-full max-w-full object-contain" />
+                </div>
+              )}
+            </dl>
+          )}
+          {!what.facts && what.playable && (
+            <a href="/kits/archive" className="mt-2 inline-flex min-h-tap items-center border-rule border-ink px-3 font-body text-[13px] font-extrabold text-ink">
+              {t('archive.what.kit.photos')}
+            </a>
+          )}
           {what.playable && (
             <a href="/kits/build" className="mt-2 inline-flex min-h-tap items-center border-rule border-red px-3 font-body text-[13px] font-extrabold text-red">
               {t('archive.what.kit.build')}

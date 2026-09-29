@@ -335,11 +335,17 @@ export function KitGameRun({
       {reviewing ? (
         <ReviewPanel puzzle={puzzle} placed={placed} onEdit={goTo} onCheck={() => void check()} busy={busy} complete={complete} />
       ) : (
-        <section aria-label={t('kitgame.pick', { step: stepLabel(step) })} className="shrink-0">
-          <p className="mb-1 text-center font-body text-[10.5px] font-bold text-muted">{t('stage.dragHint')}</p>
-          <ul className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <section aria-label={t('kitgame.pick', { step: stepLabel(step) })} className="w-full min-w-0 shrink-0">
+          <p className="mb-1 flex items-baseline justify-between gap-2 font-body text-[10.5px] font-bold text-muted">
+            <span className="text-ink">{t('kitgame.sample.caption')}</span>
+            <span>{t('stage.dragHint')}</span>
+          </p>
+          <ul
+            data-kit-rail=""
+            className="flex snap-x snap-proximity gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
             {options.map((option) => (
-              <li key={option.id} className="w-[74px] shrink-0">
+              <li key={option.id} className="w-[104px] shrink-0 snap-start">
                 <RailOption
                   step={step}
                   option={option}
@@ -445,7 +451,7 @@ function RailOption({
   }
 
   return (
-    <div className={`relative h-[92px] border-hair ${selected ? 'border-plate border-red bg-sheet' : 'border-ink/35 bg-sheet'}`}>
+    <div className={`relative h-[124px] ${selected ? 'border-plate border-red bg-paper' : 'border-hair border-ink/35 bg-sheet'}`}>
       <button
         type="button"
         {...drag}
@@ -476,13 +482,18 @@ function RailOption({
           ) : step === 'construction' ? (
             <KitShirt spec={preview} look={look} marks={marks} crop="top" className="h-full max-w-full" />
           ) : (
-            <KitMarkArt spec={preview} which={step} marks={marks} className="h-[80%] w-[86%]" />
+            <KitMarkArt spec={preview} which={step} marks={marks} className="h-[86%] w-[90%]" />
           )}
         </span>
-        <span className="block truncate border-t-hair border-ink/20 pt-0.5 text-center font-body text-[10px] font-black leading-tight text-ink">
-          {option.labelHe}
+        <span className="flex min-h-[28px] items-center justify-center border-t-hair border-ink/20 pt-0.5 text-center font-body text-[11px] font-black leading-[1.15] text-ink">
+          <span className="line-clamp-2 break-words">{option.labelHe}</span>
         </span>
       </button>
+      {selected && (
+        <span aria-hidden="true" className="pointer-events-none absolute start-0 top-0 flex h-[18px] w-[18px] items-center justify-center bg-red font-body text-[12px] font-black leading-none text-paper">
+          ✓
+        </span>
+      )}
       <button
         type="button"
         onClick={onInfo}
@@ -521,10 +532,10 @@ function ReviewPanel({
               <button
                 type="button"
                 onClick={() => onEdit(i)}
-                className="flex min-h-tap w-full flex-col items-center justify-center border-hair border-ink/35 bg-sheet px-0.5"
+                className="flex min-h-[64px] w-full flex-col items-center justify-start gap-0.5 border-hair border-ink/35 bg-sheet px-0.5 py-1"
               >
-                <span className="block w-full truncate text-center font-body text-[11px] font-extrabold leading-tight text-muted">{t(`kitgame.step.${step}` as MessageKey)}</span>
-                <span className="block w-full truncate text-center font-body text-[11px] font-black leading-tight text-ink">{option?.labelHe ?? '—'}</span>
+                <span className="block w-full break-words text-center font-body text-[10px] font-extrabold leading-tight text-muted">{t(`kitgame.step.${step}` as MessageKey)}</span>
+                <span className="block w-full break-words text-center font-body text-[11px] font-black leading-[1.15] text-ink">{option?.labelHe ?? '—'}</span>
               </button>
             </li>
           )
@@ -783,10 +794,19 @@ function StepRow({ row }: { row: StepVerdict }) {
           </span>
         </span>
       </div>
-      {wrong.length > 0 && (
-        <p className="mt-0.5 font-body text-[11px] leading-snug text-muted">
-          {t('kitgame.reveal.truthWas', { truth: [...new Set(wrong.map((f) => f.truthHe))].join(' · ') })}
-        </p>
+      {(wrong.length > 0 || row.fields.length > 1) && (
+        <ul className="mt-0.5 space-y-px font-body text-[11px] leading-snug text-muted" data-kit-fields="">
+          {row.fields.map((f) => (
+            <li key={f.field} className="flex items-baseline gap-1.5">
+              <span className={`w-3 shrink-0 font-black ${f.ok ? 'text-ink' : 'text-red'}`} aria-label={f.ok ? t('kitgame.reveal.stepRight') : t('kitgame.reveal.stepWrong')}>
+                {f.ok ? '✓' : '✕'}
+              </span>
+              <span>
+                {t(`kitgame.field.${f.field}` as MessageKey)}: {f.ok ? f.truthHe : t('kitgame.reveal.fieldWas', { truth: f.truthHe })}
+              </span>
+            </li>
+          ))}
+        </ul>
       )}
       {row.tolerant && <p className="mt-0.5 font-body text-[11px] leading-snug text-sign">{t('kitgame.reveal.tolerant')}</p>}
     </li>

@@ -65,6 +65,16 @@ export function slotShort(rule: RoyalRumbleSlotRule): string {
   return label === 'FLEX' ? t('flex') : POSITION_SHORT[label]
 }
 
+/** the budget's crown (comps, 29.9.2026) — drawn, one ink, no colour of its own */
+function Crown({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 22" className={className} aria-hidden="true" focusable="false">
+      <path d="M2 6l7 6 7-10 7 10 7-6-3 15H5z" fill="currentColor" />
+      <rect x="5" y="19" width="22" height="2" fill="currentColor" />
+    </svg>
+  )
+}
+
 function money(value: number): string {
   return `€${value}M`
 }
@@ -223,7 +233,7 @@ function DraftCard({
             </p>
           </div>
           <div className="text-end">
-            <p className={`font-display text-[21px] leading-none sm:text-[40px] ${selected ? 'text-paper' : 'text-red'}`} dir="ltr">
+            <p className={`px-1.5 py-0.5 font-display text-[22px] leading-none sm:text-[40px] ${selected ? 'bg-paper text-red' : 'bg-sheet text-red'}`} dir="ltr">
               {money(player.price)}
             </p>
             <p className={`mt-1 hidden font-body text-[8px] sm:block ${selected ? 'text-paper/55' : 'text-concrete'}`}>{t('priceEntry')}</p>
@@ -231,11 +241,11 @@ function DraftCard({
         </div>
 
         <div className={`mx-auto mt-1 flex min-h-[40px] w-full flex-1 justify-center overflow-hidden border-y-hair py-0.5 ${selected ? 'border-paper/15 bg-transparent' : 'border-ink/10 bg-transparent'}`}>
-          <Shirt player={player} kits={kits} className="h-full max-h-[108px] w-auto max-w-[94px] sm:h-[132px] sm:w-[116px]" />
+          <Shirt player={player} kits={kits} className="h-full max-h-[168px] w-auto max-w-[100px] sm:h-[132px] sm:w-[116px]" />
         </div>
 
         <div className="mt-auto pt-1.5">
-          <p className="truncate font-display text-[15px] leading-[0.92] sm:text-[29px]">{player.nameHe}</p>
+          <p className="line-clamp-2 min-h-[2em] font-display text-[17px] leading-[1] sm:text-[29px]">{player.nameHe}</p>
           <div className="mt-1 flex items-end justify-between gap-2">
             <div>
               <p className={`hidden font-body text-[8px] sm:block ${selected ? 'text-paper/55' : 'text-concrete'}`}>{t('hapoelYears')}</p>
@@ -481,7 +491,7 @@ function BudgetTrail({ budget, picks }: { budget: number; picks: RoyalRumblePick
     steps.push(left)
   }
   return (
-    <p className="mt-0.5 truncate font-mono tabular-nums text-[7px] font-black tracking-[0.08em] text-paper/45 sm:text-[8px]" dir="ltr" aria-hidden="true">
+    <p className="mt-0.5 truncate font-mono tabular-nums text-[7px] font-black tracking-[0.08em] text-muted sm:text-[9px]" dir="ltr" aria-hidden="true">
       {steps.map((step) => money(step)).join(' → ')}
     </p>
   )
@@ -840,33 +850,32 @@ function RoyalRumbleRunInner({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col md:block md:flex-none md:pb-3">
-      <header className="relative shrink-0 overflow-hidden border-rule border-ink bg-ink text-paper">
-        {!embedded && <div className="pointer-events-none absolute -start-5 -top-10 font-display text-[220px] leading-none text-paper/5 sm:text-[300px]" dir="ltr" aria-hidden="true">09</div>}
-        <div className="absolute inset-y-0 end-0 w-2 bg-red" />
+      <header data-rumble="header" className="relative shrink-0 overflow-hidden border-rule border-ink bg-red text-paper">
+        {!embedded && <div className="pointer-events-none absolute -start-4 -top-8 font-display text-[190px] leading-none text-ink/10 sm:text-[300px]" dir="ltr" aria-hidden="true">09</div>}
 
-        <div className="relative grid grid-cols-[1fr_auto] items-end gap-3 px-3 py-1.5 sm:gap-5 sm:px-6 sm:py-6">
-          <div>
-            <div className="flex items-center gap-3">
-              {!embedded && <span className="hidden border-hair border-red px-2 py-1 font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red sm:inline-block" dir="ltr">GATE 09</span>}
-              <span className="hidden font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-paper/35 sm:inline" dir="ltr">5V5 · HAPOEL ALL-TIME</span>
+        <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-stretch gap-2 px-3 py-2 sm:gap-5 sm:px-6 sm:py-6">
+          <div className="min-w-0 self-center">
+            <div className="flex items-center gap-2">
+              {!embedded && <span className="border-hair border-paper px-1.5 py-0.5 font-mono tabular-nums text-[9px] font-black tracking-[0.18em] text-paper" dir="ltr">GATE 09</span>}
+              <span className="hidden font-mono tabular-nums text-[9px] font-black tracking-[0.18em] text-paper/80 sm:inline" dir="ltr">5V5 · HAPOEL ALL-TIME</span>
             </div>
-            <h1 className="mt-1 font-display text-[22px] leading-[0.82] sm:mt-3 sm:text-[76px]">{t('title')}</h1>
-            <div className="mt-1 hidden h-1.5 w-16 bg-red sm:mt-3 sm:block sm:h-2 sm:w-24" />
-            <p className="mt-1 max-w-md font-body text-[11px] leading-snug text-paper/70 sm:mt-4 sm:text-[12px] sm:leading-relaxed" data-rumble="intro">
-              <span className="font-extrabold text-paper">{intro.title}</span>
+            <h1 className="mt-1 font-display text-[28px] leading-[0.85] sm:mt-3 sm:text-[76px]">{t('title')}</h1>
+            <p className="mt-1 max-w-md font-body text-[12px] leading-snug text-paper sm:mt-4 sm:text-[13px] sm:leading-relaxed" data-rumble="intro">
+              <span className="font-extrabold">{intro.title}</span>
               {intro.body && <span className="hidden sm:inline"> {intro.body}</span>}
             </p>
           </div>
 
-          <div className="flex min-w-[96px] flex-col justify-end border-s-hair border-paper/15 ps-3 sm:min-w-[180px] sm:ps-5">
-            <p className="font-mono tabular-nums text-[7px] font-black tracking-[0.15em] text-paper/35 sm:text-[8px]" dir="ltr">MONEY LEFT</p>
-            <div className="mt-0.5 flex items-end gap-2">
-              <p className={`font-display text-[22px] leading-none sm:text-[52px] ${remaining < 0 ? 'text-red' : 'text-paper'}`} dir="ltr">{money(remaining)}</p>
-              <span className="mb-1 hidden font-body text-[9px] text-paper/35 sm:inline">{t('budgetOf', { budget: money(activeDraft.budget) })}</span>
+          {/* the money: a cream plate with the crown — what is left, and the trail of how it went */}
+          <div data-rumble="budget" className="flex min-w-[112px] flex-col justify-center border-rule border-ink bg-paper px-2.5 py-1.5 text-ink sm:min-w-[190px] sm:px-4 sm:py-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="font-body text-[10px] font-extrabold leading-none text-red sm:text-[11px]">{t('moneyLeft')}</p>
+              <Crown className="h-3.5 w-5 text-ink sm:h-5 sm:w-7" />
             </div>
+            <p className={`mt-0.5 font-display text-[32px] leading-none sm:text-[52px] ${remaining < 0 ? 'text-red' : 'text-ink'}`} dir="ltr">{money(remaining)}</p>
             <BudgetTrail budget={activeDraft.budget} picks={picks} />
-            <div className="mt-1 h-1 bg-paper/10 sm:mt-3 sm:h-2"><div className="h-full bg-red transition-all duration-300 motion-reduce:transition-none" style={{ width: `${Math.min(100, progress)}%` }} /></div>
-            <div className="mt-1 hidden justify-between font-body text-[7px] text-paper/35 sm:mt-2 sm:flex sm:text-[8px]">
+            <div className="mt-1 h-1.5 bg-ink/15 sm:mt-3 sm:h-2"><div className="h-full bg-red transition-all duration-300 motion-reduce:transition-none" style={{ width: `${Math.min(100, progress)}%` }} /></div>
+            <div className="mt-1 hidden justify-between font-body text-[9px] text-muted sm:flex">
               <span>{t('lockedCount', { count: String(pickedCount) })}</span>
               <span>{t('archiveCount', { count: String(playerCount) })}</span>
             </div>
@@ -918,7 +927,7 @@ function RoyalRumbleRunInner({
           </div>
         </div>
 
-        <FitBox ratio={1.5} className="min-h-0 flex-1" innerClassName="flex items-stretch">
+        <FitBox ratio={1.08} className="min-h-0 flex-1" innerClassName="flex items-stretch">
           <div className="relative flex w-full">
             <RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${activeSlot}`} />
             <div className="grid w-full grid-cols-3 gap-1.5 sm:gap-3" role="group" aria-label={`${slotShort(currentSlot.rule)} · ${flexSlot ? t('flexQuestion') : t('draftQuestion')}`}>

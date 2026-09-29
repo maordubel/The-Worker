@@ -113,7 +113,10 @@ export function MyJourney({
                 {note}
               </p>
             )}
-            <ul className="mt-3 max-h-[34dvh] divide-y divide-ink/10 overflow-y-auto border-y border-ink/15">
+            <p className="mt-3 font-sign text-[13px] text-sign" data-away="journey-count">
+              {t('away89.mine.ticked', { n: String(ticked.length), total: String(data.visits.length) })}
+            </p>
+            <ul className="mt-1.5 max-h-[34dvh] divide-y divide-ink/10 overflow-y-auto border-y border-ink/15">
               {ticked.map((v) => {
                 const venue = data.venues[v.venueId]
                 return (
@@ -124,6 +127,7 @@ export function MyJourney({
                       className="flex min-h-tap w-full items-center justify-between gap-2 px-1 text-start font-body text-[12.5px] text-ink"
                     >
                       <span className="min-w-0 truncate">
+                        <span aria-hidden="true" className="me-1.5 text-red">✓</span>
                         {v.opponentHe} <span className="text-muted">· {venue?.cityHe}</span>
                       </span>
                       <span dir="ltr" className="shrink-0 font-mono text-[11px] tabular-nums text-muted">

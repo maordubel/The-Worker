@@ -2,6 +2,7 @@ export type RoyalRumbleMessageKey = keyof typeof COPY
 
 const COPY = {
   title: 'רויאל ראמבל',
+  moneyLeft: 'נשאר בקופה',
   description: 'בנה חמישיית הפועל בתקציב מוגבל, חשוף את היריבה וצא לקרב 5 על 5.',
   sub: '5 נגד 5 · תקציב 15 מיליון · הציון האמיתי נשאר סודי',
   goalkeeper: 'שוער', defence: 'הגנה', midfield: 'קישור', attack: 'התקפה',
@@ -16,7 +17,7 @@ const COPY = {
   ratingNever: 'לעולם לא נחשף', fadedNote: 'כרטיס דהוי = הבחירה הזאת לא משאירה מספיק כסף להשלים חמישייה חוקית.',
   invalidFive: 'החמישייה לא עברה אימות. בחר חמישה שחקנים מתוך ההגרלה ובתקציב.', locking: 'נועל את הזירה…',
   lockReady: 'נעל חמישייה · פתח את דלתות היריבה', missingPlayers: 'חסרים עוד {count} שחקנים',
-  rulePrice: '€1M–€5M הוא מחיר, לא Rating.', ruleRange: 'שני שחקני €5M יכולים להיות רחוקים מאוד בכוח.',
+  rulePrice: '€1M–€5M הוא מחיר, לא Rating.', ruleRange: 'שני שחקני €4M יכולים להיות רחוקים מאוד בכוח.',
   ruleOpponent: 'היריבה נקבעת מראש — אין התאמה לבחירות שלך.',
   challengeBody: 'אותם 15 מועמדים, אותה יריבה, אותו תקציב. רק ההחלטות משתנות. עכשיו אפשר להתווכח על החמישייה — לא על ההגרלה.',
   challengeCopied: 'הלינק הועתק', challengeShared: 'נשלח. עכשיו שיבנה.',

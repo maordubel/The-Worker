@@ -37,8 +37,8 @@ const byName = (nameHe: string): Searchable => {
 const spells = (entry: Searchable) => spellsFor(entry, board.versions[entry.slug])
 
 describe('האתגרים — six rules and "free", checked against the chosen spell', () => {
-  it('knows its six rules and refuses anything else', () => {
-    expect([...CHALLENGES]).toEqual(['free', 'decades', 'pre2000', 'modern', 'israeli', 'foreign'])
+  it('knows its seven rules (six plus the decade mission) and refuses anything else', () => {
+    expect([...CHALLENGES]).toEqual(['free', 'decades', 'pre2000', 'modern', 'israeli', 'foreign', 'span'])
     for (const id of CHALLENGES) expect(isChallenge(id)).toBe(true)
     expect(isChallenge('best')).toBe(false)
     expect(isChallenge(undefined)).toBe(false)

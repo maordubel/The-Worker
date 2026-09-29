@@ -81,6 +81,7 @@ export function VerbStrip({
   chosen,
   disabled = false,
   wrap = false,
+  showVerbs = true,
   onVerb,
   onEdit,
 }: {
@@ -91,9 +92,12 @@ export function VerbStrip({
   disabled?: boolean
   /** desktop: wrap into rows instead of swiping */
   wrap?: boolean
+  /** contextual controls (29.9.2026): the verbs appear only once there is a man to act with */
+  showVerbs?: boolean
   onVerb: (action: ReplayAction, el: HTMLElement) => void
   onEdit: (index: number) => void
 }) {
+  if (!showVerbs && touches.length === 0) return null
   return (
     <div
       data-goal="actionRow"
@@ -123,7 +127,8 @@ export function VerbStrip({
           ))}
         </ol>
       )}
-      {touches.length > 0 && <span aria-hidden="true" className="w-px shrink-0 self-stretch bg-ink/30" />}
+      {showVerbs && touches.length > 0 && <span aria-hidden="true" className="w-px shrink-0 self-stretch bg-ink/30" />}
+      {showVerbs && (
       <ul className={`flex gap-1 ${wrap ? 'flex-wrap' : ''}`}>
         {REPLAY_ACTIONS.map((action) => {
           const on = chosen === action
@@ -146,6 +151,7 @@ export function VerbStrip({
           )
         })}
       </ul>
+      )}
     </div>
   )
 }

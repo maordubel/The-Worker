@@ -32,15 +32,15 @@ export function ClueStack({ clues, total, fresh }: { clues: OpenClue[]; total: n
     <div className="flex min-h-0 flex-1 flex-col">
       {/* the mark takes whatever room the chain has not claimed yet, and gives it back:
           it is sized in container-height units, so ten clues shrink it to a stamp */}
-      <div className="flex min-h-[36px] flex-1 items-center justify-center gap-[3cqh] overflow-hidden [container-type:size] md:gap-4 md:py-6 md:[container-type:normal]">
-        <CowMark className="me-1 text-[min(62cqh,150px)] md:text-[110px]" />
-        <p className="font-display text-[min(17cqh,36px)] leading-none text-ink md:text-[34px]">{t('blindcow.lobby.title')}</p>
+      <div className="bc-stage my-1 flex min-h-[44px] flex-[0_1_210px] items-center justify-center gap-[3cqh] overflow-hidden border-rule border-ink [container-type:size] md:gap-4 md:py-6 md:[container-type:normal]">
+        <CowMark dark className="me-1 text-[min(62cqh,150px)] md:text-[110px]" />
+        <p className="font-display text-[min(17cqh,36px)] leading-none text-paper md:text-[34px]">{t('blindcow.lobby.title')}</p>
       </div>
       <ol
         ref={listRef}
         aria-label={t('blindcow.stack.label')}
         aria-live="polite"
-        className="flex min-h-0 shrink flex-col gap-1 overflow-y-auto overscroll-contain pb-1"
+        className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain pb-1"
       >
         {clues.map((clue, i) => {
           const last = i === clues.length - 1
@@ -50,8 +50,8 @@ export function ClueStack({ clues, total, fresh }: { clues: OpenClue[]; total: n
               ref={last ? lastRef : undefined}
               className={
                 last
-                  ? 'relative flex shrink-0 items-stretch border-rule border-ink bg-paper animate-fx-pop'
-                  : 'flex shrink-0 items-baseline gap-2 border-b-hair border-ink/25 px-1 py-[3px]'
+                  ? 'relative flex shrink-0 items-stretch border-rule border-ink bg-sheet animate-fx-pop'
+                  : 'flex shrink-0 items-baseline gap-2 border-hair border-ink/30 bg-sheet px-1.5 py-1'
               }
             >
               {last ? (
@@ -61,7 +61,12 @@ export function ClueStack({ clues, total, fresh }: { clues: OpenClue[]; total: n
                     <span className="plate-top relative text-red">{clue.n}</span>
                   </span>
                   <span className="min-w-0 flex-1 px-2.5 py-2">
-                    <span className="block font-body text-[10px] font-extrabold tracking-widest text-sign">{clue.labelHe}</span>
+                    <span className="flex items-center gap-1.5 font-body text-[10px] font-extrabold tracking-widest text-sign">
+                      {clue.labelHe}
+                      <span data-blindcow="new" className="bg-red px-1 py-px text-[9.5px] leading-none text-paper">
+                        {t('blindcow.clue.new')}
+                      </span>
+                    </span>
                     <span className="mt-0.5 block font-sign text-[17px] leading-snug text-ink [@media(max-height:680px)]:text-[15px]">
                       <bdi>{clue.valueHe}</bdi>
                     </span>
@@ -72,7 +77,7 @@ export function ClueStack({ clues, total, fresh }: { clues: OpenClue[]; total: n
                   <span className="w-5 shrink-0 text-center font-poster text-[17px] leading-none text-red" aria-hidden="true">
                     {clue.n}
                   </span>
-                  <span className="min-w-0 flex-1 font-body text-[12.5px] leading-snug text-ink">
+                  <span className="min-w-0 flex-1 font-body text-[12.5px] leading-snug text-ink/70">
                     <span className="font-extrabold text-sign">{clue.labelHe}</span> · <bdi>{clue.valueHe}</bdi>
                   </span>
                 </>

@@ -22,3 +22,10 @@ export type CrossLink = {
 }
 
 export const CROSS_LINK_KINDS: readonly CrossLinkKind[] = ['archive', 'away', 'goal']
+
+/**
+ * The whole kit collection, as the Archive shows it (Gate 5 → Gate 12): every canonical kit
+ * record, one card each. The only address of it — Gate 5 links here, the archive page reads
+ * `SHOW_PARAM` — so a route of its own (`/kits/all`) never has to exist.
+ */
+export const KIT_COLLECTION_HREF = '/archive?show=kits'

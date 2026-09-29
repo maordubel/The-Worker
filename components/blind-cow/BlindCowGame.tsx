@@ -426,7 +426,11 @@ export function BlindCowGame({
             className="flex min-h-tap flex-col items-center justify-center border-rule border-ink bg-paper px-2 py-1 text-ink transition-transform duration-press active:scale-[.97] disabled:opacity-40 motion-reduce:transition-none"
           >
             <span className="font-body text-[14px] font-extrabold leading-tight">{last ? t('blindcow.more.none') : t('blindcow.more')}</span>
-            {!last && <span className="font-mono text-[10px] tabular-nums text-sign">{t('blindcow.more.cost')}</span>}
+            {!last && (
+              <span className="font-mono text-[10px] tabular-nums text-sign">
+                {t('blindcow.more.cost')} · {t('blindcow.more.left', { n: String(view.total - view.clues.length) })}
+              </span>
+            )}
           </button>
           <button
             type="button"
@@ -573,14 +577,20 @@ export function BlindCowGame({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col md:mx-auto md:block md:w-full md:max-w-[620px] md:flex-none">
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center md:min-h-[420px]">
-        <p className="font-latin text-[10px] font-bold tracking-[0.22em] text-red" dir="ltr">
+      <div
+        data-blindcow="portrait"
+        className="bc-stage relative mb-2 flex min-h-0 flex-1 flex-col items-center justify-center gap-2 overflow-hidden border-rule border-ink px-4 text-center text-paper md:min-h-[420px]"
+      >
+        <span aria-hidden="true" className="absolute start-2 top-1 font-poster text-[64px] leading-none text-paper/15" dir="ltr">
+          10
+        </span>
+        <p className="relative font-latin text-[10px] font-bold tracking-[0.22em] text-paper/70" dir="ltr">
           {t('blindcow.latin.gate')}
         </p>
-        <CowMark className="text-[min(40vw,150px)] [@media(max-height:680px)]:text-[84px]" />
-        <h2 className="font-display text-[34px] leading-none text-ink [@media(max-height:680px)]:text-[28px]">{t('blindcow.lobby.title')}</h2>
-        <p className="max-w-[30ch] font-body text-[13.5px] leading-snug text-ink">{t('blindcow.lobby.lede')}</p>
-        <p className="font-mono text-[11px] tabular-nums text-muted">{t('blindcow.lobby.count', { n: String(bankSize) })}</p>
+        <CowMark dark className="text-[min(40vw,150px)] [@media(max-height:680px)]:text-[84px]" />
+        <h2 className="relative font-display text-[36px] leading-none text-paper [@media(max-height:680px)]:text-[28px]">{t('blindcow.lobby.title')}</h2>
+        <p className="relative max-w-[30ch] font-body text-[13.5px] leading-snug text-paper/85">{t('blindcow.lobby.lede')}</p>
+        <p className="relative border-t-hair border-paper/30 pt-1 font-mono text-[11px] tabular-nums text-concrete">{t('blindcow.lobby.count', { n: String(bankSize) })}</p>
       </div>
 
       <div className="shrink-0 md:mx-auto md:max-w-[560px]">
@@ -598,7 +608,7 @@ export function BlindCowGame({
                     firePickFxAt(e.currentTarget, { tone: 'ink', haptic: 'tap' })
                   }}
                   className={`flex min-h-tap items-center whitespace-nowrap border-hair px-2.5 font-body text-[12px] font-extrabold transition-colors duration-press motion-reduce:transition-none ${
-                    filter === f.id ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
+                    filter === f.id ? 'border-red bg-red text-paper' : 'border-ink/50 bg-sheet text-ink'
                   }`}
                 >
                   {t(f.key)}
@@ -764,29 +774,31 @@ function Hud({ view, mode, skew, onQuit, sure }: { view: RunView; mode: Mode; sk
   const max = scoringConfig().duelMaxMs
   const label: Record<Mode, MessageKey> = { solo: 'blindcow.hud.solo', daily: 'blindcow.hud.daily', duel: 'blindcow.hud.duel' }
   return (
-    <div className="flex h-9 shrink-0 items-center gap-2 border-b-hair border-ink/30">
-      <span className="shrink-0 bg-ink px-1.5 py-0.5 font-body text-[10px] font-extrabold tracking-widest text-paper">{t(label[mode])}</span>
-      <span className="shrink-0 font-body text-[12.5px] font-extrabold text-ink">
-        {t('blindcow.hud.clue', { n: String(view.clues.length), total: String(view.total) })}
-      </span>
-      <ol className="flex min-w-0 flex-1 items-center gap-[3px]" aria-hidden="true">
+    <div data-blindcow="hud" className="shrink-0 border-rule border-ink bg-red text-paper">
+      <div className="flex h-11 items-center gap-2 px-2">
+        <span className="shrink-0 bg-ink px-1.5 py-0.5 font-body text-[10px] font-extrabold tracking-widest text-paper">{t(label[mode])}</span>
+        <span className="min-w-0 flex-1 truncate font-display text-[19px] leading-none">
+          {t('blindcow.hud.clue', { n: String(view.clues.length), total: String(view.total) })}
+        </span>
+        {view.wrong > 0 && (
+          <span className="shrink-0 border-hair border-paper px-1 font-mono text-[11px] font-bold tabular-nums">{t('blindcow.hud.wrong', { n: String(view.wrong) })}</span>
+        )}
+        <span className="shrink-0 bg-paper px-2 py-0.5 font-poster text-[22px] leading-none tabular-nums text-ink" dir="ltr" aria-live="off">
+          {mode === 'duel' ? t('blindcow.hud.left', { s: String(Math.max(0, Math.ceil((max - elapsed) / 1000))) }) : `${secondsLabel(elapsed)}″`}
+        </span>
+        <button
+          type="button"
+          onClick={onQuit}
+          className={`min-h-tap shrink-0 px-1 font-body text-[11px] font-extrabold ${sure ? 'bg-ink text-paper' : 'text-paper/85'}`}
+        >
+          {sure ? t('blindcow.giveup.sure') : t('blindcow.giveup')}
+        </button>
+      </div>
+      <ol className="flex items-center gap-[3px] bg-ink px-2 py-1.5" aria-hidden="true">
         {Array.from({ length: view.total }, (_, i) => (
-          <li key={i} className={`h-1.5 min-w-0 flex-1 ${i < view.clues.length ? 'bg-red' : 'bg-ink/15'}`} />
+          <li key={i} className={`h-2 min-w-0 flex-1 ${i < view.clues.length ? 'bg-red' : 'bg-paper/25'}`} />
         ))}
       </ol>
-      <span className="shrink-0 font-poster text-[22px] leading-none tabular-nums text-ink" dir="ltr" aria-live="off">
-        {mode === 'duel' ? t('blindcow.hud.left', { s: String(Math.max(0, Math.ceil((max - elapsed) / 1000))) }) : `${secondsLabel(elapsed)}″`}
-      </span>
-      {view.wrong > 0 && (
-        <span className="shrink-0 font-mono text-[11px] font-bold tabular-nums text-sign">{t('blindcow.hud.wrong', { n: String(view.wrong) })}</span>
-      )}
-      <button
-        type="button"
-        onClick={onQuit}
-        className={`min-h-tap shrink-0 px-1 font-body text-[11px] font-extrabold ${sure ? 'text-red' : 'text-muted'}`}
-      >
-        {sure ? t('blindcow.giveup.sure') : t('blindcow.giveup')}
-      </button>
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { t, type MessageKey } from '@/lib/i18n'
 import { accepted, kitRecords, playableKits, specOf, type KitMasterRecord } from '@/lib/kit/kit-master'
 import { photoMissing } from '@/lib/kit/photo'
 import { COLLARS, COLOUR_NAME, DEFAULT_SPEC, PATTERNS, SLEEVES, type KitSpec } from '@/lib/kit/spec'
+import { canonMaker, canonSponsor, colourFamily, judge, sameColour, sameMaker, sameSponsor } from '@/lib/kit/truth'
 import { hintReceipt, signKitUnlock, verifyHintReceipt } from '@/lib/kit/unlock'
 import { cycleSeed, positionOf, takeFrom } from '@/lib/rotation/deck'
 
@@ -58,7 +59,8 @@ export * from './kit-build-run'
  * accepts any of them, and an accepted alternate is never offered as a distractor.
  */
 
-type Bundle = { signature: string; labelHe: string; infoHe: string; patch: Partial<KitSpec> }
+/** `signature` names the option (it feeds the public id, so shared links never change); `key` is the canonical identity dedupe and grading compare */
+type Bundle = { signature: string; key?: string; labelHe: string; infoHe: string; patch: Partial<KitSpec> }
 
 const MAKERS = (manufacturersFile as unknown as { records: { slug: string; nameHe: string; nameEn: string }[] }).records
 const SPONSORS = (sponsorsFile as unknown as { records: { slug: string; nameHe: string; nameEn: string; industry?: string }[] }).records
@@ -86,6 +88,7 @@ function bundle(kit: KitMasterRecord, step: KitStep): Bundle | null {
     if (pattern === 'solid') {
       return {
         signature: `${base}|solid`,
+        key: `${colourFamily(base)}|solid`,
         labelHe: t('kitgame.opt.bodySolid', { base: colour(base) }),
         infoHe: t('kitgame.info.bodySolid', { base: colour(base) }),
         patch: { base, pattern, patternInk: base },
@@ -93,6 +96,7 @@ function bundle(kit: KitMasterRecord, step: KitStep): Bundle | null {
     }
     return {
       signature: `${base}|${pattern}|${ink}`,
+      key: `${colourFamily(base)}|${pattern}|${colourFamily(ink)}`,
       labelHe: t('kitgame.opt.body', { base: colour(base), pattern: labelOf(PATTERNS, pattern) }),
       infoHe: t('kitgame.info.body', { base: colour(base), pattern: labelOf(PATTERNS, pattern), ink: colour(ink) }),
       patch: { base, pattern, patternInk: ink },
@@ -104,6 +108,7 @@ function bundle(kit: KitMasterRecord, step: KitStep): Bundle | null {
     if (!collar || !sleeves) return null
     return {
       signature: `${collar.id}|${collar.ink}|${sleeves.id}|${sleeves.ink}`,
+      key: `${collar.id}|${colourFamily(collar.ink)}|${sleeves.id}|${colourFamily(sleeves.ink)}`,
       // the inks are in the label: four crew-and-plain options differ only by colour, and four
       // identical captions under four different shirts read as a bug
       labelHe: t('kitgame.opt.construction', {
@@ -149,6 +154,7 @@ function makerBundle(name: string): Bundle {
   const row = MAKERS.find((maker) => norm(maker.slug) === norm(name) || norm(maker.nameEn) === norm(name))
   return {
     signature: norm(name),
+    key: canonMaker(name) ?? norm(name),
     labelHe: name,
     infoHe: row ? t('kitgame.info.maker', { en: row.nameEn, he: row.nameHe }) : t('kitgame.info.makerPlain', { name }),
     patch: { makerHe: name },
@@ -160,6 +166,7 @@ function sponsorBundle(name: string): Bundle {
   const row = SPONSORS.find((sponsor) => norm(sponsor.slug) === key || norm(sponsor.nameEn.split(' ')[0] ?? '') === key || norm(sponsor.nameHe).startsWith(key))
   return {
     signature: key,
+    key: canonSponsor(name) ?? key,
     labelHe: name,
     infoHe: row?.industry
       ? t('kitgame.info.sponsor', { name: row.nameHe, industry: row.industry })
@@ -169,12 +176,13 @@ function sponsorBundle(name: string): Bundle {
 }
 
 /** the signatures a kit's step ACCEPTS — its value and every alternate */
-function acceptedSignatures(kit: KitMasterRecord, step: KitStep): Set<string> {
+function acceptedSignatures(kit: KitMasterRecord, step: KitStep, legacy: boolean): Set<string> {
   const own = bundle(kit, step)
-  const out = new Set<string>(own ? [own.signature] : [])
+  const out = new Set<string>(own ? [legacy ? own.signature : (own.key ?? own.signature)] : [])
   if (step === 'crest') for (const alt of kit.fields.crest.alternates) out.add(alt.key)
-  if (step === 'maker') for (const alt of kit.fields.maker.alternates) out.add(norm(alt.name))
-  if (step === 'sponsor') for (const alt of kit.fields.sponsor.alternates) out.add(norm(alt.name))
+  // a shared link from before the canonical maps replays its own dedupe; alternates fold either way
+  if (step === 'maker') for (const alt of kit.fields.maker.alternates) out.add(legacy ? norm(alt.name) : (canonMaker(alt.name) ?? norm(alt.name)))
+  if (step === 'sponsor') for (const alt of kit.fields.sponsor.alternates) out.add(legacy ? norm(alt.name) : (canonSponsor(alt.name) ?? norm(alt.name)))
   return out
 }
 
@@ -196,14 +204,15 @@ function neighbours(target: KitMasterRecord, all: readonly KitMasterRecord[]): K
     .map((row) => row.kit)
 }
 
-function candidates(target: KitMasterRecord, step: KitStep, all: readonly KitMasterRecord[], photo: boolean): Bundle[] {
-  const taken = acceptedSignatures(target, step)
+function candidates(target: KitMasterRecord, step: KitStep, all: readonly KitMasterRecord[], photo: boolean, legacy: boolean): Bundle[] {
+  const taken = acceptedSignatures(target, step, legacy)
   const out: Bundle[] = []
   for (const kit of neighbours(target, all)) {
     const b = bundle(kit, step)
-    if (!b || taken.has(b.signature)) continue
+    const id = b ? (legacy ? b.signature : (b.key ?? b.signature)) : ''
+    if (!b || taken.has(id)) continue
     if (photo && !drawable(target, step, b)) continue
-    taken.add(b.signature)
+    taken.add(id)
     out.push(b)
   }
   return out
@@ -335,7 +344,7 @@ function dealFresh(seed: number, cursor: number, window?: KitWindow, legacy = fa
     const count = window?.options ?? OPTION_RAMP[index] ?? 4
     const wantPhoto = kit.render.photo.available && kit.render.photo.complete
     const pick = (photo: boolean) =>
-      STEP_ORDER.map((step) => ({ step, rest: candidates(kit, step, all, photo).slice(0, count - 1) }))
+      STEP_ORDER.map((step) => ({ step, rest: candidates(kit, step, all, photo, legacy && !window).slice(0, count - 1) }))
     let look: 'photo' | 'vector' = wantPhoto ? 'photo' : 'vector'
     let picked = pick(look === 'photo')
     // photo only if every step still offers at least three honest options
@@ -375,40 +384,46 @@ export function dealKitRound(seed: number, cursor = 0, window?: KitWindow, legac
 }
 
 /* ------------------------------------------------------------------ grading */
-function fieldValue(kit: KitMasterRecord, patch: Partial<KitSpec>, field: KitGradeField): { ok: boolean; tolerant: boolean } {
+export function gradeKitField(kit: KitMasterRecord, patch: Partial<KitSpec>, field: KitGradeField): { ok: boolean; tolerant: boolean; unknown?: boolean } {
   const f = kit.fields
   const truthPattern = f.pattern.value
+  // one rule for every field: a truth the archive does not hold penalizes nobody
+  const verdictOf = (j: 'match' | 'mismatch' | 'unknown', tolerant = false) =>
+    j === 'unknown' ? { ok: true, tolerant: true, unknown: true } : { ok: j === 'match', tolerant }
   switch (field) {
     case 'base':
-      return { ok: patch.base === f.base.value, tolerant: false }
+      return verdictOf(judge(f.base.value, patch.base, sameColour))
     case 'pattern':
-      return { ok: patch.pattern === truthPattern, tolerant: false }
+      return verdictOf(judge(truthPattern, patch.pattern))
     case 'secondary':
       // a solid shirt's second ink is not on the cloth: a solid answer to a solid shirt is right
       if (truthPattern === 'solid') return { ok: patch.pattern === 'solid', tolerant: false }
-      return { ok: patch.patternInk === f.secondary.value, tolerant: false }
+      return verdictOf(judge(f.secondary.value, patch.patternInk, sameColour))
     case 'collar':
-      return { ok: patch.collar === f.collar.value?.id, tolerant: false }
+      return verdictOf(judge(f.collar.value?.id, patch.collar))
     case 'collarInk':
-      return { ok: patch.collarInk === f.collar.value?.ink, tolerant: false }
+      return verdictOf(judge(f.collar.value?.ink, patch.collarInk, sameColour))
     case 'sleeves':
-      return { ok: patch.sleeves === f.sleeves.value?.id, tolerant: false }
+      return verdictOf(judge(f.sleeves.value?.id, patch.sleeves))
     case 'sleeveInk':
-      return { ok: patch.sleeveInk === f.sleeves.value?.ink, tolerant: false }
+      return verdictOf(judge(f.sleeves.value?.ink, patch.sleeveInk, sameColour))
     case 'crest': {
       const own = f.crest.value?.key
+      if (own === undefined) return verdictOf('unknown')
       if (patch.crestKey === own) return { ok: true, tolerant: false }
       return { ok: accepted(f.crest).some((c) => c.key === patch.crestKey), tolerant: true }
     }
     case 'maker': {
-      const chosen = norm(patch.makerHe ?? '')
-      if (chosen === norm(f.maker.value?.name ?? '-')) return { ok: true, tolerant: false }
-      return { ok: accepted(f.maker).some((m) => norm(m.name) === chosen), tolerant: true }
+      const own = f.maker.value?.name
+      if (own === undefined) return verdictOf('unknown')
+      if (patch.makerHe && sameMaker(patch.makerHe, own)) return { ok: true, tolerant: false }
+      return { ok: !!patch.makerHe && accepted(f.maker).some((m) => sameMaker(m.name, patch.makerHe as string)), tolerant: true }
     }
     case 'sponsor': {
-      const chosen = norm(patch.sponsorHe ?? '')
-      if (chosen === norm(f.sponsor.value?.name ?? '-')) return { ok: true, tolerant: false }
-      return { ok: accepted(f.sponsor).some((s) => norm(s.name) === chosen), tolerant: true }
+      const own = f.sponsor.value?.name
+      if (own === undefined) return verdictOf('unknown')
+      if (patch.sponsorHe && sameSponsor(patch.sponsorHe, own)) return { ok: true, tolerant: false }
+      return { ok: !!patch.sponsorHe && accepted(f.sponsor).some((s) => sameSponsor(s.name, patch.sponsorHe as string)), tolerant: true }
     }
   }
 }
@@ -470,11 +485,12 @@ export function gradeKitPuzzle(
   const steps: StepVerdict[] = puzzle.steps.map(({ step, options }) => {
     const chosen = options.find((option) => option.id === placed[step]) ?? null
     const patch = chosen?.patch ?? {}
-    const truthPatch = (bundle(kit, step) as Bundle).patch
+    const truthPatch = bundle(kit, step)?.patch ?? {}
     let tolerant = false
     const fields: FieldVerdict[] = STEP_FIELDS[step].map((field) => {
-      const verdict = chosen ? fieldValue(kit, patch, field) : { ok: false, tolerant: false }
-      if (verdict.ok && verdict.tolerant) tolerant = true
+      const verdict: { ok: boolean; tolerant: boolean; unknown?: boolean } = chosen ? gradeKitField(kit, patch, field) : { ok: false, tolerant: false }
+      // an unknown truth is awarded but says nothing about the player's memory
+      if (verdict.ok && verdict.tolerant && !verdict.unknown) tolerant = true
       return {
         field,
         ok: verdict.ok,

@@ -43,6 +43,8 @@
   "blindcow.hud.daily": "היומי",
   "blindcow.hud.duel": "דו-קרב",
   "blindcow.hud.left": "נותרו {s}″",
+  "blindcow.clue.new": "חדש",
+  "blindcow.more.left": "עוד {n}",
   "blindcow.stack.label": "הרמזים שנפתחו",
   "blindcow.guess": "יש לי ניחוש",
   "blindcow.more": "תן עוד רמז",
