@@ -134,12 +134,12 @@ describe('§19 — Blind Cow "מהשנים שחיית": the answer never leaves 
 
 describe('§18 — the themed Rumble never touches the canonical one', () => {
   // the canonical boards of three seeds, hashed BEFORE the themed mode existed (28.9.2026) and
-  // re-pinned when the balance version went 2→3 and again when the owner re-priced players (29.9.2026, Gate 9): the deal is salted with the
+  // re-pinned when the balance version went 2→3, when the owner re-priced players, and when FLEX left the draft (29.9.2026, Gate 9): the deal is salted with the
   // version, so a new price ladder is a new board by design. The themed mode still changes nothing.
   const CANON: Array<[number, number, string]> = [
-    [12345, 0, '46863df2d11c8e0cf5f865d789332fbf823114656eb8597b144fe5d4c9d2c30a'],
-    [7, 2, '63190ad5ba6728506d106f65c706163580160da6bdba4ad164a0f41de77b6ecd'],
-    [2026, 1, '25b57ad939a3188d2aa77d9e5eaec6841069f61c15d411a7f439781e9eb42d5a'],
+    [12345, 0, '1dda974f7d6e9321491d9d972ad2c2f82caacd90021d34d82d954a1190dda971'],
+    [7, 2, 'e6727b88879b608c91e17dc9cb25b3c24e1dd17d238526fa2965313b04d8c19e'],
+    [2026, 1, '63bf38eb1dae4f4f7d1ca02e9f7c8ccf6c6676b713dc4b63154196804629c40e'],
   ]
   const hashOf = (seed: number, cursor: number) => {
     const { draft, shuffleDraft } = royalRumbleRoundDrafts(seed, cursor)

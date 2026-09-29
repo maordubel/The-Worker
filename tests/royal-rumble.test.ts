@@ -27,12 +27,12 @@ describe('Royal Rumble price bands', () => {
 })
 
 describe('Royal Rumble draft contract', () => {
-  it('deals five slots — GK · DF · MF · FLEX · FW — with three public cards each', () => {
+  it('deals five slots — GK · DF · MF · MF · FW — with three public cards each', () => {
     const draft = dealRoyalRumbleDraft(190923)
     expect(draft.budget).toBe(ROYAL_RUMBLE_BUDGET)
     expect(draft.version).toBe(ROYAL_RUMBLE_BALANCE_VERSION)
     expect(draft.slots).toHaveLength(ROYAL_RUMBLE_LINEUP_SIZE)
-    expect(draft.slots.map((slot) => slotLabel(slot.rule))).toEqual(['GK', 'DF', 'MF', 'FLEX', 'FW'])
+    expect(draft.slots.map((slot) => slotLabel(slot.rule))).toEqual(['GK', 'DF', 'MF', 'MF', 'FW'])
     expect(draft.slots.map((slot) => slot.rule)).toEqual([...ROYAL_RUMBLE_DRAFT_SLOTS])
     for (const slot of draft.slots) expect(slot.offers).toHaveLength(ROYAL_RUMBLE_OFFERS_PER_SLOT)
   })

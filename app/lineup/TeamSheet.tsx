@@ -111,6 +111,7 @@ export function TeamSheet({
   notesTaken,
   kit,
   look = null,
+  keeperLook = null,
   seed = '0',
   spoken,
   doors = [],
@@ -124,6 +125,7 @@ export function TeamSheet({
   kit: KitSpec | null
   /** the match season's REAL shirt (delta 88), as on the lockers */
   look?: ShirtLook | null
+  keeperLook?: ShirtLook | null
   /** the round, for the voice's deterministic walk through its pools */
   seed?: string
   /** the result line — "מצאת 9 מתוך 11." (lib/voice, §12) */
@@ -213,7 +215,7 @@ export function TeamSheet({
           </div>
 
           <div className="mt-3">
-            <BandPitch men={men} kit={kit} look={look} active={current?.playerId ?? null} />
+            <BandPitch men={men} kit={kit} look={look} keeperLook={keeperLook} active={current?.playerId ?? null} />
           </div>
 
           <div className="mt-3 border-rule border-ink bg-sheet p-3" aria-live="polite">
@@ -304,7 +306,7 @@ export function TeamSheet({
           )}
 
           <div className="mt-3">
-            <BandPitch men={men} kit={kit} look={look} />
+            <BandPitch men={men} kit={kit} look={look} keeperLook={keeperLook} />
           </div>
           {missing.length > 0 && (
             <p className="mt-1 font-body text-[11px] leading-snug text-muted">{t('lineup.zone.ghostNote')}</p>

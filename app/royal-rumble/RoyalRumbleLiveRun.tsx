@@ -256,14 +256,14 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, roundSeed, 
         const chosen = picks[i] ?? null
         return (
           <button key={`${label}-${i}`} type="button" onClick={() => setSlot(i)} aria-pressed={slot === i} aria-label={chosen ? `${label} · ${chosen.player.nameHe} · ${money(chosen.player.price)}` : `${label} · ${t('vacant')}`} className={`min-h-tap min-w-0 border p-1 text-center ${slot === i ? 'border-red bg-red' : 'border-paper/15'}`}>
-            <span className="font-mono tabular-nums text-[7px] font-black" dir="ltr">{chosen && s.rule.kind === 'flex' ? `${label}·${POSITION_SHORT[chosen.offeredAs]}` : label}</span>
+            <span className="font-mono tabular-nums text-[7px] font-black" dir="ltr">{label}</span>
             <span key={chosen?.player.slug ?? 'none'} className={`mt-1 block truncate font-body text-[9px] font-black md:text-[8px] ${chosen ? 'animate-fx-pop motion-reduce:animate-none' : ''}`}>{chosen?.player.nameHe ?? '—'}</span>
           </button>
         )
       })}
-      {/* the formation preview after FLEX (§43) — the same mini pitch as solo */}
-      <div className="flex min-w-0 flex-col justify-center border border-paper/10 p-0.5" title={formation ? (formation === 'defensive' ? t('formationDefensive') : t('formationCreative')) : t('formationPending')}>
-        {formation ? <FormationMini formation={formation} /> : <span className="text-center font-mono tabular-nums text-[7px] font-black text-paper/35" dir="ltr">1–?–?–1</span>}
+      {/* the one shape — the same mini pitch as solo */}
+      <div className="flex min-w-0 flex-col justify-center border border-paper/10 p-0.5" title={t('formationCreative')}>
+        <FormationMini formation={formation} />
       </div>
     </section>
 
@@ -280,7 +280,7 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, roundSeed, 
     {/* THE FIELD — the three offers, as big as the phone allows */}
     <section className="mt-1.5 flex min-h-0 flex-1 flex-col border-rule border-ink bg-paper p-1.5 text-ink md:mt-0 md:block md:flex-none md:p-5">
       <div className="mb-1 flex shrink-0 items-end justify-between gap-3">
-        <div className="min-w-0"><p className="font-mono tabular-nums text-[8px] font-black tracking-[.18em] text-red" dir="ltr">PICK {slot + 1}/5 · {slotShort(currentSlot.rule)}</p><h3 className="truncate font-display text-[16px] leading-none md:text-[28px]">{currentSlot.rule.kind === 'flex' ? t('flexQuestion') : t('draftQuestion')}</h3></div>
+        <div className="min-w-0"><p className="font-mono tabular-nums text-[8px] font-black tracking-[.18em] text-red" dir="ltr">PICK {slot + 1}/5 · {slotShort(currentSlot.rule)}</p><h3 className="truncate font-display text-[16px] leading-none md:text-[28px]">{t('draftQuestion')}</h3></div>
         <p className="hidden font-display text-[34px] text-red md:block" dir="ltr">{money(remaining)}</p>
       </div>
       <FitBox ratio={1.5} className="min-h-0 flex-1" innerClassName="flex items-stretch">
@@ -300,7 +300,7 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, roundSeed, 
                 onClick={(event) => { pick(offer); firePickFxAt(event.currentTarget, { label: money(player.price), tone: 'red', haptic: 'lock' }) }}
                 className={`flex h-full min-h-tap flex-col border-rule p-1.5 text-start transition duration-200 active:translate-y-1 motion-reduce:transition-none md:min-h-[245px] md:p-2 ${active ? 'translate-y-1 border-red bg-red text-paper' : 'border-ink bg-paper text-ink'} ${disabled ? 'opacity-25 grayscale' : ''}`}
               >
-                <div className="flex shrink-0 items-start justify-between"><span className={`font-mono tabular-nums text-[8px] font-black ${currentSlot.rule.kind === 'flex' ? 'border-hair px-1' : ''} ${active ? 'border-paper/50' : 'border-red text-red'}`} dir="ltr">{POSITION_SHORT[offeredAs]}</span><span className={`font-display text-[20px] leading-none md:text-[28px] ${active ? 'text-paper' : 'text-red'}`} dir="ltr">{money(player.price)}</span></div>
+                <div className="flex shrink-0 items-start justify-between"><span className={`font-mono tabular-nums text-[8px] font-black ${active ? 'border-paper/50' : 'border-red text-red'}`} dir="ltr">{POSITION_SHORT[offeredAs]}</span><span className={`font-display text-[20px] leading-none md:text-[28px] ${active ? 'text-paper' : 'text-red'}`} dir="ltr">{money(player.price)}</span></div>
                 <div className="mt-1 flex min-h-[40px] flex-1 items-center justify-center overflow-hidden md:mt-2 md:h-[112px] md:flex-none">
                   <Shirt player={player} kits={kits} className="h-full max-h-[116px] w-auto max-w-[102px] md:h-[116px] md:w-[102px]" />
                 </div>
@@ -333,7 +333,7 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, roundSeed, 
         <p className="font-body text-[13px] leading-relaxed text-ink">{t('liveCreateBody')}</p>
         <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('rulePrice')}</p>
         <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('ruleRange')}</p>
-        <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('flexHint')}</p>
+        <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('fixedOrderHint')}</p>
         <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('shuffleBeforePick')}</p>
         <p className="font-body text-[11px] text-concrete">{t('budgetOf', { budget: money(activeDraft.budget) })}</p>
       </div>

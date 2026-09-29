@@ -91,3 +91,65 @@ describe('playerShirt — THE WORKER LIFE year', () => {
     }
   })
 })
+
+/**
+ * Delta 100 — the goalkeeper's shirt (owner brief 29.9.2026): where the archive holds an exact
+ * goalkeeper photograph for a season, a keeper wears it; where it does not, he wears the
+ * home shirt; a field player never wears one; and a pinned season is honoured.
+ */
+describe('playerShirt — the goalkeeper', () => {
+  const keepers = allPlayers().filter((player) => {
+    const codes = player.positions?.codes ?? []
+    return codes.length > 0 && codes.every((code) => code === 'GK')
+  })
+  const gkPhotoSeasons = new Set(
+    archiveShirts()
+      .filter((shirt) => shirt.variant === 'gk' && shirt.seasonLabel && !shirt.seasonAmbiguous)
+      .map((shirt) => shirt.seasonLabel as string),
+  )
+  const pinnedKeeper = keepers.find((player) => player.spells.some((spell) => spell.seasons.some((season) => gkPhotoSeasons.has(season))))
+
+  it('a keeper whose season has an exact goalkeeper photograph wears it', () => {
+    expect(pinnedKeeper).toBeTruthy()
+    const season = pinnedKeeper!.spells.flatMap((spell) => spell.seasons).find((s) => gkPhotoSeasons.has(s))!
+    const look = playerShirt(pinnedKeeper!, { season })
+    expect(look.kind).toBe('photo')
+    if (look.kind === 'photo') {
+      expect(look.variant).toBe('gk')
+      expect(look.seasonLabel).toBe(season)
+      expect(look.approx).toBe(false)
+    }
+  })
+
+  it('a keeper with no goalkeeper photograph for his season falls back to the home shirt', () => {
+    const homeOnly = keepers.find((player) => {
+      const seasons = player.spells.flatMap((spell) => spell.seasons)
+      return seasons.length > 0 && seasons.every((season) => !gkPhotoSeasons.has(season))
+    })
+    expect(homeOnly).toBeTruthy()
+    const look = playerShirt(homeOnly!)
+    if (look.kind === 'photo') expect(look.variant).not.toBe('gk')
+    expect(look).toBeTruthy()
+  })
+
+  it('a field player is never dressed in a goalkeeper shirt', () => {
+    for (const player of allPlayers()) {
+      if (keepers.includes(player)) continue
+      const look = playerShirt(player)
+      if (look.kind === 'photo') expect(look.variant).not.toBe('gk')
+      for (const season of player.spells.flatMap((spell) => spell.seasons).slice(0, 3)) {
+        const pinned = playerShirt(player, { season })
+        if (pinned.kind === 'photo') expect(pinned.variant).not.toBe('gk')
+      }
+    }
+  })
+
+  it('a slot that IS the keeper (gate 3, no man named) resolves to that season’s goalkeeper shirt', () => {
+    const season = [...gkPhotoSeasons][0]!
+    const look = playerShirt(null, { season, keeper: true })
+    expect(look.kind).toBe('photo')
+    if (look.kind === 'photo') expect(look.variant).toBe('gk')
+    const outfield = playerShirt(null, { season })
+    if (outfield.kind === 'photo') expect(outfield.variant).not.toBe('gk')
+  })
+})

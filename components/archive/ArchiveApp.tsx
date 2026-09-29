@@ -509,7 +509,7 @@ export function ArchiveApp({
       {census && (
         <SlideSheet open={censusOpen} onClose={() => setCensusOpen(false)} title={t('census.kicker')} latin="EVERY NAME" size="auto">
           <PlayerCensus census={census} compact />
-          <a href="/hapoel#club-players" className="mt-2 flex min-h-tap items-center justify-between border-rule border-ink bg-sheet px-3 font-body text-[14px] font-extrabold text-ink">
+          <a href="/hapoel?door=players" className="mt-2 flex min-h-tap items-center justify-between border-rule border-ink bg-sheet px-3 font-body text-[14px] font-extrabold text-ink">
             <span>{t('census.allNames')}</span>
             <span aria-hidden="true" className="text-red">←</span>
           </a>

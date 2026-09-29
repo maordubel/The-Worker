@@ -124,6 +124,11 @@ export default function LineupPage({
               ? playerShirt(null, { season: challenge.intro.season || challenge.kitSeason })
               : null
           }
+          keeperLook={
+            challenge.intro.season || challenge.kitSeason
+              ? playerShirt(null, { season: challenge.intro.season || challenge.kitSeason, keeper: true })
+              : null
+          }
           intro={challenge.intro}
           sourceTitle={challenge.sourceTitle}
           fixture={{

@@ -115,6 +115,7 @@ export function LineupBoard({
   kit,
   kitSeason,
   look = null,
+  keeperLook = null,
   intro = null,
   sourceTitle = '',
   fixture = null,
@@ -134,6 +135,8 @@ export function LineupBoard({
    * a per-man era shirt would leak who belongs to the season. Absent (LIFE), the drawing.
    */
   look?: ShirtLook | null
+  /** the same night's goalkeeper shirt — the GK band wears it */
+  keeperLook?: ShirtLook | null
   /** the match record, for the phone stage's "פרטי המשחק" sheet — absent inside LIFE */
   intro?: MatchIntro | null
   sourceTitle?: string
@@ -366,6 +369,7 @@ export function LineupBoard({
                 men={men}
                 kit={kit}
                 look={look}
+                keeperLook={keeperLook}
                 target={railOpen ? railLine : null}
                 active={active}
                 onBand={tapBandStage}
@@ -556,6 +560,7 @@ export function LineupBoard({
                 men={men}
                 kit={kit}
                 look={look}
+                keeperLook={keeperLook}
                 active={active}
                 armed={held !== null || active !== null}
                 armedLine={armedLine}
@@ -669,6 +674,7 @@ export function LineupBoard({
           notesTaken={notes.length}
           kit={kit}
           look={look}
+          keeperLook={keeperLook}
           seed={`${seed}:${cursor}`}
           spoken={voice({
             gate: 3,

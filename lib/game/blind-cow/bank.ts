@@ -22,7 +22,7 @@ export function questionById(id: string | null | undefined): BlindCowQuestion | 
 }
 
 /** The lobby's filters (spec §3 State 1) — few, and each one a real facet of the bank. */
-export const FILTERS = ['all', 'israeli', 'foreign', 'legend', 'hardcore', 'lived', '1950', '1960', '1970', '1980', '1990', '2000', '2010', '2020'] as const
+export const FILTERS = ['all', 'israeli', 'foreign', 'familiar', 'deep', 'legend', 'hardcore', 'lived', '1950', '1960', '1970', '1980', '1990', '2000', '2010', '2020'] as const
 export type Filter = (typeof FILTERS)[number]
 
 export function cleanFilter(value: unknown): Filter {
@@ -36,6 +36,12 @@ function matches(q: BlindCowQuestion, filter: Filter): boolean {
     case 'israeli':
     case 'foreign':
       return q.tags.origin === filter
+    case 'familiar':
+      // the players a supporter is likely to know: appearances + Royal Rumble price (`recognition.ts`)
+      return q.recognition?.tier === 'familiar'
+    case 'deep':
+      // deep cuts: little known, or a man the archive holds no price for
+      return !q.recognition || q.recognition.tier === 'deep'
     case 'legend':
       return q.tags.legend
     case 'hardcore':
@@ -77,7 +83,10 @@ export function pickSolo(filter: Filter, recent: readonly string[], lived?: read
 
 /** היומי — one question for everybody on a date, from a fixed seed on the server (§2.2). */
 export function dailyQuestion(day: string): BlindCowQuestion | null {
-  const pool = BANK.questions.filter((q) => q.eligibleModes.includes('daily'))
+  // everybody plays the same one: never a deep cut when a man more people know is available
+  const all = BANK.questions.filter((q) => q.eligibleModes.includes('daily'))
+  const known = all.filter((q) => q.recognition && q.recognition.tier !== 'deep')
+  const pool = known.length >= 30 ? known : all
   if (!pool.length) return null
   const h = createHash('sha256').update(`worker-blind-cow-daily|${day}`).digest()
   return pool[h.readUInt32BE(0) % pool.length] ?? null

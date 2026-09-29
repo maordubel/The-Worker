@@ -26,7 +26,6 @@ import {
   parseSelection,
   resolvePublicFormation,
   ROYAL_RUMBLE_DRAFT_VERSION,
-  ROYAL_RUMBLE_FLEX_SLOT,
   toLivePicks,
   toSelection,
   type RoyalRumblePick,
@@ -69,26 +68,14 @@ function cheapestLineup(draft: RoyalRumbleDraft): Lineup {
 const SWEEP_STEP = process.env.RUMBLE_FULL_SWEEP ? 1 : 7
 
 describe('slot composition', () => {
-  it('deals FLEX as two midfielders and a defender, or two defenders and a midfielder — never a flat pool', () => {
+  it('deals every slot as its own fixed position — GK · DF · MF · MF · FW — never a flat FLEX pool', () => {
     for (let seed = 0; seed < 60; seed += 1) {
-      const flex = dealRoyalRumbleDraft(seed).slots[ROYAL_RUMBLE_FLEX_SLOT]!
-      const df = flex.offers.filter((offer) => offer.offeredAs === 'DF').length
-      const mf = flex.offers.filter((offer) => offer.offeredAs === 'MF').length
-      expect([df, mf].sort()).toEqual([1, 2])
-    }
-  })
-
-  it('offers every fixed slot as its own position, and every card as a position the man is documented in', () => {
-    const { players } = royalRumbleAuditView()
-    const documented = new Map(players.map((player) => [player.slug, player.positions]))
-    for (let seed = 0; seed < 60; seed += 1) {
-      for (const slot of dealRoyalRumbleDraft(seed).slots) {
-        for (const offer of slot.offers) {
-          if (slot.rule.kind === 'fixed') expect(offer.offeredAs).toBe(slot.rule.position)
-          else expect(['DF', 'MF']).toContain(offer.offeredAs)
-          expect(documented.get(offer.player.slug)).toContain(offer.offeredAs)
-        }
-      }
+      const draft = dealRoyalRumbleDraft(seed)
+      draft.slots.forEach((slot, index) => {
+        const want = (['GK', 'DF', 'MF', 'MF', 'FW'] as const)[index]!
+        expect(slot.rule).toEqual({ kind: 'fixed', position: want })
+        for (const offer of slot.offers) expect(offer.offeredAs).toBe(want)
+      })
     }
   })
 
@@ -100,8 +87,6 @@ describe('slot composition', () => {
       expect(attempt).toBeGreaterThanOrEqual(0)
       expect(slots).toHaveLength(5)
       expect(quality.cheapest).toBeLessThanOrEqual(ROYAL_RUMBLE_BUDGET)
-      expect(quality.formationA).toBeGreaterThanOrEqual(1)
-      expect(quality.formationB).toBeGreaterThanOrEqual(1)
       expect(quality.deadPrefixes).toBe(0)
       expect(quality.legalLineups).toBeGreaterThan(0)
       if (quality.legalRatio >= 0.3 && quality.legalRatio <= 0.65) inBand += 1
@@ -116,7 +101,6 @@ describe('slot composition', () => {
     expect(all).toHaveLength(243)
     expect(quality.legalLineups).toBe(legalLineups(draft).length)
     expect(quality.cheapest).toBe(cheapestLineup(draft).cost)
-    expect(quality.formationA + quality.formationB).toBe(quality.legalLineups)
   })
 })
 
@@ -145,14 +129,13 @@ describe('multi-position men', () => {
   it('validates a two-way man only as the position he was offered in that slot', () => {
     for (let seed = 0; seed < 400; seed += 1) {
       const draft = dealRoyalRumbleDraft(seed)
-      const flex = draft.slots[ROYAL_RUMBLE_FLEX_SLOT]!
-      const card = flex.offers.find((offer) => offer.player.positions.length > 1)
+      const slot = draft.slots[2]!
+      const card = slot.offers.find((offer) => offer.player.positions.length > 1 && offer.player.positions.includes('DF'))
       if (!card) continue
-      const other: 'DF' | 'MF' = card.offeredAs === 'DF' ? 'MF' : 'DF'
-      const legal = legalLineups(draft).find((lineup) => lineup.selection[ROYAL_RUMBLE_FLEX_SLOT]!.slug === card.player.slug)
+      const legal = legalLineups(draft).find((lineup) => lineup.selection[2]!.slug === card.player.slug)
       if (!legal) continue
       expect(playRoyalRumble(seed, legal.selection)).not.toBeNull()
-      const swapped: RoyalRumbleSelection[] = legal.selection.map((pick, index) => (index === ROYAL_RUMBLE_FLEX_SLOT ? { ...pick, offeredAs: other } : pick))
+      const swapped: RoyalRumbleSelection[] = legal.selection.map((pick, index) => (index === 2 ? { ...pick, offeredAs: 'DF' as const } : pick))
       expect(playRoyalRumble(seed, swapped)).toBeNull()
       return
     }
@@ -160,9 +143,9 @@ describe('multi-position men', () => {
 })
 
 describe('formation validity', () => {
-  it('resolves exactly two formations from the five, and nothing else', () => {
-    expect(formationOf(['GK', 'DF', 'MF', 'DF', 'FW'])).toBe('defensive')
+  it('resolves exactly one shape from the five — 1-1-2-1 — and nothing else', () => {
     expect(formationOf(['GK', 'DF', 'MF', 'MF', 'FW'])).toBe('creative')
+    expect(formationOf(['GK', 'DF', 'MF', 'DF', 'FW'])).toBeNull()
     expect(formationOf(['GK', 'DF', 'DF', 'DF', 'FW'])).toBeNull()
     expect(formationOf(['GK', 'MF', 'MF', 'MF', 'FW'])).toBeNull()
     expect(formationOf(['GK', 'GK', 'MF', 'DF', 'FW'])).toBeNull()
@@ -170,34 +153,19 @@ describe('formation validity', () => {
     expect(resolveFormation([{ offeredAs: 'GK' }, { offeredAs: 'DF' }, { offeredAs: 'MF' }, { offeredAs: 'MF' }, { offeredAs: 'FW' }])).toBe('creative')
   })
 
-  it('reads the formation off the FLEX pick alone on the client', () => {
-    const draft = dealRoyalRumbleDraft(5)
+  it('knows the shape from the first pick — there is no decision left in it', () => {
     const picks: RoyalRumblePick[] = [null, null, null, null, null]
-    expect(resolvePublicFormation(picks)).toBeNull()
-    const flex = draft.slots[ROYAL_RUMBLE_FLEX_SLOT]!.offers
-    picks[ROYAL_RUMBLE_FLEX_SLOT] = flex.find((offer) => offer.offeredAs === 'DF') ?? null
-    expect(resolvePublicFormation(picks)).toBe('defensive')
-    picks[ROYAL_RUMBLE_FLEX_SLOT] = flex.find((offer) => offer.offeredAs === 'MF') ?? null
     expect(resolvePublicFormation(picks)).toBe('creative')
   })
 
-  it('plays the resolved formation into the result and onto the pitch', () => {
+  it('plays 1-1-2-1 into the result and onto the pitch, for both sides', () => {
     const draft = dealRoyalRumbleDraft(31)
-    const legal = legalLineups(draft)
-    const defensive = legal.find((lineup) => lineup.selection[ROYAL_RUMBLE_FLEX_SLOT]!.offeredAs === 'DF')!
-    const creative = legal.find((lineup) => lineup.selection[ROYAL_RUMBLE_FLEX_SLOT]!.offeredAs === 'MF')!
-    const a = playRoyalRumble(31, defensive.selection)!
-    const b = playRoyalRumble(31, creative.selection)!
-    expect(a.formation).toBe('defensive')
-    expect(b.formation).toBe('creative')
-    expect(a.frames[0]!.us.map((player) => player.position).sort()).toEqual(['DF', 'DF', 'FW', 'GK', 'MF'])
-    expect(b.frames[0]!.us.map((player) => player.position).sort()).toEqual(['DF', 'FW', 'GK', 'MF', 'MF'])
-    // the two shapes are visible on the grass: the defensive five's two defenders share a column
-    const defenders = a.frames[0]!.us.filter((player) => player.position === 'DF')
-    expect(defenders[0]!.x).toBe(defenders[1]!.x)
-    expect(defenders[0]!.y).not.toBe(defenders[1]!.y)
-    expect(['defensive', 'creative']).toContain(a.opponentFormation)
-    expect(formationOf(a.opponent.map((offer) => offer.offeredAs))).toBe(a.opponentFormation)
+    const lineup = legalLineups(draft)[0]!
+    const a = playRoyalRumble(31, lineup.selection)!
+    expect(a.formation).toBe('creative')
+    expect(a.opponentFormation).toBe('creative')
+    expect(a.frames[0]!.us.map((player) => player.position).sort()).toEqual(['DF', 'FW', 'GK', 'MF', 'MF'])
+    expect(formationOf(a.opponent.map((offer) => offer.offeredAs))).toBe('creative')
   })
 })
 
@@ -300,7 +268,7 @@ describe('the historical window', () => {
       expect(slots).toHaveLength(5)
       expect(slots.every((slot) => slot.offers.length === 3)).toBe(true)
       expect(quality.cheapest).toBeLessThanOrEqual(ROYAL_RUMBLE_BUDGET)
-      expect(quality.formationA + quality.formationB).toBeGreaterThan(0)
+      expect(quality.legalLineups).toBeGreaterThan(0)
     }
     // and a window nobody can be dealt over composes nothing — never a guess past the cutoff
     expect(composeRoyalRumbleBoard(3, { before: 1935 }).slots).toHaveLength(0)
@@ -387,15 +355,12 @@ describe('property sweep (§79)', () => {
           slugs.push(offer.player.slug)
           expect(offer.player.price).toBeGreaterThanOrEqual(1)
           expect(offer.player.price).toBeLessThanOrEqual(5)
-          if (slot.rule.kind === 'fixed') expect(offer.offeredAs).toBe(slot.rule.position)
-          else expect(['DF', 'MF']).toContain(offer.offeredAs)
+          expect(offer.offeredAs).toBe(slot.rule.position)
         }
       }
       expect(new Set(slugs).size).toBe(15)
       const quality = evaluateRoyalRumbleBoard(draft.slots)
       expect(quality.legalLineups).toBeGreaterThan(0)
-      expect(quality.formationA).toBeGreaterThanOrEqual(1)
-      expect(quality.formationB).toBeGreaterThanOrEqual(1)
       expect(quality.deadPrefixes).toBe(0)
       expect(quality.cheapest).toBeLessThanOrEqual(ROYAL_RUMBLE_BUDGET)
     }

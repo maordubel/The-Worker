@@ -133,10 +133,7 @@ async function main() {
   const push = (name: string, value: number) => (metrics[name] ??= []).push(value)
   const moods: Record<string, number> = {}
   const appearances = new Map<string, number>()
-  const flexAs: Record<string, number> = { DF: 0, MF: 0 }
   let failed = 0
-  let boardFormationA = 0
-  let boardFormationB = 0
   const started = Date.now()
   for (let seed = 0; seed < seeds; seed += 1) {
     const { slots, quality, mood, attempt } = view.compose(seed, window)
@@ -147,22 +144,19 @@ async function main() {
     moods[mood] = (moods[mood] ?? 0) + 1
     for (const [name, value] of Object.entries(quality)) push(name, value)
     push('attempt', attempt)
-    boardFormationA += quality.formationA
-    boardFormationB += quality.formationB
     for (const slot of slots) {
       for (const offer of slot.offers) {
         appearances.set(offer.player.slug, (appearances.get(offer.player.slug) ?? 0) + 1)
-        if (slot.rule.kind === 'flex') flexAs[offer.offeredAs] = (flexAs[offer.offeredAs] ?? 0) + 1
       }
     }
   }
   console.log(`composed ${seeds - failed} · failed ${failed} · ${((Date.now() - started) / 1000).toFixed(1)}s`)
   console.log('moods:', Object.entries(moods).map(([mood, n]) => `${mood} ${pct(n, seeds - failed)}`).join(' · '))
-  for (const name of ['legalLineups', 'legalRatio', 'cheapest', 'dearest', 'premiumCards', 'valueCards', 'fiveCards', 'samePriceSlots', 'formationA', 'formationB', 'deadPrefixes', 'openShare', 'score', 'attempt']) {
+  for (const name of ['legalLineups', 'legalRatio', 'cheapest', 'dearest', 'premiumCards', 'valueCards', 'fiveCards', 'samePriceSlots', 'deadPrefixes', 'openShare', 'score', 'attempt']) {
     console.log(row(name, stat(metrics[name] ?? [])))
   }
   const inBand = (metrics.legalRatio ?? []).filter((v) => v >= 0.3 && v <= 0.65).length
-  console.log(`legal ratio in 30–65%: ${pct(inBand, seeds - failed)} · dead prefixes = 0: ${pct((metrics.deadPrefixes ?? []).filter((v) => v === 0).length, seeds - failed)} · both formations legal: ${pct((metrics.formationA ?? []).filter((v, i) => v >= 1 && (metrics.formationB?.[i] ?? 0) >= 1).length, seeds - failed)}`)
+  console.log(`legal ratio in 30–65%: ${pct(inBand, seeds - failed)} · dead prefixes = 0: ${pct((metrics.deadPrefixes ?? []).filter((v) => v === 0).length, seeds - failed)}`)
 
   console.log('by mood (held), 300 seeds each — first-rung acceptance and what the boards look like:')
   for (const mood of ['balanced', 'star-heavy', 'value', 'tight', 'wild'] as const) {
@@ -176,8 +170,6 @@ async function main() {
 
   /* ---------------------------------------------------------------- formation split (§65) */
   console.log('\n== FORMATION ==')
-  console.log(`legal lineups: 1DF+2MF ${pct(boardFormationA, boardFormationA + boardFormationB)} · 2DF+1MF ${pct(boardFormationB, boardFormationA + boardFormationB)}`)
-  console.log(`FLEX cards dealt as: DF ${pct(flexAs.DF ?? 0, (flexAs.DF ?? 0) + (flexAs.MF ?? 0))} · MF ${pct(flexAs.MF ?? 0, (flexAs.DF ?? 0) + (flexAs.MF ?? 0))}`)
 
   /* ---------------------------------------------------------------- appearances (§64) */
   console.log('\n== APPEARANCES ==')

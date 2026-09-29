@@ -264,9 +264,10 @@ function recordOf(ref: PlayerRef): PlayerMasterRecord | null {
  * WORKER LIFE's year) keeps every season, photo and drawing to seasons that had BEGUN before
  * it — a man in 1993 wears a shirt the living room has already seen (rules 45, 88).
  */
-export function playerShirt(ref: PlayerRef, opts: { season?: string | null; before?: number | null } = {}): ShirtLook {
+export function playerShirt(ref: PlayerRef, opts: { season?: string | null; before?: number | null; keeper?: boolean } = {}): ShirtLook {
   const player = recordOf(ref)
-  const keeper = isKeeper(player)
+  // `opts.keeper` is for a slot that IS the goalkeeper's (gate 3's GK band) when no man is named
+  const keeper = opts.keeper ?? isKeeper(player)
   const before = typeof opts.before === 'number' && Number.isFinite(opts.before) ? opts.before : Infinity
   const found = erasOf(player, opts.season ?? undefined)
   const strict = found.strict

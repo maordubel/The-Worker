@@ -26,9 +26,10 @@ export type ClueType =
   | 'goal'
   | 'moment'
   | 'stat'
+  | 'song'
 
-/** A — identity · B — career at the club · C — achievements · D — match · E — goal/moment · F — stat */
-export type ClueFamily = 'A' | 'B' | 'C' | 'D' | 'E' | 'F'
+/** A — identity · B — career at the club · C — achievements · D — match · E — goal/moment · F — stat · G — the terrace (his song's tune) */
+export type ClueFamily = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G'
 
 export type BlindCowClue = {
   id: string
@@ -63,6 +64,15 @@ export type QuestionTags = {
   legend: boolean
 }
 
+/** how well the man is known (`recognition.ts`) — the PLAYER's difficulty, separate from any clue's */
+export type QuestionRecognition = {
+  tier: 'familiar' | 'known' | 'deep'
+  score: number
+  /** the wiki infobox figure, or null — never estimated */
+  appearances: number | null
+  basis: 'appearances+price' | 'price'
+}
+
 export type BlindCowQuestion = {
   id: string
   version: number
@@ -76,6 +86,8 @@ export type BlindCowQuestion = {
   families: ClueFamily[]
   eligibleModes: BlindCowMode[]
   tags: QuestionTags
+  /** server-side only (filters, daily); never sent to a client before the run ends */
+  recognition?: QuestionRecognition
   dataFingerprint: string
 }
 

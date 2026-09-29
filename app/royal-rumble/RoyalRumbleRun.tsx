@@ -60,10 +60,9 @@ export function positionHe(position: Position): string {
   return t('attack')
 }
 
-/** what the rail and the header call a slot — FLEX by name, never only by its place (§70) */
+/** what the rail and the header call a slot */
 export function slotShort(rule: RoyalRumbleSlotRule): string {
-  const label = slotLabel(rule)
-  return label === 'FLEX' ? t('flex') : POSITION_SHORT[label]
+  return POSITION_SHORT[slotLabel(rule)]
 }
 
 /** the budget's crown (comps, 29.9.2026) — drawn, one ink, no colour of its own */
@@ -183,7 +182,6 @@ function DraftCard({
   onPick,
   index,
   kits,
-  flex,
 }: {
   offer: RoyalRumbleOffer
   selected: boolean
@@ -191,8 +189,6 @@ function DraftCard({
   onPick: (event: MouseEvent<HTMLButtonElement>) => void
   index: number
   kits: EraKit[]
-  /** inside the FLEX slot: the offered position is the card's whole point */
-  flex: boolean
 }) {
   const { player, offeredAs } = offer
   const aria = disabled
@@ -225,9 +221,7 @@ function DraftCard({
             </p>
             {/* the OFFERED position — never `player.position` (§41) */}
             <p
-              className={`mt-0.5 inline-block font-mono tabular-nums text-[8px] font-black tracking-[0.12em] sm:text-[10px] ${
-                flex ? (selected ? 'border-hair border-paper/50 px-1' : 'border-hair border-red px-1 text-red') : ''
-              }`}
+              className="mt-0.5 inline-block font-mono tabular-nums text-[8px] font-black tracking-[0.12em] sm:text-[10px]"
               dir="ltr"
             >
               {POSITION_SHORT[offeredAs]}
@@ -311,8 +305,7 @@ function LineupRail({
               }`}
             >
               <span className={`font-mono tabular-nums text-[7px] font-black tracking-[0.12em] ${active ? 'text-paper/75' : 'text-red'}`} dir="ltr">
-                {/* a picked FLEX card says what it became */}
-                {pick && slot.rule.kind === 'flex' ? `${label}·${POSITION_SHORT[pick.offeredAs]}` : label}
+                {label}
               </span>
               {pick ? (
                 <>
@@ -328,18 +321,10 @@ function LineupRail({
             </button>
           )
         })}
-        {/* the formation preview (§43): the shape once FLEX is decided, a question until then */}
-        <div className="flex min-w-0 flex-col justify-center border-hair border-paper/10 p-1" title={formation ? formationHe(formation) : t('formationPending')}>
-          {formation ? (
-            <FormationMini formation={formation} />
-          ) : (
-            <p className="text-center font-mono tabular-nums text-[7px] font-black tracking-[0.12em] text-paper/35" dir="ltr" aria-label={t('formationPending')}>
-              1–?–?–1
-            </p>
-          )}
-          <p className="mt-0.5 hidden truncate text-center font-mono tabular-nums text-[7px] font-black text-paper/55 sm:block" dir="ltr">
-            {formation === 'defensive' ? '1–2–1–1' : formation === 'creative' ? '1–1–2–1' : 'FLEX'}
-          </p>
+        {/* the one shape, visible from the first pick */}
+        <div className="flex min-w-0 flex-col justify-center border-hair border-paper/10 p-1" title={formationHe(formation)}>
+          <FormationMini formation={formation} />
+          <p className="mt-0.5 hidden truncate text-center font-mono tabular-nums text-[7px] font-black text-paper/55 sm:block" dir="ltr">1–1–2–1</p>
         </div>
       </div>
     </section>
@@ -406,7 +391,7 @@ function MatchPitch({
             {!bare && <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red" dir="ltr">THE WORKER · GATE 09</p>}
             <p className="font-display text-[20px] leading-none sm:text-[26px]">{t('title')}</p>
             <p className="mt-1 font-mono tabular-nums text-[7px] font-black tracking-[0.12em] text-paper/45 sm:text-[8px]" dir="ltr">
-              {result.formation === 'defensive' ? '1–2–1–1' : '1–1–2–1'} · {result.opponentFormation === 'defensive' ? '1–2–1–1' : '1–1–2–1'}
+              1–1–2–1 · 1–1–2–1
             </p>
           </div>
           <div className="border-x-hair border-paper/20 px-4 text-center sm:px-8">
@@ -729,7 +714,7 @@ function RoyalRumbleRunInner({
         <div className="relative mt-4 text-center sm:mt-6">
           <span className="inline-block border-x-rule border-red px-5 py-2 font-display text-[30px] text-red sm:text-[42px]" dir="ltr">VS</span>
           <p className="mt-2 font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-paper/45" dir="ltr">
-            {result.formation === 'defensive' ? '1–2–1–1' : '1–1–2–1'} · {result.opponentFormation === 'defensive' ? '1–2–1–1' : '1–1–2–1'}
+            1–1–2–1 · 1–1–2–1
           </p>
           {!embedded && <p className="mt-2 font-mono tabular-nums text-[8px] font-black tracking-[0.24em] text-paper/40" dir="ltr">ROYAL RUMBLE · GATE 09</p>}
         </div>
@@ -750,7 +735,7 @@ function RoyalRumbleRunInner({
     if (embedded) return null
     const won = result.winner === 'us'
     const draw = result.winner === 'draw'
-    const formationLine = result.formation === 'defensive' ? t('formationDefensiveHeld') : t('formationCreativeMade')
+    const formationLine = t('formationCreativeMade')
     // §18: "זאת החמישייה שלך. זה מה שיצא." — competitive, never toxic; the tier only picks the body
     const tier: ResultTier = won ? 'high' : draw ? 'done' : 'low'
     const spoken = voice({ gate: 9, moment: 'result', result: tier, seed: activeDraft.seed })
@@ -846,8 +831,7 @@ function RoyalRumbleRunInner({
   if (!currentSlot) return null
 
   const progress = (pickedCount / activeDraft.slots.length) * 100
-  const flexSlot = currentSlot.rule.kind === 'flex'
-  const slotName = currentSlot.rule.kind === 'flex' ? t('flex') : positionHe(currentSlot.rule.position)
+  const slotName = positionHe(currentSlot.rule.position)
 
   return (
     <div className="flex min-h-0 flex-1 flex-col max-md:flex-none md:block md:flex-none md:pb-3">
@@ -921,9 +905,9 @@ function RoyalRumbleRunInner({
           <div className="font-display text-[20px] leading-none text-red sm:text-[62px]" dir="ltr">{String(activeSlot + 1).padStart(2, '0')}</div>
           <div className="min-w-0 border-s-rule border-ink ps-2">
             <p className="font-mono tabular-nums text-[7px] font-black tracking-[0.2em] text-red sm:text-[8px]" dir="ltr">PICK {activeSlot + 1}/5 · {slotShort(currentSlot.rule)}</p>
-            <h2 className="truncate font-display text-[15px] leading-none sm:text-[34px]">{flexSlot ? t('flexQuestion') : t('draftQuestion')}</h2>
+            <h2 className="truncate font-display text-[15px] leading-none sm:text-[34px]">{t('draftQuestion')}</h2>
             <p className="mt-0.5 hidden truncate font-body text-[9px] text-concrete sm:block">
-              {flexSlot ? t('flexHint') : t('draftPosition', { position: slotName })}
+              {t('draftPosition', { position: slotName })}
             </p>
           </div>
         </div>
@@ -931,13 +915,12 @@ function RoyalRumbleRunInner({
         <div className="md:hidden">
           <div className="relative">
             <RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${activeSlot}`} />
-            <div className="grid w-full grid-cols-3 gap-1.5 [&>button]:min-h-[270px]" role="group" aria-label={`${slotShort(currentSlot.rule)} · ${flexSlot ? t('flexQuestion') : t('draftQuestion')}`}>
+            <div className="grid w-full grid-cols-3 gap-1.5 [&>button]:min-h-[270px]" role="group" aria-label={`${slotShort(currentSlot.rule)} · ${t('draftQuestion')}`}>
               {currentSlot.offers.map((offer, index) => (
                 <DraftCard
                   key={`${offer.player.slug}-${offer.offeredAs}-m`}
                   offer={offer}
                   index={index}
-                  flex={flexSlot}
                   selected={picks[activeSlot]?.player.slug === offer.player.slug}
                   disabled={!canPick(activeSlot, offer)}
                   onPick={(event) => {
@@ -954,13 +937,12 @@ function RoyalRumbleRunInner({
         <FitBox ratio={1.08} className="min-h-0 flex-1" innerClassName="flex items-stretch">
           <div className="relative flex w-full">
             <RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${activeSlot}`} />
-            <div className="grid w-full grid-cols-3 gap-1.5 sm:gap-3" role="group" aria-label={`${slotShort(currentSlot.rule)} · ${flexSlot ? t('flexQuestion') : t('draftQuestion')}`}>
+            <div className="grid w-full grid-cols-3 gap-1.5 sm:gap-3" role="group" aria-label={`${slotShort(currentSlot.rule)} · ${t('draftQuestion')}`}>
               {currentSlot.offers.map((offer, index) => (
                 <DraftCard
                   key={`${offer.player.slug}-${offer.offeredAs}`}
                   offer={offer}
                   index={index}
-                  flex={flexSlot}
                   selected={picks[activeSlot]?.player.slug === offer.player.slug}
                   disabled={!canPick(activeSlot, offer)}
                   onPick={(event) => {
@@ -990,7 +972,7 @@ function RoyalRumbleRunInner({
       >
         <span className="min-w-0">
           <span className="block truncate font-mono tabular-nums text-[8px] font-black tracking-[0.2em] opacity-60" dir="ltr">
-            LOCK THE FIVE{formation ? ` · ${formation === 'defensive' ? '1–2–1–1' : '1–1–2–1'} · ${money(remaining)} LEFT` : ''}
+            LOCK THE FIVE · 1–1–2–1 · {money(remaining)} LEFT
           </span>
           <span className="block truncate font-display text-[23px] sm:text-[31px]">
             {busy ? t('locking') : complete ? t('lockReady') : t('missingPlayers', { count: String(5 - pickedCount) })}
@@ -1006,7 +988,7 @@ function RoyalRumbleRunInner({
           <div className="grid gap-2">
             <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('rulePrice')}</p>
             <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('ruleRange')}</p>
-            <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('flexHint')}</p>
+            <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('fixedOrderHint')}</p>
             <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('shuffleBeforePick')}</p>
             <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('ruleOpponent')}</p>
           </div>

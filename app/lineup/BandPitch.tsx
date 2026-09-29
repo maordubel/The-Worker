@@ -66,6 +66,7 @@ export function BandPitch({
   men,
   kit,
   look = null,
+  keeperLook = null,
   active = null,
   armed = false,
   armedLine = null,
@@ -76,6 +77,7 @@ export function BandPitch({
   kit: KitSpec | null
   /** the match season's REAL shirt (delta 88) — the photograph wins over `kit` */
   look?: ShirtLook | null
+  keeperLook?: ShirtLook | null
   /** the selected man, if any */
   active?: string | null
   /** a locker is held: every band is a target */
@@ -125,7 +127,7 @@ export function BandPitch({
                   key={`${man.ghost ? 'ghost-' : ''}${man.playerId}`}
                   man={man}
                   kit={kit}
-                  look={look}
+                  look={line === 'GK' ? keeperLook ?? look : look}
                   tight={tight}
                   active={active === man.playerId}
                   onTap={onMan}
@@ -224,6 +226,7 @@ export function BandPitchStage({
   men,
   kit,
   look = null,
+  keeperLook = null,
   target = null,
   active = null,
   onBand,
@@ -234,6 +237,7 @@ export function BandPitchStage({
   kit: KitSpec | null
   /** the match season's REAL shirt (delta 88, `lib/kit/playerShirt.ts`) — wins over `kit` */
   look?: ShirtLook | null
+  keeperLook?: ShirtLook | null
   /** the band the picking rail is aimed at — outlined, with a dashed shirt where he will stand */
   target?: Line | null
   active?: string | null
@@ -278,7 +282,7 @@ export function BandPitchStage({
                   key={man.playerId}
                   man={man}
                   kit={kit}
-                  look={look}
+                  look={line === 'GK' ? keeperLook ?? look : look}
                   active={active === man.playerId}
                   onTap={onMan}
                   onDrop={onDrop}
