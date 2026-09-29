@@ -40,9 +40,9 @@ export function RoyalRumbleMode({
   const [mode, setMode] = useState<'solo' | 'live'>(initialRoomCode ? 'live' : 'solo')
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col md:block md:flex-none">
-      <div data-rumble="marquee" className="bc-stage mx-auto mb-1.5 flex w-full max-w-5xl shrink-0 justify-center overflow-hidden border-rule border-ink [@media(max-height:680px)]:hidden md:mb-2">
-        <GateLogo logo="royal-rumble" className="h-[84px] w-auto sm:h-[120px]" />
+    <div className="flex min-h-0 flex-1 flex-col max-md:overflow-y-auto max-md:pb-2 md:block md:flex-none">
+      <div data-rumble="marquee" className="bc-stage mx-auto mb-1.5 flex w-full max-w-5xl shrink-0 justify-center overflow-hidden border-rule border-ink md:mb-2 max-md:shrink-0">
+        <GateLogo logo="royal-rumble" className="h-[60px] w-auto sm:h-[120px]" />
       </div>
       {mode === 'solo' && <LivedRumbleDoor />}
       <nav
