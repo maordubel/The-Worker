@@ -5770,6 +5770,7 @@ export class WorldScene extends Phaser.Scene {
     const clipMs = next.bridge.clip ? TRANSITIONS[next.bridge.clip].ms : 0
     this.ctx.bus.emit('card', {
       clip: next.bridge.clip,
+      docu: next.bridge.docu,
       titleHe: next.bridge.titleHe,
       subHe: next.bridge.subHe,
       ms: next.bridge.ms + clipMs,

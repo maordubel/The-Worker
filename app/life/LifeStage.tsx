@@ -48,6 +48,7 @@ import { AchievementQueue } from '@/components/life/AchievementCard'
 import { RouteCard } from '@/components/life/RouteCard'
 import { PlaceCard, Stamp, TitleCard } from '@/components/life/Stamp'
 import { TransitionClip } from '@/components/life/TransitionClip'
+import { SeasonDocu } from '@/components/life/SeasonDocu'
 import { CloseUp } from '@/components/life/CloseUp'
 import { Panorama } from '@/components/life/Panorama'
 import { TunnelWalk } from '@/components/life/TunnelWalk'
@@ -250,6 +251,7 @@ export function LifeStage({
   const [clipDone, setClipDone] = useState(false)
   const [mapIntro, setMapIntro] = useState(false)
   useEffect(() => setClipDone(false), [titleCard])
+  const docuOn = Boolean(titleCard?.docu) && !clipDone
 
   const {
     snapshot,
@@ -836,9 +838,10 @@ export function LifeStage({
             }}
           />
         )}
+        {docuOn && <SeasonDocu onDone={() => setClipDone(true)} />}
         {titleCard?.clip && !clipDone && <TransitionClip clip={titleCard.clip} onDone={() => setClipDone(true)} />}
         {titleCard &&
-          (titleCard.clip && !clipDone ? null : titleCard.art ? (
+          ((titleCard.clip || titleCard.docu) && !clipDone ? null : titleCard.art ? (
             <ChapterCard
               titleHe={titleCard.titleHe}
               subHe={titleCard.subHe}

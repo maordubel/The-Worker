@@ -37,6 +37,8 @@ import type { TransitionKey } from '@/lib/life/transitions'
 export type Bridge = {
   /** a clip played over the game before the card — Maor's cuts, 30.9.2026 */
   clip?: TransitionKey
+  /** a season documentary plays in place of the clip (A7) */
+  docu?: boolean
   /** the big word on the card — a month, a year, a place */
   titleHe: string
   subHe: string | null
@@ -185,7 +187,7 @@ export const CHAPTERS: readonly ChapterDef[] = [
     minute: MIN(16, 0),
     start: { location: 'street', spawn: 'fromHome' },
     next: '1986',
-    bridge: { clip: 'generic', titleHe: 'שבוע לפני', subHe: '17.5.1986', ms: 2600 },
+    bridge: { docu: true, titleHe: 'שבוע לפני', subHe: '17.5.1986', ms: 2600 },
     anchorKey: '1986',
     hudDateHe: '17 במאי 1986',
     playable: true,
