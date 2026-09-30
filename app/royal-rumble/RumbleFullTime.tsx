@@ -1,5 +1,6 @@
 'use client'
 
+import { GateLogo } from '@/components/gates/GateLogo'
 import { compactName } from '@/lib/game/roster-search'
 import type { RumbleMatchScript } from '@/lib/game/royal-rumble-presentation'
 import { t } from '@/lib/royal-rumble/i18n'
@@ -25,6 +26,9 @@ export function RumbleFullTime({
   const mvp = script.manOfTheMatch
   return (
     <>
+      <div className="bc-stage relative mx-auto mb-3 flex w-fit justify-center border-rule border-ink px-4 py-2">
+        <GateLogo logo="royal-rumble" decorative className="h-[54px] w-auto" />
+      </div>
       <p className="relative font-mono tabular-nums text-[9px] font-black tracking-[0.3em] text-red" dir="ltr">FULL TIME · ROYAL RUMBLE</p>
       <p className="relative mt-3 font-display text-[92px] leading-[0.8] sm:text-[132px]" dir="ltr">{script.final.us}–{script.final.them}</p>
       <div className="relative mx-auto mt-5 h-1 w-20 bg-red" />

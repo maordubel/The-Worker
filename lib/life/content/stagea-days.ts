@@ -123,7 +123,7 @@ export const STAGE_A_DAYS: readonly StageADay[] = [
   {
     id: 'a6',
     dateHe: '21 בדצמבר 1985',
-    year: 1986,
+    year: 1985,
     weekday: 6,
     minute: 14 * 60,
     age: 7,

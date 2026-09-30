@@ -815,7 +815,7 @@ export const ENDINGS_A3: Record<string, EndingCard> = {
   street: {
     id: 'street',
     titleHe: 'לא עכשיו',
-    bodyHe: 'הילד עם הכדור הכתום הלך לכיוון הקיר, ואתה נשארת ברחוב שאתה מכיר. שיחקת עם מה שהיה, עד שקראו לך הביתה. לא ידעת אז שיש עוד בית, ושהוא עוד יחכה לך פעם אחת.',
+    bodyHe: 'הילד עם הכדור הכתום הלך לכיוון הקיר, ואתה נשארת ברחוב שאתה מכיר. שיחקת עם מה שהיה, עד שאמא צעקה מהחלון. לא ידעת אז שיש עוד בית, ושהוא עוד יחכה לך.',
     memoryHe: 'כדור כתום, מתרחק.',
     memoryItem: 'coin',
   },
@@ -843,7 +843,7 @@ export const BEATS_A3: Beat[] = [
        * ball, and walking up to him is the player's own act. A life that answered him in the
        * old A2 (`life:efi:met` via the legacy alias) is greeted by name in `efi-a3`.
        */
-      { a: 'lines', lines: [{ who: null, text: 'אותו רחוב, שנה אחרי. אתה כבר יודע איפה הבור במדרכה.' }, { who: null, text: 'בקצה הרחוב, ליד הקיר, ילד שאתה לא מכיר מקפיץ כדור כתום. גדול, מנוקד, וכל הקפצה שלו נשמעת כמו דלת שנטרקת.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'אותו רחוב, חורף 1992. אתה בן ארבע־עשרה, והבור במדרכה נראה קטן יותר.' }, { who: null, text: 'בקצה הרחוב, ליד הקיר, ילד שאתה לא מכיר מקפיץ כדור כתום. גדול, מנוקד, וכל הקפצה שלו נשמעת כמו דלת שנטרקת.' }] },
     ],
   },
   {
@@ -989,7 +989,7 @@ export const BEATS_A3: Beat[] = [
     id: 'a3-night-alone',
     trigger: 'clock',
     when: { flag: A3, afterMinute: at(20, 0), none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:deferred' }, { flag: 'a3:inside' }, { flag: 'a3:done' }] },
-    do: [{ a: 'lines', lines: [{ who: null, text: 'חושך. הילד עם הכדור הכתום כבר לא בקצה הרחוב. מישהו קורא לך מהחלון.' }] }, { a: 'flag', flag: 'a3:done' }, { a: 'ending', id: 'street' }],
+    do: [{ a: 'lines', lines: [{ who: null, text: 'חושך. הילד עם הכדור הכתום כבר לא בקצה הרחוב. אמא קוראת לך מהחלון, כמו שקראה כשהיית קטן.' }] }, { a: 'flag', flag: 'a3:done' }, { a: 'ending', id: 'street' }],
   },
 ]
 
@@ -1781,7 +1781,7 @@ export const CONVERSATIONS_A4: Conversation[] = [
 export function objectiveA5(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (state.flags['a5:there']) return null
-  if (!state.flags['a5:dressed']) return 'שבת. משחק. אבא מחכה למטה. תתלבש לבד.'
+  if (!state.flags['a5:dressed']) return 'שבת. משחק. אבא מחכה למטה עד שלוש. תתלבש לבד.'
   if (state.flags['a5:in']) return 'הברזל שאבא אמר. בפתח המנהרה.'
   if (sceneId === 'bloomfield-outside') return 'שער 7. אבא. הקרוסלה.'
   return 'לבלומפילד. בחולצה.'
