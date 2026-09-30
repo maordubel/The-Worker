@@ -57,6 +57,7 @@ import { LifeHud } from '@/components/life/LifeHud'
 import { LifeMap } from '@/components/life/LifeMap'
 import { LifeMenu } from '@/components/life/LifeMenu'
 import { Opening } from '@/components/life/Opening'
+import { MapIntro } from '@/components/life/MapIntro'
 import { CodaCard } from '@/components/life/CodaCard'
 import { MapReveal } from '@/components/life/MapReveal'
 import { ChapterCard } from '@/components/life/ChapterCard'
@@ -247,6 +248,7 @@ export function LifeStage({
     closeOpening,
   } = useLifeRuntime({ holder, runtime, engineRef, busRef, audio, anchor, prologueAnchor, anchors, catalog })
   const [clipDone, setClipDone] = useState(false)
+  const [mapIntro, setMapIntro] = useState(false)
   useEffect(() => setClipDone(false), [titleCard])
 
   const {
@@ -591,8 +593,15 @@ export function LifeStage({
         {/* הפתיח — over everything, including the loading plate, because it IS the
             loading plate: the game boots underneath it while the player watches a cot,
             a bus and a man lifting a five-year-old over a crowd. */}
-        {opening && (
-          <Opening anchor={prologueAnchor} onDone={closeOpening} />
+        {opening && !mapIntro && <Opening anchor={prologueAnchor} onDone={() => setMapIntro(true)} />}
+        {/* מפת הפתיחה — between the film and the terrace: the house opens on the map (delta 98) */}
+        {opening && mapIntro && (
+          <MapIntro
+            onDone={() => {
+              setMapIntro(false)
+              closeOpening()
+            }}
+          />
         )}
 
         {cutscene && (

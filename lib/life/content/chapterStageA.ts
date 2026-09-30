@@ -422,6 +422,7 @@ export const CONVERSATIONS_A1: Conversation[] = [
         ],
         then: [
           { e: 'sfx', key: 'crowd-real-goal', level: 0.8 },
+          { e: 'plate', art: 'cup83', titleHe: 'גול', subHe: 'הכול קופץ', ms: 1800 },
           { e: 'redheart', key: 'footballLove', delta: 6 },
           { e: 'remember', who: 'kobi', eventId: 'shoulders-1983', significance: 'major' },
           { e: 'goto', node: 'a1-kobi' },
@@ -564,7 +565,7 @@ export const CONVERSATIONS_A1: Conversation[] = [
 ]
 
 /** joining the two-on-two — the same act whatever is in his hands */
-const A2_PLAY: ChoiceDef['then'] = [{ e: 'flag', flag: 'a2:played' }, { e: 'rel', who: 'ofir', axis: 'bond', delta: 4 }, { e: 'remember', who: 'ofir', eventId: 'first-team-1984', significance: 'major' }, { e: 'wellbeing', key: 'happiness', delta: 6 }, { e: 'sfx', key: 'ball-kick', level: 0.7 }, { e: 'minigame', id: 'football' }]
+const A2_PLAY: ChoiceDef['then'] = [{ e: 'plate', art: 'alley', titleHe: 'שניים־שניים', subHe: 'אפי איתך. מי שמפסיד יוצא.', ms: 1600 }, { e: 'flag', flag: 'a2:played' }, { e: 'rel', who: 'ofir', axis: 'bond', delta: 4 }, { e: 'remember', who: 'ofir', eventId: 'first-team-1984', significance: 'major' }, { e: 'wellbeing', key: 'happiness', delta: 6 }, { e: 'sfx', key: 'ball-kick', level: 0.7 }, { e: 'minigame', id: 'football' }]
 
 /** the evening in the flat — every answer closes the same day; each is a different boy */
 const A2_HOME = (value: string, extra: ChoiceDef['then'] = []): ChoiceDef['then'] => [
@@ -653,12 +654,12 @@ export const CONVERSATIONS_A2: Conversation[] = [
       {
         when: { flag: 'a2:errand', beforeMinute: BREAD_BY },
         lines: [{ who: 'רפי מהקיוסק', text: 'לחם לרחל. על החשבון — תשאיר את המטבעות בכיס. ותגיד לה שהחשבון כבר לא זוכר את עצמו.' }],
-        then: [{ e: 'flag', flag: 'a2:bread' }, { e: 'time', minutes: 6 }, { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:bread', subjectHe: BREAD_PROMISE, noteHe: 'הלחם היה על השיש לפני חמש.' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'sfx', key: 'bell-shop', level: 0.5 }, { e: 'toast', text: 'לחם חם. הנייר נרטב מהחום.', tone: 'plain' }],
+        then: [{ e: 'plate', art: 'kiosk', titleHe: 'לחם חם', subHe: 'על החשבון', ms: 1500 }, { e: 'flag', flag: 'a2:bread' }, { e: 'time', minutes: 6 }, { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:bread', subjectHe: BREAD_PROMISE, noteHe: 'הלחם היה על השיש לפני חמש.' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'sfx', key: 'bell-shop', level: 0.5 }, { e: 'toast', text: 'לחם חם. הנייר נרטב מהחום.', tone: 'plain' }],
       },
       {
         when: { flag: 'a2:errand' },
         lines: [{ who: 'רפי מהקיוסק', text: 'לחם לרחל. האחרון. על החשבון, כמו תמיד — ותגיד לה שהגעת עכשיו.' }],
-        then: [{ e: 'flag', flag: 'a2:bread' }, { e: 'time', minutes: 6 }, { e: 'sfx', key: 'bell-shop', level: 0.5 }, { e: 'toast', text: 'לחם, כבר לא חם. הוא הוציא אותו מתחת לדלפק.', tone: 'plain' }],
+        then: [{ e: 'plate', art: 'kiosk', titleHe: 'לחם', subHe: 'האחרון', ms: 1500 }, { e: 'flag', flag: 'a2:bread' }, { e: 'time', minutes: 6 }, { e: 'sfx', key: 'bell-shop', level: 0.5 }, { e: 'toast', text: 'לחם, כבר לא חם. הוא הוציא אותו מתחת לדלפק.', tone: 'plain' }],
       },
       {
         lines: [{ who: 'רפי מהקיוסק', text: 'ילד. אתה קונה, או שאתה עומד לי בשמש?' }],
@@ -702,7 +703,7 @@ export const CONVERSATIONS_A2: Conversation[] = [
       {
         when: { flag: 'a2:bread', none: [{ flag: 'a2:bread-home' }] },
         lines: [
-          { who: 'אופיר', text: 'פוגי, איתי. מה זה ביד — לחם? תזרוק אותו איפשהו, מתחילים.' },
+          { who: 'אופיר', text: 'פוגי, אתה עם אפי. מה זה ביד — לחם? תזרוק אותו איפשהו, מתחילים.' },
           { who: null, text: 'הלחם עוד חם דרך הנייר. הקיר נמוך, והכדור כבר מקפץ עליו.' },
         ],
         choices: [
@@ -712,7 +713,7 @@ export const CONVERSATIONS_A2: Conversation[] = [
         ],
       },
       {
-        lines: [{ who: 'אופיר', text: 'פוגי, איתי. אתה מאחורה. לא לגעת ביד, ולא לברוח מהכדור.' }],
+        lines: [{ who: 'אופיר', text: 'פוגי, אתה עם אפי. אתה מאחורה. לא לגעת ביד, ולא לברוח מהכדור.' }],
         choices: [
           { id: 'play', text: 'להיכנס.', then: A2_PLAY },
           { id: 'watch', text: 'לעמוד ולראות קודם.', then: [{ e: 'personality', key: 'curiosity', delta: 1 }, { e: 'toast', text: '"תעמוד. אבל תעמוד רחוק מהשער."', tone: 'plain' }] },
