@@ -162,7 +162,7 @@ export const CHAPTERS: readonly ChapterDef[] = [
     id: 'a6-radio',
     stage: 'A',
     unit: 'A6',
-    titleHe: 'אכזבה רגילה',
+    titleHe: 'ניצחון בגשם',
     dateHe: '21 בדצמבר 1985',
     year: 1985,
     weekday: 6,
