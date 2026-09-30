@@ -971,6 +971,17 @@
      "decidedOn": "2026-09-25"
     }
    ]
+  },
+  {
+   "entityTable": "match",
+   "entityKey": "1983-06-01 הפועל-תל-אביב — מכבי-תל-אביב",
+   "sourceAUrl": "https://www.ynet.co.il/articles/0,7340,L-219628,00.html",
+   "sourceBUrl": "https://he.wikipedia.org/wiki/גמר_גביע_המדינה_בכדורגל_1983",
+   "resolution": null,
+   "field": "goal_minute",
+   "claimA": "שער היד של לנדאו — דקה 67 (ynet; ויקיפדיה העברית)",
+   "claimB": "דקה 66 (כתבה נוספת של ynet)",
+   "noteHe": "מקורות חלוקים בדקה אחת. הארכיון נושא 67; שום שורה במשחק לא מדפיסה דקה. הקהל: 30,000 בוויקיפדיה מול 50,000 ב-mako — לא נרשם בארכיון."
   }
  ]
 }
