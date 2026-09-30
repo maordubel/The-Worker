@@ -455,6 +455,8 @@ export type LifeBusEvents = {
   } | null
 
   card: {
+    /** a transition clip to play before the card shows */
+    clip?: import('../transitions').TransitionKey
     titleHe: string
     subHe: string | null
     ms: number

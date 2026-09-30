@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { AnchorCard } from '@/components/life/AnchorCard'
 import { DocSheet } from '@/components/life/DocSheet'
@@ -47,6 +47,7 @@ import { EndingCard } from '@/components/life/EndingCard'
 import { AchievementQueue } from '@/components/life/AchievementCard'
 import { RouteCard } from '@/components/life/RouteCard'
 import { PlaceCard, Stamp, TitleCard } from '@/components/life/Stamp'
+import { TransitionClip } from '@/components/life/TransitionClip'
 import { CloseUp } from '@/components/life/CloseUp'
 import { Panorama } from '@/components/life/Panorama'
 import { TunnelWalk } from '@/components/life/TunnelWalk'
@@ -245,6 +246,8 @@ export function LifeStage({
     opening,
     closeOpening,
   } = useLifeRuntime({ holder, runtime, engineRef, busRef, audio, anchor, prologueAnchor, anchors, catalog })
+  const [clipDone, setClipDone] = useState(false)
+  useEffect(() => setClipDone(false), [titleCard])
 
   const {
     snapshot,
@@ -824,8 +827,9 @@ export function LifeStage({
             }}
           />
         )}
+        {titleCard?.clip && !clipDone && <TransitionClip clip={titleCard.clip} onDone={() => setClipDone(true)} />}
         {titleCard &&
-          (titleCard.art ? (
+          (titleCard.clip && !clipDone ? null : titleCard.art ? (
             <ChapterCard
               titleHe={titleCard.titleHe}
               subHe={titleCard.subHe}

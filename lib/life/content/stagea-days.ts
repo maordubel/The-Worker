@@ -92,7 +92,7 @@ export const STAGE_A_DAYS: readonly StageADay[] = [
     wantHe: 'ללכת עם אפי לאולם',
     teachesHe: 'ענף שני, וקהילה שמכירה אותך בשם',
     anchorKey: null,
-    built: true,
+    built: false,
   },
   {
     id: 'a4',

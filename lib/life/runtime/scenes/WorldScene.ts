@@ -1,3 +1,4 @@
+import { TRANSITIONS } from '@/lib/life/transitions'
 import Phaser from 'phaser'
 
 import { eligibleFor, offerConversationFor, offeredFlag } from '../../routes'
@@ -5766,15 +5767,17 @@ export class WorldScene extends Phaser.Scene {
     this.paused = true
     this.ctx.bus.emit('controls', { visible: false })
     this.ctx.bus.emit('prompt', null)
+    const clipMs = next.bridge.clip ? TRANSITIONS[next.bridge.clip].ms : 0
     this.ctx.bus.emit('card', {
+      clip: next.bridge.clip,
       titleHe: next.bridge.titleHe,
       subHe: next.bridge.subHe,
-      ms: next.bridge.ms,
+      ms: next.bridge.ms + clipMs,
       art: plateFor(next.id),
       fromYear: state.year,
       nameHe: next.titleHe,
     })
-    this.time.delayedCall(next.bridge.ms + 100, () => {
+    this.time.delayedCall(next.bridge.ms + clipMs + 100, () => {
       this.ctx.engine.dispatch(
         { t: 'year.entered', year: next.year, weekday: next.weekday, minute: next.minute },
         { t: 'chapter.entered', chapter: next.id },
