@@ -24,6 +24,12 @@ export function TransitionClip({ clip, onDone }: { clip: TransitionKey; onDone: 
       return
     }
     const video = ref.current
+    if (video) {
+      // React sets `muted` as a property only; iOS Safari wants the attribute to allow autoplay.
+      video.muted = true
+      video.setAttribute('muted', '')
+      video.setAttribute('webkit-playsinline', '')
+    }
     const guard = window.setTimeout(finish, TRANSITIONS[clip].ms + 1500)
     const play = video?.play()
     if (play) play.catch(() => finish())
@@ -42,14 +48,16 @@ export function TransitionClip({ clip, onDone }: { clip: TransitionKey; onDone: 
       <video
         ref={ref}
         className="absolute inset-0 h-full w-full object-cover"
-        src={TRANSITIONS[clip].src}
         muted
         playsInline
+        autoPlay
         preload="auto"
         aria-hidden="true"
         onEnded={finish}
-        onError={finish}
-      />
+      >
+        <source src={TRANSITIONS[clip].mp4} type="video/mp4" />
+        <source src={TRANSITIONS[clip].src} type="video/webm" onError={finish} />
+      </video>
       <div className="absolute bottom-3 end-3 z-[42]">
         <FilmSkipButton onSkip={finish} data-life="transition-skip" />
       </div>
