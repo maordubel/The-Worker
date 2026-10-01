@@ -1,7 +1,7 @@
 'use client'
 
 import type { KitSpec } from '@/lib/kit/spec'
-import { compactName } from '@/lib/game/roster-search'
+import { surname } from '@/lib/game/roster-search'
 import type { RumbleSide, RumbleVisualPlayer } from '@/lib/game/royal-rumble-presentation'
 
 import { RumbleShirt } from './RumbleShirt'
@@ -10,12 +10,15 @@ type EraKit = { seasonLabel: string; spec: KitSpec }
 
 /** a slot on the vertical pitch: ours attack UP from the bottom half, theirs DOWN from the top */
 export function screenPos(player: Pick<RumbleVisualPlayer, 'x' | 'y' | 'side'>): { x: number; y: number } {
-  return player.side === 'us' ? { x: player.x, y: 50 + player.y / 2 } : { x: 100 - player.x, y: 50 - player.y / 2 }
+  // spread the slots across the width and centre each half between its goal and the halfway line
+  const x = 50 + (player.x - 50) * 1.7
+  const depth = 54 + player.y * 0.44
+  return player.side === 'us' ? { x, y: depth } : { x: 100 - x, y: 100 - depth }
 }
 
 /** where the ball ends up when a side scores: the goal it attacks */
 export function goalPos(side: RumbleSide): { x: number; y: number } {
-  return side === 'us' ? { x: 50, y: 1 } : { x: 50, y: 99 }
+  return side === 'us' ? { x: 50, y: 1.5 } : { x: 50, y: 98.5 }
 }
 
 function Token({
@@ -51,7 +54,7 @@ function Token({
           </span>
         </div>
         <div className="mt-0.5 max-w-[68px] truncate px-1 text-center font-body text-[9px] font-extrabold leading-[1.35] text-paper [paint-order:stroke] [-webkit-text-stroke:3px_rgb(var(--p-ink))] sm:max-w-[88px] sm:text-[11px]">
-          {compactName(player.nameHe)}
+          {surname(player.nameHe)}
         </div>
         <span className="font-mono tabular-nums text-[7px] font-black tracking-[0.14em] text-paper/80 [paint-order:stroke] [-webkit-text-stroke:2px_rgb(var(--p-ink))]" dir="ltr">{player.position}</span>
       </div>
@@ -90,6 +93,8 @@ export function RumblePitchFive({
   return (
     <div className={`relative mx-auto aspect-[4/5] w-full max-w-[460px] overflow-hidden border-2 border-ink ${className}`} data-rumble="pitch" style={{ backgroundImage: 'repeating-linear-gradient(180deg, rgb(var(--p-grass-dark) / .34) 0 12.5%, transparent 12.5% 25%), linear-gradient(180deg, rgb(var(--p-grass-dark)), rgb(var(--p-grass)) 55%, rgb(var(--p-grass-dark))), radial-gradient(ellipse at 50% 42%, transparent 55%, rgb(var(--p-ink) / .18))', backgroundColor: 'rgb(var(--p-grass))' }}>
       <div className="absolute inset-x-0 top-1/2 h-px bg-paper" />
+      <div className="absolute inset-x-[38%] top-0 h-[3%] border-x-2 border-b-2 border-paper bg-paper/25" data-rumble="goal" />
+      <div className="absolute inset-x-[38%] bottom-0 h-[3%] border-x-2 border-t-2 border-paper bg-paper/25" data-rumble="goal" />
       <div className="absolute start-1/2 top-1/2 aspect-square h-[22%] -translate-x-1/2 -translate-y-1/2 border border-paper" />
       <div className="absolute inset-x-[24%] top-0 h-[16%] border-x border-b border-paper" />
       <div className="absolute inset-x-[24%] bottom-0 h-[16%] border-x border-t border-paper" />
