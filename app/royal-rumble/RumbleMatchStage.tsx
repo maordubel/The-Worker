@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { KitSpec } from '@/lib/kit/spec'
-import { compactName } from '@/lib/game/roster-search'
+import { surname } from '@/lib/game/roster-search'
 import { RUN_MS, type PublicRumbleEvent, type RumbleMatchScript, type RumbleVisualPlayer } from '@/lib/game/royal-rumble-presentation'
 import { t } from '@/lib/royal-rumble/i18n'
 
@@ -111,7 +111,7 @@ export function RumbleMatchStage({
         } else {
           const keeper = event.goalkeeperSlug ? find(event.side === 'us' ? 'them' : 'us', event.goalkeeperSlug) : undefined
           const g = goalPos(event.side)
-          setBall(keeper ? screenPos(keeper) : { x: event.type === 'miss' ? 88 : 50, y: g.y === 1 ? 6 : 94 })
+          setBall(keeper ? screenPos(keeper) : { x: event.type === 'miss' ? 88 : 50, y: g.y < 50 ? 6 : 94 })
           await wait(1400 - 520)
           if (cancelled) return
           setBall({ x: 50, y: 50 })
@@ -192,8 +192,8 @@ export function RumbleMatchStage({
             {moment && scorer && (
               <RumbleGoalMoment
                 ours={moment.side === 'us'}
-                scorer={compactName(scorer.nameHe)}
-                assist={assist ? compactName(assist.nameHe) : null}
+                scorer={surname(scorer.nameHe)}
+                assist={assist ? surname(assist.nameHe) : null}
                 minute={moment.minute}
                 score={moment.scoreAfter}
                 line={moment.textHe}

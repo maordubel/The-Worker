@@ -1,7 +1,7 @@
 'use client'
 
 import { GateLogo } from '@/components/gates/GateLogo'
-import { compactName } from '@/lib/game/roster-search'
+import { surname } from '@/lib/game/roster-search'
 import type { RumbleMatchScript } from '@/lib/game/royal-rumble-presentation'
 import { t } from '@/lib/royal-rumble/i18n'
 
@@ -21,7 +21,7 @@ export function RumbleFullTime({
   const goals = script.events.filter((e) => e.type === 'goal')
   const name = (side: 'us' | 'them', slug: string) => {
     const p = (side === 'us' ? script.us : script.them).find((x) => x.slug === slug)
-    return p ? compactName(p.nameHe) : ''
+    return p ? surname(p.nameHe) : ''
   }
   const mvp = script.manOfTheMatch
   return (
@@ -55,7 +55,7 @@ export function RumbleFullTime({
       <div className="relative mx-auto mt-4 max-w-sm border-hair border-red px-3 py-2">
         <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red" dir="ltr">MAN OF THE MATCH</p>
         <p className="font-display text-[22px] leading-tight">
-          {t('manOfMatch')}: {compactName(mvp.nameHe)}
+          {t('manOfMatch')}: {surname(mvp.nameHe)}
         </p>
         <p className="font-body text-[11px] text-paper/70">{mvp.reasonHe}</p>
       </div>

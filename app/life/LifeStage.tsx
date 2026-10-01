@@ -38,7 +38,7 @@ import type { LocationId } from '@/lib/life/types'
 import { afterConversation, type ActivityId, type Settlement } from '@/lib/life/activities'
 import { describeMoneyChange } from '@/lib/life/money'
 import type { MechanicCatalog } from '@/lib/mechanics/types'
-import { ControlDeck, TapChip } from '@/components/life/ControlDeck'
+import { ControlDeck } from '@/components/life/ControlDeck'
 import { DebugPanel } from '@/components/life/DebugPanel'
 import { LifeDevOverlay, useLifeDebug } from '@/components/life/LifeDevOverlay'
 import { DialogueBox } from '@/components/life/DialogueBox'
@@ -243,8 +243,6 @@ export function LifeStage({
     setRoute,
     earned,
     dismissEarned,
-    deck,
-    toggleDeck,
     opening,
     closeOpening,
   } = useLifeRuntime({ holder, runtime, engineRef, busRef, audio, anchor, prologueAnchor, anchors, catalog })
@@ -430,7 +428,7 @@ export function LifeStage({
         )}
         {help && <HelpSheet objective={hud.objective} hint={hud.hint} waitingOn={hud.waitingOn ?? null} checklist={checklist} offers={offers} capHe={cap} onClose={closeHelp} />}
 
-        {ready && !covered && controls && (touch ? deck : true) && (
+        {ready && !covered && controls && (
           <ControlDeck
             top={fullBleed ? stage : frame}
             height={fullBleed ? 0 : Math.max(0, stage - frame)}
@@ -441,16 +439,6 @@ export function LifeStage({
             onAxis={onAxis}
             onAction={onAction}
             onCancel={onCancel}
-            pulse={pulseAct}
-          />
-        )}
-
-        {ready && !covered && controls && touch && !deck && (
-          <TapChip
-            verb={prompt?.verb ?? null}
-            label={prompt ? `${t(`life.verb.${prompt.verb}` as MessageKey)} ${prompt.label}` : null}
-            locked={prompt?.locked ?? false}
-            onAction={onAction}
             pulse={pulseAct}
           />
         )}
@@ -892,7 +880,6 @@ export function LifeStage({
         {menu && (
           <LifeMenu
             touch={touch}
-            deck={deck}
             persisted={persisted}
             debug={process.env.NODE_ENV !== 'production'}
             onClose={closeMenu}
@@ -904,7 +891,6 @@ export function LifeStage({
               setMenu(false)
               openMe()
             }}
-            onDeck={toggleDeck}
             sound={sound}
             onSound={(on) => {
               setSound(on)
