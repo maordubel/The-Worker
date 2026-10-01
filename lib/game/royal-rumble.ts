@@ -178,6 +178,8 @@ export type RoyalRumbleEvidence = {
   shirtSeasons: number
   songs: number
   moments: number
+  /** the current squad's captain — also read by the owner report */
+  captain: boolean
 }
 
 /**
@@ -222,7 +224,7 @@ function evidenceOf(player: PlayerMasterRecord, position: Position): { fame: num
     nudge
   return {
     fame,
-    evidence: { seasons, titles, goals, lineups, shirtSeasons, songs, moments },
+    evidence: { seasons, titles, goals, lineups, shirtSeasons, songs, moments, captain: Boolean(player.currentSquad?.captain) },
     input: {
       slug: player.slug,
       position,

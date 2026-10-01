@@ -86,7 +86,7 @@ describe('the chosen city decides the room', () => {
     expect(open('2010-anthem', withFlags({ 'life:trip2010': 'lyon' }))).toEqual([])
     // Lyon has no door of its own (one doorway, one room a year): the bus takes him on
     expect(open('2010-anthem', withFlags({ 'life:trip2010': 'lyon', 'c10:benfica': true }))).toEqual([])
-    const bus = eraFor('2010-anthem').beats.find((beat) => beat.id === 'c10-port-lyon')!
+    const bus = eraFor('2010-anthem').beats!.find((beat) => beat.id === 'c10-port-lyon')!
     expect(bus.at).toBe('port-europe')
     expect(bus.do.at(-1)).toEqual({ a: 'travel', to: 'away-lyon', spawn: 'start' })
     expect(meets(withFlags({ 'life:trip2010': 'lyon', 'c10:lyonFlown': true }), bus.when)).toBe(true)
@@ -104,7 +104,7 @@ describe('the chosen city decides the room', () => {
   })
 
   it('the road to Teddy is for whoever took the seat; the living room stays where it was', () => {
-    const road = eraFor('2010-teddy').beats.find((b) => b.id === 'd10-road')!
+    const road = eraFor('2010-teddy').beats!.find((b) => b.id === 'd10-road')!
     const base = { 'd10:plan': true }
     expect(meets(withFlags({ ...base, 'd10:mode': 'venue' }), road.when)).toBe(true)
     expect(meets(withFlags({ ...base, 'd10:mode': 'home' }), road.when)).toBe(false)
