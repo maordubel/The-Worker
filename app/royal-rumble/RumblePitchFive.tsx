@@ -41,17 +41,19 @@ function Token({
     >
       {/* transform-only: the man is drawn, then scaled in — no opacity, no layout */}
       <div className={`flex flex-col items-center transition-transform duration-300 ease-out motion-reduce:transition-none ${shown ? 'scale-100' : 'scale-0'}`}>
-        <div
-          className={`flex h-[46px] w-[42px] items-center justify-center border-2 sm:h-[54px] sm:w-[50px] ${
-            ours ? 'border-red bg-ink/40' : 'border-paper/70 bg-ink'
-          } ${active ? 'scale-110' : ''} ${pulse ? 'rr-pulse' : ''}`}
-        >
-          <RumbleShirt player={player.player} kits={kits} className="h-9 w-8 sm:h-11 sm:w-10" />
+        <div className={`relative flex h-[46px] w-[42px] items-center justify-center sm:h-[54px] sm:w-[50px] ${active ? 'scale-110' : ''} ${pulse ? 'rr-pulse' : ''}`}>
+          <svg viewBox="0 0 60 16" aria-hidden="true" className="absolute inset-x-[-14%] bottom-[-6%] block h-auto w-[128%]">
+            <ellipse cx="30" cy="8" rx="22" ry="5" fill="rgb(var(--p-ink))" opacity=".3" />
+            {active && <ellipse cx="30" cy="8" rx="27" ry="6.5" fill="none" stroke="rgb(var(--p-line))" strokeWidth="1.6" />}
+          </svg>
+          <span className="relative block [filter:drop-shadow(0_2px_1.5px_rgb(var(--p-ink)/.45))]">
+            <RumbleShirt player={player.player} kits={kits} className="h-9 w-8 sm:h-11 sm:w-10" />
+          </span>
         </div>
-        <div className={`mt-0.5 max-w-[68px] truncate border-hair px-1 text-center font-body text-[9px] font-bold leading-[1.35] text-paper sm:max-w-[88px] sm:text-[11px] ${ours ? 'border-red bg-red' : 'border-paper/30 bg-ink'}`}>
+        <div className="mt-0.5 max-w-[68px] truncate px-1 text-center font-body text-[9px] font-extrabold leading-[1.35] text-paper [paint-order:stroke] [-webkit-text-stroke:3px_rgb(var(--p-ink))] sm:max-w-[88px] sm:text-[11px]">
           {compactName(player.nameHe)}
         </div>
-        <span className="font-mono tabular-nums text-[7px] font-black tracking-[0.14em] text-paper/70" dir="ltr">{player.position}</span>
+        <span className="font-mono tabular-nums text-[7px] font-black tracking-[0.14em] text-paper/80 [paint-order:stroke] [-webkit-text-stroke:2px_rgb(var(--p-ink))]" dir="ltr">{player.position}</span>
       </div>
     </div>
   )
@@ -86,11 +88,11 @@ export function RumblePitchFive({
   children?: React.ReactNode
 }) {
   return (
-    <div className={`relative mx-auto aspect-[4/5] w-full max-w-[460px] overflow-hidden border-2 border-paper/65 bg-sign ${className}`} data-rumble="pitch">
-      <div className="absolute inset-x-0 top-1/2 h-px bg-paper/55" />
-      <div className="absolute start-1/2 top-1/2 aspect-square h-[22%] -translate-x-1/2 -translate-y-1/2 border border-paper/55" />
-      <div className="absolute inset-x-[24%] top-0 h-[16%] border-x border-b border-paper/55" />
-      <div className="absolute inset-x-[24%] bottom-0 h-[16%] border-x border-t border-paper/55" />
+    <div className={`relative mx-auto aspect-[4/5] w-full max-w-[460px] overflow-hidden border-2 border-ink ${className}`} data-rumble="pitch" style={{ backgroundImage: 'repeating-linear-gradient(180deg, rgb(var(--p-grass-dark) / .34) 0 12.5%, transparent 12.5% 25%), linear-gradient(180deg, rgb(var(--p-grass-dark)), rgb(var(--p-grass)) 55%, rgb(var(--p-grass-dark))), radial-gradient(ellipse at 50% 42%, transparent 55%, rgb(var(--p-ink) / .18))', backgroundColor: 'rgb(var(--p-grass))' }}>
+      <div className="absolute inset-x-0 top-1/2 h-px bg-paper" />
+      <div className="absolute start-1/2 top-1/2 aspect-square h-[22%] -translate-x-1/2 -translate-y-1/2 border border-paper" />
+      <div className="absolute inset-x-[24%] top-0 h-[16%] border-x border-b border-paper" />
+      <div className="absolute inset-x-[24%] bottom-0 h-[16%] border-x border-t border-paper" />
       {us.map((player, index) => (
         <Token
           key={`us-${player.slug}`}
