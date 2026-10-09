@@ -484,6 +484,7 @@ describe('פרויקט משותף עם DUBID — THE WORKER touches only what it
       '20260928120000_worker_stands.sql',
       // 28.9.2026 (ONE RED WORLD §35): the public identity, "אדום #N" (tests/personal-area.test.ts)
       '20260928130000_worker_public_identity.sql',
+      '20261009180000_worker_game_origin.sql', // one closet, two apps (supabase/tests/73-game-origin.sql)
     ]
     for (const name of readdirSync(dir)) {
       if (live.includes(name)) continue
