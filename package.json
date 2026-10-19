@@ -98,6 +98,7 @@
     "playwright": "^1.62.1",
     "pngjs": "^7.0.0",
     "postcss": "^8.4.47",
+    "sharp": "0.34.5",
     "tailwindcss": "^3.4.13",
     "tsx": "^4.23.13",
     "typescript": "^5.6.3",
