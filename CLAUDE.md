@@ -1,3 +1,5 @@
+> **Ecosystem (FAN LIFE · OFFSIDES · DUBID · THE WORKER share one Supabase):** before any DB, auth, domain or cross-app change, read `ecosystem/contract.json` and run the `ecosystem-sync` skill. THE WORKER never writes `worker_*` migrations: they are written in FAN LIFE (the hub) and mirrored here byte-for-byte.
+
 # The Worker — working notes for Claude
 
 Hebrew, RTL, single-club (Hapoel Tel Aviv) football history game.
