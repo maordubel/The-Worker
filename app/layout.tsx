@@ -3,6 +3,7 @@ import Script from 'next/script'
 
 import { Analytics } from '@/components/ads/Analytics'
 import { ClosetBridge } from '@/components/collector/ClosetBridge'
+import { EcosystemBeacon } from '@/components/ecosystem/EcosystemBeacon'
 import { GateMeter } from '@/components/meter/GateMeter'
 import { ADSENSE_CLIENT } from '@/lib/ads'
 import { BRAND, SITE_URL } from '@/lib/brand'
@@ -102,6 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* first-party measurement: views, starts, finishes, where people leave (lib/analytics) */}
         <GateMeter />
         <ClosetBridge />
+        <EcosystemBeacon />
       </body>
     </html>
   )

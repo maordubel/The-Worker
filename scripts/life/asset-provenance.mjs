@@ -66,6 +66,7 @@ const MANIFEST = join(ROOT, 'content/manual/asset-provenance.json')
  * being named here rather than by being forgotten.
  */
 const SHIPPED = [
+  'public/brand/gates',
   'public/life/art',
   // 17.9.2026 — עשרה חפצים סרוקים. התיקייה נפרדת מ-`art` כי היא התיקייה היחידה תחת
   // `public/life` שנושאת צהוב בכוונה (כלל 69, החריג השני), ולכן היא בדיוק תיקייה שאסור
@@ -97,9 +98,12 @@ const KIND = new Set([
 ])
 // 25.9.2026 — `free-licence`: a photograph published under CC BY / CC BY-SA / PD (Wikimedia
 // Commons), fetched from its file page; author, licence and page URL live in away-media.json.
-const ORIGIN = new Set(['maor-upload', 'archive-scan', 'original-artwork', 'procedural', 'free-licence', 'unknown'])
+const ORIGIN = new Set(['maor-upload', 'archive-scan', 'original-artwork', 'procedural', 'free-licence', 'third-party-archive', 'unknown'])
+// 9.10.2026 — `third-party-archive`: product photographs from a public kit catalogue (footballkitarchive.com),
+// the photographer credited in sourceTitle; the rights are NOT settled, and the records say so at confidence 1.
 /** every physical thing done to a file between his hard drive and a player's browser */
 const TREATMENT = new Set([
+  'resize', // Controlled resizing recorded by the upstream asset import.
   'none',
   // 16.9.2026 — the kit archive. `cut-out` is a matte lifted off a photographed garment
   // (u2net), which is not `key-flat` or `key-checker`: those name a known background
