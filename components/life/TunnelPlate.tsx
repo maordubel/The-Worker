@@ -53,8 +53,9 @@ export function TunnelPlate() {
   }, [])
 
   const resumable = resume !== null
-  const kicker = resumable ? t('life.tunnel.resumeKicker') : t('life.tunnel.kicker')
-  const cta = resumable ? t('life.resume.cta') : t('life.tunnel.start')
+  // LIFE is closed to the public (owner, 24.11.2026): the plate says Coming soon; /life shows the Coming soon screen
+  const kicker = resumable ? t('life.tunnel.resumeKicker') : t('life.soon.plate')
+  const cta = t('life.soon.stamp')
 
   return (
     <Link

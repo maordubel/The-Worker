@@ -49,7 +49,7 @@ describe('the tunnel plate', () => {
     expect(plate).toContain('resume.year')
   })
   it('states the honest default and the resume kicker', () => {
-    expect(plate).toContain("t('life.tunnel.start')")
+    expect(plate).toContain("t('life.soon.plate')")   // LIFE closed to the public (24.11.2026)
     expect(plate).toContain("t('life.tunnel.resumeKicker')")
   })
 })
