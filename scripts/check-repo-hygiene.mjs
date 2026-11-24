@@ -35,6 +35,7 @@ const ROOT = process.cwd()
 const ALLOW = new Set([
   'next.config.mjs',
   'next-env.d.ts',
+  'middleware.ts', // Next.js requires request middleware at the root (LIFE lock, 24.11.2026).
   'postcss.config.mjs',
   'tailwind.config.ts',
   'vitest.config.ts',

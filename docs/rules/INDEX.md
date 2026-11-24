@@ -142,3 +142,4 @@ Adding a rule: write `docs/rules/<next number>.md` and add one line here under i
 - [80](080.md) · העולם שגדל מפיל שומרים, והם מתהפכים ולא מתרככים (21.9.2026)
 - [81](081.md) · מכשיר שמדמה חצי מעבר מדווח על המודל של עצמו (21.9.2026)
 - [89](089.md) · הפרויקט ב-Supabase משותף עם DUBID — THE WORKER נוגע רק במה שהוא יצר (22.9.2026)
+- [life-closed](life-closed.md) · LIFE is closed: Coming soon on every LIFE page, the owner enters through /owner with the FAN LIFE admin key (24.11.2026)

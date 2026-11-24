@@ -569,5 +569,21 @@
   "life.dress.hoops.in.3": "עוד אחד.",
   "life.dress.hoops.miss.1": "קצר.",
   "life.dress.hoops.miss.2": "כמעט.",
-  "life.dress.hoops.miss.3": "תנסה שוב."
+  "life.dress.hoops.miss.3": "תנסה שוב.",
+  "life.soon.meta": "LIFE · בקרוב · The Worker",
+  "life.soon.kicker": "The Worker מציג",
+  "life.soon.stamp": "בקרוב",
+  "life.soon.line": "העיר היא היציע שלך.",
+  "life.soon.lede": "חיים שלמים של אוהד הפועל — המשחק הראשון, משחקי החוץ, הלילות שלא שוכחים. שכונה פתוחה, מסלול משלך, ההיסטוריה האמיתית של המועדון. ה-GTA של אוהד הכדורגל בבנייה.",
+  "life.soon.status": "בבנייה · השערים עוד נעולים",
+  "life.soon.home": "חזרה לקיר השערים",
+  "life.soon.plate": "בקרוב · LIFE בבנייה",
+  "life.owner.title": "כניסת בעלים ל-LIFE",
+  "life.owner.lede": "LIFE סגור לציבור. הקלד את מפתח הניהול של FAN LIFE כדי להיכנס.",
+  "life.owner.key": "מפתח ניהול",
+  "life.owner.go": "כניסה",
+  "life.owner.wrong": "המפתח לא נכון.",
+  "life.owner.closed": "מפתח הניהול לא מוגדר בשרת.",
+  "life.owner.in": "אתה מחובר כבעלים. LIFE פתוח בשבילך.",
+  "life.owner.enter": "להיכנס ל-LIFE"
 }
